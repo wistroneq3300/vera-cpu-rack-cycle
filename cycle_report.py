@@ -37,7 +37,7 @@ def facts(pairs):
 
 def record_html(record, node_index):
     phase_id = f"node-{node_index}-" + ("pre" if record["phase"] == "PRE" else f"loop-{record['loop']}")
-    issues = ''.join(f'<li>{badge(i["severity"])} <strong>{esc(i["component"])}</strong> — {esc(i["detail"])} {badge(i.get("classification", "NEW"))}</li>' for i in record["issues"])
+    issues = ''.join(f'<li>{badge(i["severity"])} <strong>{esc(i["component"])}</strong> — {esc(i["detail"])} {badge(i.get("classification", "NEW"))}' + (f'<pre class="snippet">{esc(i["snippet"])}</pre>' if i.get("snippet") else '') + '</li>' for i in record["issues"])
     evidence = ''.join(f'<li>{evidence_link(p)}</li>' for p in dict.fromkeys(record["evidence"]))
     action = ''
     if record['phase'] != 'PRE':
@@ -78,8 +78,9 @@ def render_html(campaign):
             # The panel anchor for a loop record is "loop-<n>" (see record_html);
             # "PRE" or an unparsable phase must fall back to the PRE anchor.
             phase_id = f"node-{i}-" + (f"loop-{loop.group(1)}" if event['phase'] != 'PRE' and loop else 'pre')
-            occurrences.append(f'<tr><td><a href="#{phase_id}" data-panel="node-{i}">{esc(event["phase"])}</a></td><td>{esc(event["detail"])}</td><td>{evidence_link(event["evidence"])}</td></tr>')
-        issue_rows.append(f'''<details class="issue-row" data-severity="{esc(item['severity'])}" data-classification="{esc(item['classification'])}"><summary>{badge(item['severity'])}<span class="issue-title">{esc(item['node'])} / {esc(item['component'])}</span> {badge(item['classification'])}<span class="issue-meta">{esc(item['code'])} · {len(item['occurrences'])} finding(s)</span></summary><div class="detail-body"><p>{esc(item['detail'])}</p><p class="muted">{esc(item.get('known_reason',''))}</p><div class="tablewrap"><table><thead><tr><th scope="col">Phase</th><th scope="col">Finding</th><th scope="col">Evidence</th></tr></thead><tbody>{''.join(occurrences)}</tbody></table></div></div></details>''')
+            source = f'<pre class="snippet">{esc(event.get("snippet", ""))}</pre>' if event.get("snippet") else '<span class="muted">—</span>'
+            occurrences.append(f'<tr><td><a href="#{phase_id}" data-panel="node-{i}">{esc(event["phase"])}</a></td><td>{esc(event["detail"])}</td><td>{source}</td><td>{evidence_link(event["evidence"])}</td></tr>')
+        issue_rows.append(f'''<details class="issue-row" data-severity="{esc(item['severity'])}" data-classification="{esc(item['classification'])}"><summary>{badge(item['severity'])}<span class="issue-title">{esc(item['node'])} / {esc(item['component'])}</span> {badge(item['classification'])}<span class="issue-meta">{esc(item['code'])} · {len(item['occurrences'])} finding(s)</span></summary><div class="detail-body"><p>{esc(item['detail'])}</p><p class="muted">{esc(item.get('known_reason',''))}</p><div class="tablewrap"><table><thead><tr><th scope="col">Phase</th><th scope="col">Finding</th><th scope="col">Source line</th><th scope="col">Evidence</th></tr></thead><tbody>{''.join(occurrences)}</tbody></table></div></div></details>''')
     issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option></select></label></div><p id="issue-count" aria-live="polite" class="muted">{len(items)} matching issues</p>{''.join(issue_rows)}<p id="no-matches" class="empty" {'hidden' if items else ''}>No matching issues. Clear the filters to show all findings.</p></div></section>'''
     css = (ASSETS / 'report.css').read_text(encoding='utf-8')
     js = (ASSETS / 'report.js').read_text(encoding='utf-8')

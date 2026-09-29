@@ -40,7 +40,8 @@ BASE = Path(__file__).resolve().parent
 # stand out on the terminal, while the log file keeps the plain text so it
 # stays greppable. Disabled when the output is not a terminal or when NO_COLOR
 # is set.
-COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m'}
+COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m',
+           'OK': '\033[1;32m', 'PASS': '\033[1;32m', 'DONE': '\033[1;32m'}
 BLUE = '\033[1;34m'
 RESET = '\033[0m'
 COLOUR_ON = sys.stdout.isatty() and not os.environ.get('NO_COLOR')
@@ -99,7 +100,13 @@ def parallel(function, sessions, console, label, display_result=True):
         while pending:
             done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
             if not done:
-                console(f"{label}: waiting for {len(pending)} target(s)")
+                # Show where each still-running node is, so a long silence is
+                # always attributable to a phase rather than looking hung.
+                where = ', '.join(
+                    f"{futures[f].target.key}: {futures[f].node.get('stage') or 'starting'}"
+                    for f in sorted(pending, key=lambda f: futures[f].target.key)
+                )
+                console(f"{label}: still running — {where}")
             for future in done:
                 session = futures[future]
                 try:
@@ -229,15 +236,21 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
                     break
                 number += 1
                 console(f"Loop {number}: starting {len(active)} target(s) concurrently")
+                for session in active:
+                    session.progress = (lambda msg, n=number: console(f"Loop {n}: {msg}"))
                 parallel(lambda s, n=number: s.one_loop(n), active, console, f'Loop {number}')
+                for session in active:
+                    session.progress = None
                 write_reports(output, data)
             data['finished'] = now()
             write_reports(output, data)
             registry.finish(data['state'])
             finalized = True
             result = status(data)
-            console(f"Execution: {result['completion']} | Health: {result['health']} | Completed node-loops: {result['completed_node_loops']}")
+            console("=" * 60)
+            console(f"FINISHED: {result['completion']} | Health: {result['health']} | Completed node-loops: {result['completed_node_loops']}")
             console(f"Report: {output / 'CYCLE_REVIEW_REPORT.html'}")
+            console("=" * 60)
             return 0 if result['completion'] == 'COMPLETE' and result['health'] != 'FAIL' else 1
     finally:
         if data and not finalized:
@@ -248,6 +261,8 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
                     registry.finish('INCOMPLETE')
             except Exception as exc:
                 console(f"Final report could not be written: {exc}. Recover with --report {output}")
+        for session in sessions:
+            session.cleanup_remote()
         locks.close()
         for sig, handler in prior_handlers.items():
             signal.signal(sig, handler)

@@ -115,8 +115,9 @@ def inventory_blocks(targets):
                 blocked[key].append(reason)
     return {k: v for k, v in blocked.items() if v}
 
-def issue(code, component, detail, severity="FAIL", evidence=""):
-    return dict(code=code, component=component, detail=detail, severity=severity, evidence=evidence)
+def issue(code, component, detail, severity="FAIL", evidence="", snippet=""):
+    return dict(code=code, component=component, detail=detail, severity=severity, evidence=evidence,
+                snippet=snippet)
 
 def health(issues):
     return "FAIL" if any(i["severity"] == "FAIL" for i in issues) else "WARN" if issues else "PASS"
@@ -141,19 +142,20 @@ def classify(items, project, rules):
 def parse_sensors(text):
     """Keep incomplete and puzzling rows so the evaluator cannot silently pass them."""
     rows = []
-    for line in text.splitlines():
+    for lineno, line in enumerate(text.splitlines(), 1):
         if not line.strip():
             continue
         if "|" not in line:
             # ipmitool exit code 0 does not guarantee table rows; a stray
             # diagnostic line must surface instead of quietly shrinking the list.
-            rows.append(dict(name=line.strip(), reading="", unit="", status="",
+            rows.append(dict(name=line.strip(), reading="", unit="", status="", line=lineno,
+                             raw=line,
                              format_error=f"Expected a table row; received: {line.strip()}"))
             continue
         cells = [v.strip() for v in line.split("|")]
         fields = cells + [""] * max(0, 4 - len(cells))
         row = dict(name=fields[0] or "(unnamed sensor)", reading=fields[1],
-                   unit=fields[2], status=fields[3].lower())
+                   unit=fields[2], status=fields[3].lower(), line=lineno, raw=line)
         if len(cells) < 4 or not cells[0]:
             row["format_error"] = f"Expected sensor name, reading, unit and status; received: {line.strip()}"
         rows.append(row)
@@ -169,6 +171,14 @@ def _known_no_reading(row, unreadable):
     unit = row["unit"].strip()
     return "coruti" in name or ("\ufffd" in name and not unit)
 
+def _snippet(row):
+    """One-line, greppable pointer back to the exact evidence row."""
+    raw = (row.get("raw") or "").strip()
+    line = row.get("line")
+    if raw and line:
+        return f"line {line}: {raw}"
+    return raw or (f"line {line}" if line else "")
+
 def sensor_issues(rows):
     found = []
     if not rows:
@@ -178,29 +188,39 @@ def sensor_issues(rows):
     unreadable = {"ns", "na", "n/a", "no reading", "unknown", ""}
     counts = Counter(r["name"] for r in rows)
     for name, count in counts.items():
-        if count > 1:
-            found.append(issue("SENSOR_DUPLICATE", name, f"{count} rows share this sensor name; every row is evaluated", "WARN"))
+        if count <= 1:
+            continue
+        # Vera BMC firmware lists some sensors more than once. Identical repeats
+        # are a known firmware quirk, not a finding; only warn when the rows
+        # disagree (different reading/unit/status), which is actionable.
+        signatures = {(r["reading"].strip(), r["unit"].strip(), r["status"].strip())
+                      for r in rows if r["name"] == name}
+        if len(signatures) > 1:
+            dup_rows = [r for r in rows if r["name"] == name]
+            found.append(issue("SENSOR_DUPLICATE", name,
+                               f"{count} rows share this sensor name with differing values; review each row", "WARN",
+                               snippet="\n".join(_snippet(r) for r in dup_rows)))
     for r in rows:
         if r.get("format_error"):
-            found.append(issue("SENSOR_MALFORMED", r["name"], r["format_error"]))
+            found.append(issue("SENSOR_MALFORMED", r["name"], r["format_error"], snippet=_snippet(r)))
             continue
         state = r["status"]
         if state in failures:
-            found.append(issue("SENSOR_CRITICAL", r["name"], f"Status {state}; reading {r['reading']}"))
+            found.append(issue("SENSOR_CRITICAL", r["name"], f"Status {state}; reading {r['reading']}", snippet=_snippet(r)))
         elif state in warnings:
-            found.append(issue("SENSOR_NONCRITICAL", r["name"], f"Status {state}; reading {r['reading']}", "WARN"))
+            found.append(issue("SENSOR_NONCRITICAL", r["name"], f"Status {state}; reading {r['reading']}", "WARN", snippet=_snippet(r)))
         elif _known_no_reading(r, unreadable):
             # Vera emits these platform-defined no-value rows while healthy.
             # Keep the raw row in evidence, but do not turn it into a failure.
             continue
         elif state in unreadable or r["reading"].lower() in unreadable:
-            found.append(issue("SENSOR_UNREADABLE", r["name"], f"Status {state or '(empty)'}; reading {r['reading']}"))
+            found.append(issue("SENSOR_UNREADABLE", r["name"], f"Status {state or '(empty)'}; reading {r['reading']}", snippet=_snippet(r)))
         elif r["unit"].strip().lower() == "discrete" and re.fullmatch(r"0x[0-9a-f]+", state):
             # ipmitool reports discrete states as hexadecimal bit fields (for
             # example 0x0100); threshold status names do not apply here.
             continue
         elif state not in {"ok", "0x0000"}:
-            found.append(issue("SENSOR_UNRECOGNIZED", r["name"], f"Unrecognized status {state}; review raw sensor output"))
+            found.append(issue("SENSOR_UNRECOGNIZED", r["name"], f"Unrecognized status {state}; review raw sensor output", snippet=_snippet(r)))
     return found
 
 def missing_sensors(baseline, current):
@@ -286,5 +306,7 @@ def aggregate_issues(campaign):
                 entry = merged.setdefault(key, {**item, "node": node["key"], "occurrences": []})
                 if item["severity"] == "FAIL":
                     entry["severity"] = "FAIL"
-                entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"], evidence=item.get("evidence", "")))
+                entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"],
+                                                  evidence=item.get("evidence", ""),
+                                                  snippet=item.get("snippet", "")))
     return list(merged.values())

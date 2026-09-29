@@ -48,13 +48,39 @@ class NodeSession:
         self.run_id, self.script, self.script_hash = run_id, script, script_hash
         self.options, self.rules = options, rules
         self.remote = f"/tmp/vera-{run_id}-{target.key}-{script_hash[:12]}.sh"
+        # Optional stage reporter set by the campaign; keeps one_loop silent when
+        # a NodeSession is driven directly (tests, dry-run).
+        self.progress = None
         self.node = dict(key=target.key, target=target.__dict__, blocked=[], active=True,
-                         pre=new_record("PRE"), loops=[], completed=0, stop_reason="")
+                         pre=new_record("PRE"), loops=[], completed=0, stop_reason="", stage="")
         self.previous_sel = ""
         self.baseline = None
 
+    def stage(self, text):
+        """Report the current phase for this node so the operator can see where
+        the loop is, or where it is stuck. Never raises."""
+        self.node["stage"] = text
+        if self.progress:
+            try:
+                self.progress(f"{self.target.key} | {text}")
+            except Exception:
+                pass
+
     def folder(self, record):
         return self.root / self.target.key / ("" if record["phase"] == "PRE" else f"loop{record['loop']:04d}")
+
+    def cleanup_remote(self):
+        """Remove the temporary hardware script this run pushed to the node.
+        Best effort: a node that is offline or reprovisioned must not turn
+        teardown into an error. Only this run's own file is touched, and a
+        node that was never used (blocked at PRE) is not contacted at all."""
+        if self.node["blocked"]:
+            return
+        script = shlex.quote(self.remote)
+        try:
+            self.transport.ssh(self.target, "os", f"rm -f {script}", 30, True)
+        except Exception:
+            pass
 
     def persist(self, record):
         classify(record["issues"], self.options.project, self.rules)
@@ -306,6 +332,10 @@ class NodeSession:
             record["recovery"]["old_boot_id"] = old_boot
             deadline = time.monotonic() + self.options.boot_timeout
             mode, channel = self.options.cycle_mode, self.options.channel
+            # Short label for the stage line; "sent" (not "issued") so operators
+            # never read it as a problem report.
+            cycle_label = {"aux_cycle": "aux cycle", "reboot": "reboot",
+                           "power_cycle": "power cycle"}.get(mode, mode)
             if mode == "aux_cycle":
                 state = self.dispatch(record, "cycle_command", "bmc", "/usr/bin/stbypowerctrl.sh aux_cycle")
             elif mode == "reboot" and channel == "outband":
@@ -339,8 +369,11 @@ class NodeSession:
                     command = "power cycle"
                 state = self.dispatch(record, "cycle_command", "os" if inband else "oob", command, sudo=inband)
             if state in {"SENT", "RESPONSE_LOST"}:
+                self.stage(f"{cycle_label} sent")
+                self.stage("waiting OS boot")
                 recovered = self.wait_boot(record, old_boot, deadline)
             else:
+                self.stage(f"{cycle_label} not sent")
                 recovered = False
                 record["recovery"]["boot_changed"] = False
             # Even a rejected power action receives POST while the OS is available.
@@ -350,7 +383,9 @@ class NodeSession:
                 if role != "os":
                     self.identity(record, role, role + "_after_cycle",
                                   save_evidence=False, record_command=False)
+            self.stage("OS up, system check running")
             self.capture(record, post=True)
+            self.stage(f"system check done ({health(record['issues'])})")
             if recovered and record.get("power_on"):
                 for action in record["action"]:
                     if action["state"] == "RESPONSE_LOST":
@@ -374,4 +409,6 @@ class NodeSession:
                     self.command(record, "failure_power", "oob", "power status")
                 except Exception as bmc_exc:
                     self.add(record, "BMC_UNAVAILABLE", "recovery", str(bmc_exc))
-        return self.finish(record)
+        result = self.finish(record)
+        self.stage(f"DONE ({result['status']})")
+        return result
