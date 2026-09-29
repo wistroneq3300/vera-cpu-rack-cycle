@@ -225,6 +225,82 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         for sig, handler in prior_handlers.items():
             signal.signal(sig, handler)
 
+def choose(title, options, default):
+    """Numbered menu. Accepts the number, or the option text (case-insensitive).
+
+    Re-prompts on anything else so a typo never aborts the wizard. An empty
+    reply takes the default. `options` is a list of (key, label) pairs.
+    """
+    print(f"\n{title}:")
+    for index, (_, label) in enumerate(options, 1):
+        mark = ' (default)' if index == default else ''
+        print(f"  {index}. {label}{mark}")
+    keys = {key for key, _ in options}
+    while True:
+        reply = input(f"Select [{default}]: ").strip().lower()
+        if not reply:
+            return options[default - 1][0]
+        if reply.isdigit() and 1 <= int(reply) <= len(options):
+            return options[int(reply) - 1][0]
+        if reply in keys:
+            return reply
+        valid = ', '.join(str(i) for i in range(1, len(options) + 1))
+        print(f"  INVALID: '{reply}' — enter {valid}, or the option name")
+
+
+def choose_limit(kind):
+    """Loop or hour limit; re-prompts on non-numeric input. No default value."""
+    unit = 'loops' if kind == 'loops' else 'hours'
+    while True:
+        reply = input(f"How many {unit}? ").strip()
+        if not reply:
+            print(f"  Enter a number of {unit}")
+            continue
+        try:
+            value = int(reply) if kind == 'loops' else float(reply)
+        except ValueError:
+            print(f"  INVALID: '{reply}' is not a number")
+            continue
+        if not math.isfinite(value) or value <= 0:
+            print(f"  Must be a positive number of {unit}")
+            continue
+        return value
+
+
+def wizard(options):
+    """Interactive campaign setup, mirroring the rackctl prompt style."""
+    print('=' * 50)
+    print('  Vera Cycle Wizard (interactive)')
+    print('=' * 50)
+    options.project = choose('Project', [('neutrino', 'neutrino'), ('naboo', 'naboo')], 1)
+    options.inventory = options.inventory or BASE / f'cycle_inventory_{options.project}.csv'
+    targets = load_inventory(options.inventory)
+    names = sorted({t.node for t in targets})
+    print(f"\nNodes in inventory: {', '.join(names)}")
+    while True:
+        reply = input("Which nodes? (all / comma-sep, e.g. n1,n2) [all]: ").strip()
+        if not reply or reply.lower() == 'all':
+            options.node = None
+            break
+        parts = [p for p in reply.replace(',', ' ').split() if p]
+        bad = [p for p in parts if p not in names]
+        if bad:
+            print(f"  INVALID: {', '.join(bad)} — valid: {', '.join(names)}")
+            continue
+        options.node = parts
+        break
+    options.cycle_mode = choose('Cycle mode', [
+        ('power_cycle', 'power_cycle'), ('reboot', 'reboot'), ('aux_cycle', 'aux_cycle')], 1)
+    options.channel = choose('Channel', [('inband', 'inband'), ('outband', 'outband')], 1)
+    options.loops, options.hours = 0, 0.0
+    if choose('Duration type', [('loops', 'Loops (number of cycles)'), ('hours', 'Hours (time limit)')], 1) == 'loops':
+        options.loops = choose_limit('loops')
+    else:
+        options.hours = choose_limit('hours')
+    options.cycle = True
+    return targets
+
+
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--project', choices=('1', '2', 'neutrino', 'naboo'))
@@ -259,24 +335,15 @@ def main(argv=None):
             print(f"Report rebuilt: {options.report / 'CYCLE_REVIEW_REPORT.html'} ({info['state']})")
             return 0
         interactive = not arguments
-        if not options.project:
-            options.project = input('Project [1=neutrino, 2=naboo]: ').strip()
-        options.project = {'1': 'neutrino', '2': 'naboo'}.get(options.project, options.project)
-        if options.project not in {'neutrino', 'naboo'}:
-            raise ValueError('Invalid project')
-        options.inventory = options.inventory or BASE / f'cycle_inventory_{options.project}.csv'
-        targets = load_inventory(options.inventory)
-        if not options.node:
-            print('Available targets: ' + ', '.join(f'{t.tray}/{t.node}' for t in targets))
-            options.node = input('Select targets separated by commas, or all: ').strip().split(',')
-            options.node = [s.strip() for s in options.node]
-        targets = select_targets(targets, options.node)
         if interactive:
-            options.cycle_mode = input('Cycle mode [reboot / power_cycle / aux_cycle]: ').strip()
-            options.channel = input('Channel [inband / outband]: ').strip()
-            options.loops = int(input('Loop limit [0 = no loop limit]: ').strip())
-            options.hours = float(input('Hour limit [0 = no time limit]: ').strip())
-            options.cycle = True
+            targets = wizard(options)
+        else:
+            options.project = {'1': 'neutrino', '2': 'naboo'}.get(options.project, options.project)
+            if options.project not in {'neutrino', 'naboo'}:
+                raise ValueError('Invalid project')
+            options.inventory = options.inventory or BASE / f'cycle_inventory_{options.project}.csv'
+            targets = load_inventory(options.inventory)
+        targets = select_targets(targets, options.node or ['all'])
         if options.cycle_mode not in {'reboot', 'power_cycle', 'aux_cycle'} or options.channel not in {'inband', 'outband'}:
             raise ValueError('Invalid mode or channel')
         if options.loops < 0 or not math.isfinite(options.hours) or options.hours < 0 or not (options.loops or options.hours):

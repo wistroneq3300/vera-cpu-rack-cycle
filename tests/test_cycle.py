@@ -231,7 +231,9 @@ class PureTests(unittest.TestCase):
             path = Path(temp)/'inventory.csv'
             path.write_text('os_hostname,node,os_ip,tray,bmc_hostname,bmc_ip\nos,n1,192.0.2.2,tray,bmc,192.0.2.1\n')
             self.assertFalse(inventory_blocks(load_inventory(path)))
-        self.assertEqual(len(inventory_blocks(load_inventory(BASE/'cycle_inventory_neutrino.csv'))),4)
+        shipped=load_inventory(BASE/'cycle_inventory_neutrino.csv')
+        self.assertTrue(shipped)
+        self.assertFalse(inventory_blocks(shipped))
 
 class EngineTests(unittest.TestCase):
     def setUp(self):
