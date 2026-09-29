@@ -390,7 +390,7 @@ class NodeSession:
                                   save_evidence=False, record_command=False)
             self.stage("OS up, system check running")
             self.capture(record, post=True)
-            self.stage(f"system check done ({health(record['issues'])})")
+            self.stage("system check done")
             if recovered and record.get("power_on"):
                 for action in record["action"]:
                     if action["state"] == "RESPONSE_LOST":
@@ -415,5 +415,5 @@ class NodeSession:
                 except Exception as bmc_exc:
                     self.add(record, "BMC_UNAVAILABLE", "recovery", str(bmc_exc))
         result = self.finish(record)
-        self.stage(f"DONE ({result['status']})")
+        self.stage("DONE")
         return result
