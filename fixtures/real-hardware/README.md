@@ -81,5 +81,6 @@ without a numeric value. It must not fail the node.
 ### 3. Known duplicate IDs (noise every loop)
 
 Rows such as `PrMo0MeCn0MeTem0` legitimately repeat (up to 4 times). The
-evaluator emits a `SENSOR_DUPLICATE` WARN for each. This is expected platform
-behaviour and should not be reported as a finding on every loop.
+evaluator emits a `SENSOR_DUPLICATE` WARN for each capture. This is expected
+platform behaviour, remains visible per the project policy, and does not make
+the node FAIL.
