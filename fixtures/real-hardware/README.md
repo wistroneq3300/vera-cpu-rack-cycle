@@ -15,21 +15,34 @@ Note on hostnames: the OS hostname of the first node is currently `neutrino-n2`
 (it is being renumbered to `neutrino-n1` later, together with the operator).
 The BMC hostnames are final.
 
-## Result of feeding these files to the current evaluator
+## Result of feeding these files to the evaluator
 
-Using the current `cycle_core.parse_sensors` + `sensor_issues`, all three
-**healthy** machines are reported as **FAIL**:
+### Before the fixes (commit `1d7a313`)
+
+All three **healthy** machines were reported **FAIL**:
 
 ```
-n1: rows=240 health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
-n2: rows=240 health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
-n3: rows=240 health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
+n1: health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
+n2: health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
+n3: health=FAIL {'SENSOR_DUPLICATE': 4, 'SENSOR_UNRECOGNIZED': 2}
 ```
 
-Expected: PASS (or at most WARN for the known duplicate IDs). These are false
-failures; the machines passed a full 10-loop campaign on the same day.
+### After `f8e819c` + `46bc906`
 
-## Why they fail
+```
+n1: health=WARN {'SENSOR_DUPLICATE': 4}
+n2: health=WARN {'SENSOR_DUPLICATE': 4}
+n3: health=WARN {'SENSOR_DUPLICATE': 4}
+```
+
+The false `SENSOR_UNRECOGNIZED` / `SENSOR_UNREADABLE` findings are gone. Only
+the known duplicate-ID WARN remains, which matches expected platform behaviour.
+The same data set (a full 30-loop campaign from 2026-09-29) went from
+`FAIL 8 / WARN 22` to `WARN 30/30`.
+
+Expected: PASS (or at most WARN for the known duplicate IDs).
+
+## Why they used to fail (now fixed)
 
 ### 1. Discrete sensors use hex status values (false `SENSOR_UNRECOGNIZED`)
 
