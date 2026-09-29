@@ -1,0 +1,9 @@
+UTC: 2026-09-29T12:20:56+00:00
+Role: oob
+Command: sel elist
+Exit: 0
+State: RETURNED
+Duration: 0.28s
+
+SEL has no entries
+

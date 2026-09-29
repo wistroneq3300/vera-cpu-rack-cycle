@@ -1,0 +1,10 @@
+UTC: 2026-09-29T12:31:33+00:00
+Role: os
+Command: printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id
+Exit: 0
+State: RETURNED
+Duration: 0.33s
+
+HOSTNAME=neutrino-n3
+BOOT_ID=3c6a4aae-1735-4e68-9a93-37ead8ed2562
+

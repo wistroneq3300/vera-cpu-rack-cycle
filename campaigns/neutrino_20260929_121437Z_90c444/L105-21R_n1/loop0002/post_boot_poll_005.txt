@@ -1,0 +1,9 @@
+UTC: 2026-09-29T12:22:01+00:00
+Role: os
+Command: printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id
+Exit: 255
+State: NOT_ISSUED
+Duration: 3.05s
+
+
+NoValidConnectionsError: [Errno None] Unable to connect to port 22 on 10.35.228.148

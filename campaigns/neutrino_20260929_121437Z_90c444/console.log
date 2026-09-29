@@ -1,0 +1,161 @@
+2026-09-29T12:14:37+00:00 Run ID: neutrino_20260929_121437Z_90c444
+2026-09-29T12:14:37+00:00 Time zone: UTC (Z in Run ID; +00:00 in evidence timestamps)
+2026-09-29T12:14:37+00:00 Planned output: /root/vera-cycle/campaigns/neutrino_20260929_121437Z_90c444
+2026-09-29T12:14:37+00:00 Selected targets: L105-21R_n1, L105-21R_n3
+2026-09-29T12:14:37+00:00 Mode: aux_cycle; channel: inband; loops: 5; hours: unlimited
+2026-09-29T12:14:37+00:00 Auxiliary AC cycle uses the BMC standby controller for either selected channel.
+2026-09-29T12:14:37+00:00 PRE started. Missing standard tools will be installed with apt when available; mst is not installed by this program.
+2026-09-29T12:14:59+00:00 L105-21R_n1 | PRE | FAIL
+2026-09-29T12:14:59+00:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T12:14:59+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:14:59+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:14:59+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:14:59+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:14:59+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:15:06+00:00 L105-21R_n3 | PRE | FAIL
+2026-09-29T12:15:06+00:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T12:15:06+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:15:06+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:15:06+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:15:06+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:15:06+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00 Operator decision: START
+2026-09-29T12:16:02+00:00 Campaign started. Output: /root/vera-cycle/campaigns/neutrino_20260929_121437Z_90c444
+2026-09-29T12:16:02+00:00 Stop after the current POST: ./stop_cycle.sh neutrino_20260929_121437Z_90c444
+2026-09-29T12:16:02+00:00 L105-21R_n3 | PRE | FAIL
+2026-09-29T12:16:02+00:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T12:16:02+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00 L105-21R_n1 | PRE | FAIL
+2026-09-29T12:16:02+00:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T12:16:02+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:16:02+00:00 Loop 1: starting 2 target(s) concurrently
+2026-09-29T12:16:32+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:17:02+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:17:32+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:18:02+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:18:32+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:19:02+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:19:32+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:20:02+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:20:32+00:00 Loop 1: waiting for 2 target(s)
+2026-09-29T12:20:57+00:00 L105-21R_n1 | LOOP 1 | FAIL
+2026-09-29T12:20:57+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:20:57+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:20:57+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:20:57+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:20:57+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:20:57+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:21:02+00:00 L105-21R_n3 | LOOP 1 | FAIL
+2026-09-29T12:21:02+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:21:02+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:21:02+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:21:02+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:21:02+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:21:02+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:21:02+00:00 Loop 2: starting 2 target(s) concurrently
+2026-09-29T12:21:32+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:22:02+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:22:32+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:23:02+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:23:32+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:24:02+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:24:32+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:25:02+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:25:32+00:00 Loop 2: waiting for 2 target(s)
+2026-09-29T12:26:00+00:00 L105-21R_n1 | LOOP 2 | FAIL
+2026-09-29T12:26:00+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:26:00+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:26:00+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:00+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:00+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:00+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:03+00:00 L105-21R_n3 | LOOP 2 | FAIL
+2026-09-29T12:26:03+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:26:03+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:26:03+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:03+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:03+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:03+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:26:03+00:00 Loop 3: starting 2 target(s) concurrently
+2026-09-29T12:26:33+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:27:03+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:27:33+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:28:03+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:28:33+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:29:03+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:29:33+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:30:03+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:30:33+00:00 Loop 3: waiting for 2 target(s)
+2026-09-29T12:30:57+00:00 L105-21R_n1 | LOOP 3 | FAIL
+2026-09-29T12:30:57+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:30:57+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:30:57+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:30:57+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:30:57+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:30:57+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:31:27+00:00 Loop 3: waiting for 1 target(s)
+2026-09-29T12:31:32+00:00 L105-21R_n3 | LOOP 3 | FAIL
+2026-09-29T12:31:32+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:31:32+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:31:32+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:31:32+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:31:32+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:31:32+00:00 Loop 4: starting 2 target(s) concurrently
+2026-09-29T12:32:02+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:32:32+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:33:02+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:33:32+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:34:02+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:34:32+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:35:02+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:35:32+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:36:02+00:00 Loop 4: waiting for 2 target(s)
+2026-09-29T12:36:27+00:00 L105-21R_n1 | LOOP 4 | FAIL
+2026-09-29T12:36:27+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:36:27+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:36:27+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:27+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:27+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:27+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:34+00:00 L105-21R_n3 | LOOP 4 | FAIL
+2026-09-29T12:36:34+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:36:34+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:36:34+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:34+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:34+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:34+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:36:34+00:00 Loop 5: starting 2 target(s) concurrently
+2026-09-29T12:37:04+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:37:34+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:38:04+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:38:34+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:39:04+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:39:34+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:40:04+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:40:34+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:41:04+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:41:34+00:00 Loop 5: waiting for 2 target(s)
+2026-09-29T12:41:35+00:00 L105-21R_n1 | LOOP 5 | FAIL
+2026-09-29T12:41:35+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:41:35+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:41:35+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:35+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:35+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:35+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:36+00:00 L105-21R_n3 | LOOP 5 | FAIL
+2026-09-29T12:41:36+00:00   FAIL [NEW] BF4: Expected at least 1; detected 0
+2026-09-29T12:41:36+00:00   FAIL [NEW] BMC-firmware: Command exited 1
+2026-09-29T12:41:36+00:00   WARN [NEW] PrMo0CPU0EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:36+00:00   WARN [NEW] PrMo0CPU1EnfEDP0: 2 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:36+00:00   WARN [NEW] PrMo0MeCn0MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:36+00:00   WARN [NEW] PrMo0MeCn1MeTem0: 4 rows share this sensor name; every row is evaluated
+2026-09-29T12:41:36+00:00 Execution: COMPLETE | Health: FAIL | Completed node-loops: 10
+2026-09-29T12:41:36+00:00 Report: /root/vera-cycle/campaigns/neutrino_20260929_121437Z_90c444/CYCLE_REVIEW_REPORT.html

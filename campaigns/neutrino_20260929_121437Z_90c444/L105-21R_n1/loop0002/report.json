@@ -1,0 +1,1902 @@
+{
+  "phase": "LOOP 2",
+  "started": "2026-09-29T12:21:02+00:00",
+  "finished": "2026-09-29T12:26:00+00:00",
+  "status": "FAIL",
+  "issues": [
+    {
+      "code": "BF4_MISSING",
+      "component": "BF4",
+      "detail": "Expected at least 1; detected 0",
+      "severity": "FAIL",
+      "evidence": "L105-21R_n1/loop0002/post_hardware.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    },
+    {
+      "code": "COLLECTION_FAILED",
+      "component": "BMC-firmware",
+      "detail": "Command exited 1",
+      "severity": "FAIL",
+      "evidence": "L105-21R_n1/loop0002/post_hardware.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0CPU0EnfEDP0",
+      "detail": "2 rows share this sensor name; every row is evaluated",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0002/post_sensor.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0CPU1EnfEDP0",
+      "detail": "2 rows share this sensor name; every row is evaluated",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0002/post_sensor.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0MeCn0MeTem0",
+      "detail": "4 rows share this sensor name; every row is evaluated",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0002/post_sensor.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0MeCn1MeTem0",
+      "detail": "4 rows share this sensor name; every row is evaluated",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0002/post_sensor.txt",
+      "classification": "NEW",
+      "known_reason": ""
+    }
+  ],
+  "evidence": [
+    "L105-21R_n1/loop0002/post_bmc_before_cycle.txt",
+    "L105-21R_n1/loop0002/post_os_before_cycle.txt",
+    "L105-21R_n1/loop0002/post_cycle_command.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_001.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_002.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_003.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_004.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_005.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_006.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_007.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_008.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_009.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_010.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_011.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_012.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_013.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_014.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_015.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_016.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_017.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_018.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_019.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_020.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_021.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_022.txt",
+    "L105-21R_n1/loop0002/post_boot_poll_023.txt",
+    "L105-21R_n1/loop0002/post_bmc_boot_poll_023.txt",
+    "L105-21R_n1/loop0002/post_os_after_cycle.txt",
+    "L105-21R_n1/loop0002/post_bmc_after_cycle.txt",
+    "L105-21R_n1/loop0002/post_pci.txt",
+    "L105-21R_n1/loop0002/post_pci_tree.txt",
+    "L105-21R_n1/loop0002/post_pci_verbose.txt",
+    "L105-21R_n1/loop0002/post_pci_config.txt",
+    "L105-21R_n1/loop0002/post_disks.txt",
+    "L105-21R_n1/loop0002/post_nvme.txt",
+    "L105-21R_n1/loop0002/post_usb.txt",
+    "L105-21R_n1/loop0002/post_memory.txt",
+    "L105-21R_n1/loop0002/post_network.txt",
+    "L105-21R_n1/loop0002/post_dmesg.txt",
+    "L105-21R_n1/loop0002/post_dmesg_clear.txt",
+    "L105-21R_n1/loop0002/post_firmware.txt",
+    "L105-21R_n1/loop0002/post_system.txt",
+    "L105-21R_n1/loop0002/post_hardware.txt",
+    "L105-21R_n1/loop0002/post_sensor.txt",
+    "L105-21R_n1/loop0002/post_sel.txt",
+    "L105-21R_n1/loop0002/post_sel_delta.txt",
+    "L105-21R_n1/loop0002/post_bmc_firmware.txt",
+    "L105-21R_n1/loop0002/post_power.txt",
+    "L105-21R_n1/loop0002/post_host_power.txt"
+  ],
+  "commands": {
+    "bmc_before_cycle": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_bmc_before_cycle.txt",
+      "valid": true
+    },
+    "os_before_cycle": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_os_before_cycle.txt",
+      "valid": true
+    },
+    "cycle_command": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_cycle_command.txt",
+      "valid": true
+    },
+    "boot_poll_001": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_001.txt",
+      "valid": true
+    },
+    "boot_poll_002": {
+      "code": 124,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_002.txt",
+      "valid": false
+    },
+    "boot_poll_003": {
+      "code": 124,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_003.txt",
+      "valid": false
+    },
+    "boot_poll_004": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_004.txt",
+      "valid": false
+    },
+    "boot_poll_005": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_005.txt",
+      "valid": false
+    },
+    "boot_poll_006": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_006.txt",
+      "valid": false
+    },
+    "boot_poll_007": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_007.txt",
+      "valid": false
+    },
+    "boot_poll_008": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_008.txt",
+      "valid": false
+    },
+    "boot_poll_009": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_009.txt",
+      "valid": false
+    },
+    "boot_poll_010": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_010.txt",
+      "valid": false
+    },
+    "boot_poll_011": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_011.txt",
+      "valid": false
+    },
+    "boot_poll_012": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_012.txt",
+      "valid": false
+    },
+    "boot_poll_013": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_013.txt",
+      "valid": false
+    },
+    "boot_poll_014": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_014.txt",
+      "valid": false
+    },
+    "boot_poll_015": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_015.txt",
+      "valid": false
+    },
+    "boot_poll_016": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_016.txt",
+      "valid": false
+    },
+    "boot_poll_017": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_017.txt",
+      "valid": false
+    },
+    "boot_poll_018": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_018.txt",
+      "valid": false
+    },
+    "boot_poll_019": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_019.txt",
+      "valid": false
+    },
+    "boot_poll_020": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_020.txt",
+      "valid": false
+    },
+    "boot_poll_021": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_021.txt",
+      "valid": false
+    },
+    "boot_poll_022": {
+      "code": 255,
+      "state": "NOT_ISSUED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_022.txt",
+      "valid": false
+    },
+    "boot_poll_023": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_boot_poll_023.txt",
+      "valid": true
+    },
+    "bmc_boot_poll_023": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_bmc_boot_poll_023.txt",
+      "valid": true
+    },
+    "os_after_cycle": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_os_after_cycle.txt",
+      "valid": true
+    },
+    "bmc_after_cycle": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_bmc_after_cycle.txt",
+      "valid": true
+    },
+    "pci": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_pci.txt",
+      "valid": true
+    },
+    "pci_tree": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_pci_tree.txt",
+      "valid": true
+    },
+    "pci_verbose": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_pci_verbose.txt",
+      "valid": true
+    },
+    "pci_config": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_pci_config.txt",
+      "valid": true
+    },
+    "disks": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_disks.txt",
+      "valid": true
+    },
+    "nvme": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_nvme.txt",
+      "valid": true
+    },
+    "usb": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_usb.txt",
+      "valid": true
+    },
+    "memory": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_memory.txt",
+      "valid": true
+    },
+    "network": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_network.txt",
+      "valid": true
+    },
+    "dmesg": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_dmesg.txt",
+      "valid": true
+    },
+    "dmesg_clear": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_dmesg_clear.txt",
+      "valid": true
+    },
+    "firmware": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_firmware.txt",
+      "valid": true
+    },
+    "system": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_system.txt",
+      "valid": true
+    },
+    "hardware": {
+      "code": 1,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_hardware.txt",
+      "valid": false
+    },
+    "sensor": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_sensor.txt",
+      "valid": true
+    },
+    "sel": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_sel.txt",
+      "valid": true
+    },
+    "bmc_firmware": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_bmc_firmware.txt",
+      "valid": true
+    },
+    "power": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_power.txt",
+      "valid": true
+    },
+    "host_power": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0002/post_host_power.txt",
+      "valid": true
+    }
+  },
+  "identities": {
+    "bmc": {
+      "hostname": "vc-256-bmc-n1",
+      "boot_id": "70aeb97d-f3ad-4384-a5b7-c46e82156560"
+    },
+    "os": {
+      "hostname": "neutrino-n1",
+      "boot_id": "60c6bb9c-f087-404f-a25a-cb307acc745c"
+    }
+  },
+  "pci": {
+    "0001:00:00.0": "10de:2f95",
+    "0002:00:00.0": "10de:2f98",
+    "0002:01:00.0": "1a03:1150",
+    "0002:02:00.0": "1a03:2000",
+    "0002:20:00.0": "10de:2f98",
+    "0002:21:00.0": "1912:0014",
+    "0003:00:00.0": "10de:2f96",
+    "0003:80:00.0": "10de:2f96",
+    "0004:00:00.0": "10de:2f97",
+    "0004:01:00.0": "1e0f:002e",
+    "0004:40:00.0": "10de:2f97",
+    "0004:80:00.0": "10de:2f97",
+    "0004:c0:00.0": "10de:2f97",
+    "0005:00:00.0": "10de:2f95",
+    "0006:00:00.0": "10de:2f95",
+    "0009:00:00.0": "10de:2f95",
+    "000a:00:00.0": "10de:2f98",
+    "000a:20:00.0": "10de:2f98",
+    "000b:00:00.0": "10de:2f96",
+    "000b:80:00.0": "10de:2f96",
+    "000c:00:00.0": "10de:2f97",
+    "000c:01:00.0": "1e0f:001c",
+    "000c:40:00.0": "10de:2f97",
+    "000c:80:00.0": "10de:2f97",
+    "000c:c0:00.0": "10de:2f97",
+    "000d:00:00.0": "10de:2f95",
+    "000e:00:00.0": "10de:2f95"
+  },
+  "sensors": [
+    {
+      "name": "Chass0HSCCurren0",
+      "reading": "3.120",
+      "unit": "Amps",
+      "status": "ok"
+    },
+    {
+      "name": "NVMeE1SSSD0STS0",
+      "reading": "0x1",
+      "unit": "discrete",
+      "status": "0x0100"
+    },
+    {
+      "name": "NVMeE1SSSD1STS0",
+      "reading": "0x1",
+      "unit": "discrete",
+      "status": "0x0100"
+    },
+    {
+      "name": "PrMo0CPU0CpuFre0",
+      "reading": "3386000000.000",
+      "unit": "Hz",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CpuFre0",
+      "reading": "3386000000.000",
+      "unit": "Hz",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MemCnt0Fre0",
+      "reading": "4299500000.000",
+      "unit": "Hz",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MemCnt1Fre0",
+      "reading": "4299500000.000",
+      "unit": "Hz",
+      "status": "ok"
+    },
+    {
+      "name": "Chassi0HSCPower0",
+      "reading": "165.200",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0EnfEDP0",
+      "reading": "588.000",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0EnfEDP0",
+      "reading": "901.600",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "ProMod0CPU0Powe0",
+      "reading": "117.600",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1EnfEDP0",
+      "reading": "588.000",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1EnfEDP0",
+      "reading": "901.600",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "ProMod0CPU1Powe0",
+      "reading": "117.600",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre0CpuPow0",
+      "reading": "39.200",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre0SocPow0",
+      "reading": "0.000",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre1CpuPow0",
+      "reading": "39.200",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre1SocPow0",
+      "reading": "0.000",
+      "unit": "Watts",
+      "status": "ok"
+    },
+    {
+      "name": "BMC0_Temp_0",
+      "reading": "36.000",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "Chassis0HSCTemp0",
+      "reading": "18.000",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "NVMeE1SSSD0Temp0",
+      "reading": "40.836",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "NVMeE1SSSD1Temp0",
+      "reading": "46.812",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CoOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0SyOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0TemAvg0",
+      "reading": "24.520",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0TemLim0",
+      "reading": "67.640",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CoOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1SyOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1TemAvg0",
+      "reading": "23.540",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1TemLim0",
+      "reading": "68.620",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem0",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem1",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem2",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem3",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem4",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem5",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem6",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0DrTem7",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem0",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem1",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem2",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem3",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem4",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem5",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem6",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1DrTem7",
+      "reading": "27.460",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "SMM_0_Temp_0",
+      "reading": "28.000",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "E1S_SMA0_Temp",
+      "reading": "49.000",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "StoraBackplTemp0",
+      "reading": "37.000",
+      "unit": "degrees C",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti0",
+      "reading": "12.960",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti1",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti2",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti3",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti4",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti5",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti6",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti7",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti8",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU0CorUti9",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti10",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti11",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti12",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti13",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti14",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti15",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti16",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti17",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti18",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti19",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti20",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti21",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti22",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti23",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti24",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti25",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti26",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti27",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti28",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti29",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti30",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti31",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti32",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti33",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti34",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti35",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti36",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti37",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti38",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti39",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti40",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti41",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti42",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti43",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti44",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti45",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti46",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti47",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti48",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti49",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti50",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti51",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti52",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti53",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti54",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti55",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti56",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti57",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti58",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti59",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti60",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti61",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti62",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti63",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti64",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti65",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti66",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti67",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti68",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti69",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti70",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti71",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti72",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti73",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti74",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti75",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti76",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti77",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti78",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti79",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti80",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti81",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti82",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti83",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti84",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti85",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti86",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP0CorUti87",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti0",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti1",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti2",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti3",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti4",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti5",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti6",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti7",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti8",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CPU1CorUti9",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti10",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti11",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti12",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti13",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti14",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti15",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti16",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti17",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti18",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti19",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti20",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti21",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti22",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti23",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti24",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti25",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti26",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti27",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti28",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti29",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti30",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti31",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti32",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti33",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti34",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti35",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti36",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti37",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti38",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti39",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti40",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti41",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti42",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti43",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti44",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti45",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti46",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti47",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti48",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti49",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti50",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti51",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti52",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti53",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti54",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti55",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti56",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti57",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti58",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti59",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti60",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti61",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti62",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti63",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti64",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti65",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti66",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti67",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti68",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti69",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti70",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti71",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti72",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti73",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti74",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti75",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti76",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti77",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti78",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti79",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti80",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti81",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti82",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti83",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti84",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti85",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti86",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0CP1CorUti87",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok"
+    },
+    {
+      "name": "Chass0HSCVoltag0",
+      "reading": "50.740",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "Chass0LeakDetec0",
+      "reading": "1.729",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre0CpuVol0",
+      "reading": "1.064",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre0SocVol0",
+      "reading": "0.831",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre1CpuVol0",
+      "reading": "0.919",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "PrMo0Vre1SocVol0",
+      "reading": "0.838",
+      "unit": "Volts",
+      "status": "ok"
+    },
+    {
+      "name": "RTCBatterVoltag0",
+      "reading": "2.904",
+      "unit": "Volts",
+      "status": "ok"
+    }
+  ],
+  "action": [
+    {
+      "command": "/usr/bin/stbypowerctrl.sh aux_cycle",
+      "role": "bmc",
+      "state": "SENT",
+      "code": 0
+    }
+  ],
+  "recovery": {
+    "old_boot_id": "2a2de074-0056-4885-bdf4-bda35e0be846",
+    "boot_changed": true,
+    "new_boot_id": "60c6bb9c-f087-404f-a25a-cb307acc745c",
+    "attempts": 23
+  },
+  "loop": 2,
+  "sel_review": "REVIEW REQUIRED: cumulative SEL and delta are evidence; event correctness is not automatically judged.",
+  "power_on": true,
+  "post_complete": true
+}
