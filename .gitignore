@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.log
+screenlog.*
+cycle_test*/
+dryrun_*/
