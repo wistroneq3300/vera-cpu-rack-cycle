@@ -172,6 +172,10 @@ def sensor_issues(rows):
             found.append(issue("SENSOR_NONCRITICAL", r["name"], f"Status {state}; reading {r['reading']}", "WARN"))
         elif state in unreadable or r["reading"].lower() in unreadable:
             found.append(issue("SENSOR_UNREADABLE", r["name"], f"Status {state or '(empty)'}; reading {r['reading']}"))
+        elif r["unit"].strip().lower() == "discrete" and re.fullmatch(r"0x[0-9a-f]+", state):
+            # ipmitool reports discrete states as hexadecimal bit fields (for
+            # example 0x0100); threshold status names do not apply here.
+            continue
         elif state not in {"ok", "0x0000"}:
             found.append(issue("SENSOR_UNRECOGNIZED", r["name"], f"Unrecognized status {state}; review raw sensor output"))
     return found

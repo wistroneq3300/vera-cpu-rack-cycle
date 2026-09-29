@@ -142,6 +142,18 @@ class PureTests(unittest.TestCase):
                 self.assertEqual(health(sensor_issues(parse_sensors(f'Temp | 30 | C | {state}'))), 'FAIL')
         self.assertEqual(health(sensor_issues(parse_sensors('Temp | 30 | C | nc'))), 'WARN')
 
+    def test_discrete_hex_status_is_normal(self):
+        rows = parse_sensors(
+            'NVMeE1SSSD0STS0 | 0x0 | discrete | 0x0100 | na | na\n'
+            'NVMeE1SSSD1STS0 | 0x0 | discrete | 0x0000 | na | na\n'
+        )
+        self.assertEqual(sensor_issues(rows), [])
+        self.assertEqual(health(sensor_issues(rows)), 'PASS')
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('Temp | 0x0 | degrees C | 0x0100'))),
+            'FAIL',
+        )
+
     def test_sensor_missing_and_reread(self):
         pre = parse_sensors(SENSORS)
         initial = pre[:1]
