@@ -247,7 +247,11 @@ def config_issues(text, code):
         items.append(issue("CONFIG_FAILED", "hardware", "Hardware script returned RESULT|FAIL"))
     if "RESULT|" not in text:
         items.append(issue("CONFIG_INCOMPLETE", "hardware", "Hardware script did not return a final structured result"))
-    if not any(i['code'] == 'PCIE_DOWNGRADE' for i in items) and re.search(r"down[\s-]*grad|degrad", text, re.I):
+    # Fallback for older scripts that scan links but do not emit ISSUE|PCIE_DOWNGRADE.
+    # When the script ran its own link check, trust its structured verdict: it
+    # deliberately ignores devices (e.g. NVMe x2) that are not real downgrades.
+    if "[Evidence] PCIe-links" not in text and not any(i['code'] == 'PCIE_DOWNGRADE' for i in items) \
+            and re.search(r"down[\s-]*grad|degrad", text, re.I):
         items.append(issue("PCIE_DOWNGRADE", "PCIe", "Hardware script reported link downgrade"))
     return items
 

@@ -36,7 +36,13 @@ class Transport:
 
     def _connect(self, target, role, timeout):
         # Report rebuilding and CLI help do not require Paramiko to be installed.
-        import paramiko
+        # Paramiko 2.x still references the moved TripleDES symbol at import
+        # time; newer cryptography releases raise CryptographyDeprecationWarning
+        # (a UserWarning subclass) on every SSH call. Silence that one message.
+        import warnings
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message=r'.*TripleDES.*', category=UserWarning)
+            import paramiko
         client = paramiko.SSHClient()
         # Campaign-isolated TOFU; later key changes fail. Hostname is separately
         # checked against operator-supplied inventory before any remote mutation.

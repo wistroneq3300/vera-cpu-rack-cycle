@@ -139,6 +139,9 @@ class NodeSession:
                         if cleared.code == 0:
                             existing = {(i['code'], i['detail']) for i in record['issues']}
                             record['issues'] += [i for i in dmesg_issues(cleared.output) if (i['code'], i['detail']) not in existing]
+        if post:
+            # AC cycle clears /tmp (tmpfs); re-push the verified script before post-check.
+            self.transport.upload(self.target, self.script, self.remote)
         config = self.command(record, "hardware", "os", "bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
         record["issues"] += config_issues(config.output, config.code)
         sensor = self.command(record, "sensor", "oob", "sensor list")

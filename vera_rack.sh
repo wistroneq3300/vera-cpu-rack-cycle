@@ -50,9 +50,16 @@ nvme_check() {
     minimum NVMe "$qty" "$NVMe_MIN"
 }
 nic_bf4_check() {
-    local data nic bf4
+    local data nic bf4 modules
     collect data MST mst status -v
-    nic=$(printf '%s\n' "$data" | awk 'tolower($1) ~ /^vera(\(|$)/ && /\/dev\/mst\// {a[$2]=1} END {for (v in a) n++; print n+0}')
+    # Count Vera devices from the mst device table. The MST column is only
+    # populated when the MST kernel module is loaded, so keying on '/dev/mst/'
+    # alone reports 0 NICs on a healthy host whose module is not yet loaded.
+    # A Vera row that carries a PCI BDF is the evidence we want.
+    nic=$(printf '%s\n' "$data" | awk 'tolower($1) ~ /^vera(\(|$)/ {for (i=2;i<=NF;i++) if ($i ~ /^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]$/) {n++; break}} END {print n+0}')
+    if ((nic == 0)) && printf '%s\n' "$data" | grep -q 'MST PCI module is not loaded'; then
+        fail MST_MODULE MST "MST kernel module is not loaded; Vera NIC count is unavailable (run: mst start)"
+    fi
     minimum NIC "$nic" "$NIC_MIN"
     # BF3, generic BlueField/DPU and non-Vera MST devices are not BF4 evidence.
     bf4=$(printf '%s\n%s\n' "$data" "$PCI" | grep -Ei '(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)' || :)
@@ -65,13 +72,26 @@ pci_count() {
     minimum "$component" "$qty" "$expected"
 }
 link_check() {
-    local data bdf="unknown" line
+    local data bdf="unknown" name="" class="" line
     collect data PCIe-links lspci -Dvv
+    # Device name comes from the header line, kept here so a downgrade can be
+    # reported with something an operator recognises instead of a bare BDF.
     while IFS= read -r line; do
-        if [[ "$line" =~ ^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ]]; then bdf=${line%% *}; fi
-        if [[ "$line" == *LnkSta:* ]] && printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad'; then
-            fail PCIE_DOWNGRADE "$bdf" "${line#"${line%%[![:space:]]*}"}"
+        if [[ "$line" =~ ^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ]]; then
+            bdf=${line%% *}
+            name=${line#* }                       # e.g. 'Non-Volatile memory controller: KIOXIA ...'
+            class=${name%%:*}                     # e.g. 'Non-Volatile memory controller'
+            continue
         fi
+        [[ "$line" == *LnkSta:* ]] || continue
+        printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad' || continue
+        # Storage devices legitimately negotiate x2, so a narrow link is not a
+        # downgrade for them; only flag links that lost width or speed.
+        case "$class" in
+            *'Non-Volatile memory'*|*Storage*|*SATA*|*RAID*|*NVMe*) continue ;;
+        esac
+        if [[ "$line" =~ Width[[:space:]]x([0-9]+) ]] && ((BASH_REMATCH[1] <= 2)); then continue; fi
+        fail PCIE_DOWNGRADE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
     done <<< "$data"
 }
 firmware() {

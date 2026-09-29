@@ -6,6 +6,7 @@ import argparse
 import getpass
 import math
 import os
+import re
 import signal
 import sys
 import tempfile
@@ -34,6 +35,15 @@ from cycle_transport import Transport
 
 BASE = Path(__file__).resolve().parent
 
+# Colour the words that decide whether a run needs a human look: FAIL and NEW
+# stand out on the terminal, while the log file keeps the plain text so it
+# stays greppable. Disabled when the output is not a terminal or when NO_COLOR
+# is set.
+COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m'}
+BLUE = '\033[1;34m'
+RESET = '\033[0m'
+COLOUR_ON = sys.stdout.isatty() and not os.environ.get('NO_COLOR')
+
 class Console:
     def __init__(self):
         self.lines = []
@@ -43,11 +53,24 @@ class Console:
     def __call__(self, message):
         with self.lock:
             line = f"{now()} {message}"
-            print(line, flush=True)
+            print(self.paint(line), flush=True)
             self.lines.append(line)
             if self.path:
                 with self.path.open('a', encoding='utf-8') as stream:
                     stream.write(line + '\n')
+
+    def paint(self, line):
+        if not COLOUR_ON:
+            return line
+        # The run ID identifies the whole run, so it gets its own colour to be
+        # scannable in a long transcript. Matched on the generated shape
+        # (<project>_<YYYYmmdd>_<HHMMSS>Z_<hex>) rather than on the label, so
+        # ids quoted in other messages colourise too.
+        line = re.sub(r'\b[A-Za-z0-9-]+_\d{8}_\d{6}Z_[0-9a-f]{6}\b',
+                      lambda m: f'{BLUE}{m.group(0)}{RESET}', line)
+        for word, colour in COLOURS.items():
+            line = re.sub(rf'\b{word}\b', f'{colour}{word}{RESET}', line)
+        return line
 
     def attach(self, path):
         self.path = path
