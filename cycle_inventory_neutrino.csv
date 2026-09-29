@@ -1,5 +1,5 @@
 tray,node,bmc_ip,os_ip,bmc_hostname,os_hostname,lily_bmc_ip,lily_os_ip,lily_bmc_hostname,lily_os_hostname
 L105-21R,n0,10.35.228.147,10.35.228.146,,,,,,
 L105-21R,n1,10.35.228.149,10.35.228.148,vc-256-bmc-n1,neutrino-n1,,,,
-L105-21R,n2,10.35.228.151,10.35.228.150,vc-256-bmc-n2,neutrino-n2,,,,
+L105-21R,n2,10.35.228.151,10.35.228.150,vc-256-bmc-n3,neutrino-n2,,,,
 L105-21R,n3,10.35.228.155,10.35.228.154,vc-256-bmc-n3,neutrino-n3,,,,

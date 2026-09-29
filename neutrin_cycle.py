@@ -14,10 +14,11 @@ import threading
 import time
 import uuid
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from cycle_core import (
+    LOG_TIMEZONE,
     ROLES,
     atomic_write,
     digest,
@@ -64,9 +65,9 @@ class Console:
             return line
         # The run ID identifies the whole run, so it gets its own colour to be
         # scannable in a long transcript. Matched on the generated shape
-        # (<project>_<YYYYmmdd>_<HHMMSS>Z_<hex>) rather than on the label, so
+        # (<project>_<YYYYmmdd>_<HHMMSS+0800>_<hex>) rather than on the label, so
         # ids quoted in other messages colourise too.
-        line = re.sub(r'\b[A-Za-z0-9-]+_\d{8}_\d{6}Z_[0-9a-f]{6}\b',
+        line = re.sub(r'\b[A-Za-z0-9-]+_\d{8}_\d{6}(?:Z|[+-]\d{4})_[0-9a-f]{6}\b',
                       lambda m: f'{BLUE}{m.group(0)}{RESET}', line)
         for word, colour in COLOURS.items():
             line = re.sub(rf'\b{word}\b', f'{colour}{word}{RESET}', line)
@@ -118,7 +119,7 @@ def parallel(function, sessions, console, label, display_result=True):
 
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
-    run_id = f"{options.project}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%SZ')}_{uuid.uuid4().hex[:6]}"
+    run_id = f"{options.project}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S%z')}_{uuid.uuid4().hex[:6]}"
     output = options.output.resolve() / run_id
     locks = EndpointLocks(runtime_root)
     stop = threading.Event()
@@ -135,7 +136,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         policy_text = options.issue_policy.read_text(encoding='utf-8')
         rules = parse_policy(policy_text)
         console(f"Run ID: {run_id}")
-        console("Time zone: UTC+8 (+08:00 in console/evidence timestamps; Run ID remains UTC Z)")
+        console("Time zone: UTC+8 (+0800 in Run ID, +08:00 in console/evidence timestamps)")
         console(f"Planned output: {output}")
         console("Selected targets: " + ', '.join(t.key for t in targets))
         console(f"Mode: {options.cycle_mode}; channel: {options.channel}; loops: {options.loops or 'unlimited'}; hours: {options.hours or 'unlimited'}")

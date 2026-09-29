@@ -487,7 +487,7 @@ class EngineTests(unittest.TestCase):
         self.assertIn('| log clearing | complete', console_log)
         self.assertEqual(rebuild(output)['state'],'COMPLETE')
 
-    def test_run_id_uses_utc_on_a_host_eight_hours_ahead(self):
+    def test_run_id_uses_rack_timezone(self):
         fixed=datetime(2026,9,29,8,0,0,tzinfo=timezone.utc)
         def clock(tz=None):
             return fixed.astimezone(tz) if tz is not None else (fixed+timedelta(hours=8)).replace(tzinfo=None)
@@ -495,8 +495,8 @@ class EngineTests(unittest.TestCase):
             mocked_clock.now.side_effect=clock
             self.run_campaign()
         output=next(self.options.output.iterdir())
-        self.assertTrue(output.name.startswith('neutrino_20260929_080000Z_'),output.name)
-        self.assertIn('Time zone: UTC+8',(output/'console.log').read_text())
+        self.assertTrue(output.name.startswith('neutrino_20260929_160000+0800_'),output.name)
+        self.assertIn('Time zone: UTC+8 (+0800 in Run ID',(output/'console.log').read_text())
 
     def test_graceful_stop_keeps_current_loop_post(self):
         def callback():

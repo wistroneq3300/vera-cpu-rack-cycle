@@ -94,7 +94,7 @@ class RunRegistry:
         write_json(path, data)
 
 def request_stop(run_id, root=None):
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+", run_id):
+    if not re.fullmatch(r"[A-Za-z0-9_.+\-]+", run_id):
         raise ValueError("Invalid Run ID")
     path = (Path(root) if root is not None else shared_root()) / ("run-" + run_id)
     if path.is_symlink() or not path.is_dir():
