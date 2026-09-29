@@ -40,8 +40,15 @@ BASE = Path(__file__).resolve().parent
 # stand out on the terminal, while the log file keeps the plain text so it
 # stays greppable. Disabled when the output is not a terminal or when NO_COLOR
 # is set.
-COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m',
-           'OK': '\033[1;32m', 'PASS': '\033[1;32m', 'DONE': '\033[1;32m'}
+COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m', 'KNOWN': '\033[90m',
+           'WARN': '\033[1;33m', 'OK': '\033[1;32m', 'PASS': '\033[1;32m', 'DONE': '\033[1;32m',
+           'COMPLETE': '\033[1;32m', 'INCOMPLETE': '\033[1;33m', 'STOPPED': '\033[1;31m',
+           'BLOCKED': '\033[1;31m', 'PENDING': '\033[90m'}
+# Run-header labels that introduce a value. The label is recoloured (not the
+# value) so every "Label: value" line reads as a definition.
+HEADER_LABELS = ('Run ID', 'Time zone', 'Planned output', 'Selected targets',
+                 'Mode', 'channel', 'loops', 'hours', 'Identity', 'Operator decision',
+                 'Campaign started', 'Stop after', 'Output', 'Excluded targets')
 BLUE = '\033[1;34m'
 CYAN = '\033[1;36m'
 MAGENTA = '\033[1;35m'
@@ -75,6 +82,12 @@ class Console:
                       line, count=1)
         # Standalone loop markers, e.g. "Loop 1: waiting for 2 target(s)".
         line = re.sub(r'Loop (\d+)\b', lambda m: f'{MAGENTA}Loop {m.group(1)}{RESET}', line)
+        # Run header labels ("Run ID:", "Mode:", "Selected targets:" ...) get a
+        # bold-cyan prefix so the value is easy to pick out of the prose. Matched
+        # as explicit, known labels rather than a generic "Word:" rule so the
+        # timestamp (which contains colons) is never recoloured.
+        for label in HEADER_LABELS:
+            line = re.sub(rf'\b({re.escape(label)}:) ', f'{CYAN}\\1{RESET} ', line)
         # The run ID identifies the whole run, so it gets its own colour to be
         # scannable in a long transcript. Matched on the generated shape
         # (<project>_<YYYYmmdd>_<HHMMSS+0800>_<hex>) rather than on the label, so

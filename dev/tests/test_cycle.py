@@ -627,6 +627,22 @@ class ConsolePaintTests(unittest.TestCase):
         out = self.paint('Run ID: neutrino_20260929_231617+0800_690ec1')
         self.assertIn('\033[1;34mneutrino_20260929_231617+0800_690ec1\033[0m', out)
 
+    def test_header_labels_are_coloured_but_timestamps_are_not(self):
+        out = self.paint('2026-09-29T23:16:17+08:00 Mode: aux_cycle; channel: inband; loops: 5')
+        for label in ('Mode:', 'channel:', 'loops:'):
+            self.assertIn('\033[1;36m' + label + '\033[0m', out)
+        self.assertNotIn('\033[1;36m2026', out)          # timestamp not recoloured
+        self.assertNotIn('\033[1;36m23:', out)
+
+    def test_status_words(self):
+        self.assertIn('\033[1;31mSTOPPED\033[0m', self.paint('n3 | LOOP 1 | STOPPED'))
+        self.assertIn('\033[1;33mWARN\033[0m', self.paint('  WARN [NEW] x: y'))
+        self.assertIn('\033[1;32mCOMPLETE\033[0m', self.paint('n1 | PRE | COMPLETE'))
+
+    def test_known_is_dim_but_unknown_is_not_matched(self):
+        self.assertIn('\033[90mKNOWN\033[0m', self.paint('  FAIL [KNOWN] BF4: x'))
+        self.assertNotIn('\033[90m', self.paint('UNKNOWN'))
+
     def test_colour_off_returns_plain_text(self):
         console = Console()
         with patch('neutrin_cycle.COLOUR_ON', False):
