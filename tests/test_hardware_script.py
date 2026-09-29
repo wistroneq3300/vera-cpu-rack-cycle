@@ -17,28 +17,23 @@ class HardwareTests(unittest.TestCase):
             tools={
               'dmidecode':f'''case "$*" in
                 '-t processor') printf 'Status: Populated, Enabled\\nStatus: Populated, Enabled\\n';;
-                '-t memory') for ((i=1;i<={dimms};i++)); do printf 'Memory Device\\n Size: 128 GB\\n'; done; printf 'Memory Device\\n Size: No Module Installed\\n';;
+                '-t memory') i=1; while [ "$i" -le {dimms} ]; do printf 'Memory Device\\n Size: 128 GB\\n'; i=$((i+1)); done; printf 'Memory Device\\n Size: No Module Installed\\n';;
                 *) echo 'Version: example';; esac''',
               'nvme':"printf '/dev/nvme0n1 disk0\\n/dev/nvme0n2 namespace2\\n/dev/nvme1n1 disk1\\n'",
-              'mst':f'''for ((i=1;i<=22;i++)); do echo "Vera(rev:0) /dev/mst/mt12183_pciconf$i 0001:01:00.0"; done
+              'mst':f'''i=1; while [ "$i" -le 22 ]; do echo "Vera(rev:0) /dev/mst/mt12183_pciconf$i 0001:01:00.0"; i=$((i+1)); done
                         echo '{bf4}(rev:0) /dev/mst/dpu 0000:02:00.0' ''',
-              'lspci':f'''if [[ "$*" == -Dvv ]]; then
-                    printf '0000:01:00.0 Controller\\n LnkSta: Speed 16GT/s, Width x8 {'(downgraded)' if downgrade else ''}\\n'
-                  else
-                    for ((i=1;i<=20;i++)); do printf '0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]\\n'; done
-                    echo '0000:02:00.0 USB controller [0c03]: controller [1234:5678]'
-                    echo '0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]'
-                  fi''',
+              'lspci':f'''case "$1" in
+                    -Dvv) printf '0000:01:00.0 Controller\\n LnkSta: Speed 16GT/s, Width x8 {'(downgraded)' if downgrade else ''}\\n';;
+                    *) i=1; while [ "$i" -le 20 ]; do printf '0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]\\n'; i=$((i+1)); done
+                       echo '0000:02:00.0 USB controller [0c03]: controller [1234:5678]'
+                       echo '0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]';;
+                  esac''',
               'ipmitool':"echo 'Firmware Revision: example'"}
+            # POSIX sh stubs so the harness runs under both dash and Git Bash.
             for name,content in tools.items():
                 file=root/name
-                file.write_text('#!/usr/bin/env bash\n'+content+'\n',encoding='utf-8',newline='\n')
+                file.write_text('#!/usr/bin/env sh\n'+content+'\n',encoding='utf-8',newline='\n')
                 file.chmod(0o755)
-            # Git for Windows sh is Bash but env bash may not exist. Use sh
-            # shebang stubs; they use only Bash-compatible Git sh syntax.
-            for name in tools:
-                file=root/name
-                file.write_text(file.read_text().replace('/usr/bin/env bash','/usr/bin/env sh'),encoding='utf-8',newline='\n')
             env={**os.environ,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
             result=subprocess.run([SHELL,str(BASE/'vera_rack.sh')],env=env,capture_output=True,text=True,timeout=45)
             return result
