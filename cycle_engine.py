@@ -68,16 +68,22 @@ class NodeSession:
     def add(self, record, code, component, detail, severity="FAIL", evidence=""):
         record["issues"].append(issue(code, component, detail, severity, evidence))
 
-    def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True):
+    def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
+                save_evidence=True, record_command=True, include_output=True):
         result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
                   self.transport.ssh(self.target, role, cmd, timeout, sudo))
-        prefix = "pre" if record["phase"] == "PRE" else "post"
-        path = self.folder(record) / f"{prefix}_{stem}.txt"
-        evidence = path.relative_to(self.root).as_posix()
-        atomic_write(path, f"UTC: {now()}\nRole: {role}\nCommand: {cmd}\nExit: {result.code}\nState: {result.state}\nDuration: {result.duration:.2f}s\n\n{result.output}\n")
-        record["evidence"].append(evidence)
+        evidence = ""
+        if save_evidence:
+            filename = f"pre_{stem}.txt" if record["phase"] == "PRE" else f"{stem}.txt"
+            path = self.folder(record) / filename
+            evidence = path.relative_to(self.root).as_posix()
+            body = result.output if include_output else "[Command output suppressed; status retained in this evidence file.]\n"
+            atomic_write(path, f"UTC+8: {now()}\nRole: {role}\nCommand: {cmd}\nExit: {result.code}\nState: {result.state}\nDuration: {result.duration:.2f}s\n\n{body}")
+            record["evidence"].append(evidence)
         ipmi_error = role == "oob" and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
-        record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": result.code == 0 and not ipmi_error}
+        valid = result.code == 0 and not ipmi_error
+        if record_command:
+            record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": valid}
         if check and result.code != 0:
             self.add(record, "COLLECTION_FAILED", stem, f"Exit {result.code} ({result.state}); see evidence", evidence=evidence)
         elif check and ipmi_error:
@@ -85,8 +91,9 @@ class NodeSession:
         self.persist(record)
         return result
 
-    def identity(self, record, role, stem=None, timeout=30):
-        result = self.command(record, stem or (role + "_identity"), role, IDENTITY, timeout=timeout, check=False)
+    def identity(self, record, role, stem=None, timeout=30, save_evidence=True, record_command=True):
+        result = self.command(record, stem or (role + "_identity"), role, IDENTITY, timeout=timeout,
+                              check=False, save_evidence=save_evidence, record_command=record_command)
         if result.code:
             raise ConnectionError(f"{role} identity unavailable: exit {result.code} ({result.state})")
         values = dict(re.findall(r"^(HOSTNAME|BOOT_ID)=(.*)$", result.output, re.M))
@@ -133,7 +140,8 @@ class NodeSession:
                 if result.code == 0:
                     record["issues"] += dmesg_issues(result.output)
                     if post:
-                        cleared = self.command(record, "dmesg_clear", "os", "dmesg -c", sudo=True)
+                        cleared = self.command(record, "dmesg_clear", "os", "dmesg -c", sudo=True,
+                                               include_output=False)
                         # Read-and-clear also saves messages arriving between the
                         # first read and clearing; -C alone would discard them.
                         if cleared.code == 0:
@@ -171,7 +179,7 @@ class NodeSession:
         if record['commands']['sel']['valid']:
             delta = sel_delta(self.previous_sel, sel.output)
             self.previous_sel = sel.output
-            path = self.folder(record) / ("post_sel_delta.txt" if post else "pre_sel_delta.txt")
+            path = self.folder(record) / ("sel_delta.txt" if post else "pre_sel_delta.txt")
             atomic_write(path, delta or "No new SEL records.\n")
             record["evidence"].append(path.relative_to(self.root).as_posix())
             record["sel_review"] = "REVIEW REQUIRED: cumulative SEL and delta are evidence; event correctness is not automatically judged."
@@ -225,7 +233,8 @@ class NodeSession:
         # Clear only successfully captured evidence. Do not erase unread evidence.
         for stem, role, cmd, sudo in (("dmesg", "os", "dmesg -c", True), ("sel", "oob", "sel clear", False)):
             if record["commands"].get(stem, {}).get("valid"):
-                result = self.command(record, "start_" + stem + "_clear", role, cmd, sudo=sudo)
+                result = self.command(record, "start_" + stem + "_clear", role, cmd, sudo=sudo,
+                                      include_output=(stem != "dmesg"))
                 if stem == 'dmesg' and result.code == 0:
                     existing = {(i['code'], i['detail']) for i in record['issues']}
                     record['issues'] += [i for i in dmesg_issues(result.output) if (i['code'], i['detail']) not in existing]
@@ -241,7 +250,10 @@ class NodeSession:
         while time.monotonic() < deadline:
             attempts += 1
             try:
-                current = self.identity(record, "os", f"boot_poll_{attempts:03d}", min(20, max(1, deadline - time.monotonic())))
+                current = self.identity(
+                    record, "os", timeout=min(20, max(1, deadline - time.monotonic())),
+                    save_evidence=False, record_command=False,
+                )
                 if current["boot_id"] != old_boot:
                     boot_changed = True
                     record["recovery"].update(boot_changed=True, new_boot_id=current["boot_id"], attempts=attempts)
@@ -253,7 +265,8 @@ class NodeSession:
                             remaining = deadline - time.monotonic()
                             if remaining <= 0:
                                 raise ConnectionError('Recovery deadline reached')
-                            self.identity(record, role, f"{role}_boot_poll_{attempts:03d}", min(20, remaining))
+                            self.identity(record, role, timeout=min(20, remaining),
+                                          save_evidence=False, record_command=False)
                     return True
             except IdentityUnsafe:
                 raise
@@ -287,7 +300,8 @@ class NodeSession:
         try:
             # Re-verify every selected endpoint before issuing another power action.
             for role, _, _ in self.target.endpoints():
-                self.identity(record, role, role + "_before_cycle")
+                self.identity(record, role, role + "_before_cycle",
+                              save_evidence=False, record_command=False)
             old_boot = record["identities"]["os"]["boot_id"]
             record["recovery"]["old_boot_id"] = old_boot
             deadline = time.monotonic() + self.options.boot_timeout
@@ -301,7 +315,11 @@ class NodeSession:
                     attempt = 0
                     while time.monotonic() < deadline:
                         attempt += 1
-                        power = self.command(record, f"power_off_poll_{attempt:03d}", "oob", "power status", timeout=min(20, max(1, deadline-time.monotonic())), check=False)
+                        power = self.command(
+                            record, "power_off_poll", "oob", "power status",
+                            timeout=min(20, max(1, deadline-time.monotonic())), check=False,
+                            save_evidence=False, record_command=False,
+                        )
                         if power.code == 0 and re.search(r"Chassis Power is off", power.output, re.I):
                             off = True
                             break
@@ -326,10 +344,12 @@ class NodeSession:
                 recovered = False
                 record["recovery"]["boot_changed"] = False
             # Even a rejected power action receives POST while the OS is available.
-            self.identity(record, "os", "os_after_cycle")
+            self.identity(record, "os", "os_after_cycle",
+                          save_evidence=False, record_command=False)
             for role, _, _ in self.target.endpoints():
                 if role != "os":
-                    self.identity(record, role, role + "_after_cycle")
+                    self.identity(record, role, role + "_after_cycle",
+                                  save_evidence=False, record_command=False)
             self.capture(record, post=True)
             if recovered and record.get("power_on"):
                 for action in record["action"]:

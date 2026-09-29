@@ -82,7 +82,7 @@ tray,node,bmc_ip,os_ip,bmc_hostname,os_hostname,lily_bmc_ip,lily_os_ip,lily_bmc_
 
 Lily endpoints are optional; when supplied their expected hostnames are required. Same node labels on different trays are allowed. Duplicate tray/node or ambiguous selections are rejected. Duplicate IP endpoints in selected rows are listed and blocked. Names used in paths accept letters, digits, dots and hyphens.
 
-Run IDs include project, a UTC timestamp ending in `Z` and a random collision suffix (for example `neutrino_20260929_080000Z_a1b2c3`). Console and evidence timestamps also use UTC (`+00:00`), and the console states the time zone. Every target folder includes tray and node. On Linux, endpoint locks are advisory file locks in `/tmp/vera-cycle-runtime` (mode `1777`); lock files are shared across users and are **not deleted on release**, avoiding inode races. A crashed process releases its OS-held locks. Failure to open or acquire a lock blocks that target; there is no fallback lock directory.
+Run IDs include project, a UTC timestamp ending in `Z` and a random collision suffix (for example `neutrino_20260929_080000Z_a1b2c3`). Console and evidence timestamps use the rack lab timezone UTC+8 (`+08:00`); the console states the time zone. Every target folder includes tray and node. Loop evidence uses concise names without a redundant `post_` prefix, while transient boot/identity polls are kept in the JSON recovery summary instead of producing one file per attempt. On Linux, endpoint locks are advisory file locks in `/tmp/vera-cycle-runtime` (mode `1777`); lock files are shared across users and are **not deleted on release**, avoiding inode races. A crashed process releases its OS-held locks. Failure to open or acquire a lock blocks that target; there is no fallback lock directory.
 
 All operators on the **same orchestrator** must use the same runtime path. If `/tmp` is isolated per user/service, provision a shared local directory and set `VERA_RUNTIME_DIR` consistently. Locks do not coordinate separate orchestrator machines. Registry directories are owner-only. Never remove live endpoint lock files or use independent runtime paths to bypass an active run.
 
@@ -120,8 +120,8 @@ campaigns/<run_id>/
     node_summary.txt
     loop0001/
       report.json
-      post_hardware.txt / post_sensor.txt / post_sensor_confirm.txt / ...
-      post_dmesg.txt / post_sel.txt / post_sel_delta.txt
+      hardware.txt / sensor.txt / sensor_confirm.txt / ...
+      dmesg.txt / sel.txt / sel_delta.txt
 ```
 
 There is no extra PRE directory. Loop files are always retained. All formats use the same evaluator. The HTML has overview/node/issue tabs, collapsible phases, known/new and severity filters, action/recovery records and evidence links. CSS/JS are inline; it opens offline. Keep the HTML with its sibling log folders when sharing evidence links. Text from devices is escaped, not interpreted as HTML. Sample data is labeled **SYNTHETIC**.

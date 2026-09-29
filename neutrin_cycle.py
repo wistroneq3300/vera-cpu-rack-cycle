@@ -90,7 +90,7 @@ def show_result(console, node, record):
     for reason in node['blocked']:
         console(f"  BLOCKED: {reason}")
 
-def parallel(function, sessions, console, label):
+def parallel(function, sessions, console, label, display_result=True):
     """Bounded wait with concise progress; never dump remote command output."""
     with ThreadPoolExecutor(max_workers=min(32, max(1, len(sessions)))) as pool:
         futures = {pool.submit(function, s): s for s in sessions}
@@ -111,7 +111,10 @@ def parallel(function, sessions, console, label):
                         session.node['blocked'].append(str(exc))
                     session.finish(record)
                 record = session.node['loops'][-1] if session.node['loops'] else session.node['pre']
-                show_result(console, session.node, record)
+                if display_result:
+                    show_result(console, session.node, record)
+                elif label == 'Start log clearing':
+                    console(f"{session.node['key']} | log clearing | complete")
 
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
@@ -132,7 +135,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         policy_text = options.issue_policy.read_text(encoding='utf-8')
         rules = parse_policy(policy_text)
         console(f"Run ID: {run_id}")
-        console("Time zone: UTC (Z in Run ID; +00:00 in evidence timestamps)")
+        console("Time zone: UTC+8 (+08:00 in console/evidence timestamps; Run ID remains UTC Z)")
         console(f"Planned output: {output}")
         console("Selected targets: " + ', '.join(t.key for t in targets))
         console(f"Mode: {options.cycle_mode}; channel: {options.channel}; loops: {options.loops or 'unlimited'}; hours: {options.hours or 'unlimited'}")
@@ -206,7 +209,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             console(f"Campaign started. Output: {output}")
             console(f"Stop after the current POST: ./stop_cycle.sh {run_id}")
             start = time.monotonic()
-            parallel(lambda s: s.start(), runnable, console, 'Start log clearing')
+            parallel(lambda s: s.start(), runnable, console, 'Start log clearing', display_result=False)
             write_reports(output, data)
             number = 0
             while True:

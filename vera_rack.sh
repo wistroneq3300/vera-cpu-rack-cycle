@@ -85,18 +85,14 @@ link_check() {
         fi
         [[ "$line" == *LnkSta:* ]] || continue
         printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad' || continue
-        # Storage devices legitimately negotiate x2, so a narrow link is not a
-        # downgrade for them; only flag links that lost width or speed.
-        case "$class" in
-            *'Non-Volatile memory'*|*Storage*|*SATA*|*RAID*|*NVMe*) continue ;;
-        esac
-        if [[ "$line" =~ Width[[:space:]]x([0-9]+) ]] && ((BASH_REMATCH[1] <= 2)); then continue; fi
         fail PCIE_DOWNGRADE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
     done <<< "$data"
 }
 firmware() {
     local data
-    collect data BMC-firmware ipmitool mc info
+    # BMC firmware is collected through the authenticated OOB channel by
+    # cycle_engine.py. The OS-side ipmitool mc info path requires /dev/ipmi0,
+    # which is absent on this platform and would create a false FAIL.
     collect data BIOS-firmware dmidecode -t bios
 }
 mode="${1:-all}"

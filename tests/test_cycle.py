@@ -193,16 +193,27 @@ class PureTests(unittest.TestCase):
         self.assertEqual(parsed['0001:01:00.0'], '10de:2f95')
         self.assertEqual(len(pci_issues(parsed, parse_pci(PCI.replace('1234:5678','1234:9999')))), 1)
 
+    def test_pcie_downgrade_is_always_a_failure(self):
+        text = (
+            '[Evidence] PCIe-links\n'
+            '0004:01:00.0 Non-Volatile memory controller: KIOXIA NVMe\n'
+            '\tLnkSta: Speed 32GT/s, Width x2 (downgraded)\n'
+            'RESULT|PASS\n'
+        )
+        items = config_issues(text, 0)
+        self.assertEqual(health(items), 'FAIL')
+        self.assertIn('PCIE_DOWNGRADE', [item['code'] for item in items])
+
     def test_empty_config_is_not_pass(self):
         self.assertEqual(health(config_issues('', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|FAIL', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|PASS', 0)), 'PASS')
 
-    def test_bf4_absent_is_new_failure_under_shipped_policy(self):
-        # Policy decision: BF4 is expected. Absent BF4 is a real, unclassified FAIL.
+    def test_bf4_absent_is_known_failure_under_shipped_policy(self):
+        # The missing card is known to the operator, but it remains a real FAIL.
         rule = parse_policy((BASE / 'issue_policy.md').read_text())
         items = classify([issue('BF4_MISSING','BF4','missing')], 'neutrino', rule)
-        self.assertEqual(items[0]['classification'], 'NEW')
+        self.assertEqual(items[0]['classification'], 'KNOWN')
         self.assertEqual(health(items), 'FAIL')
 
     def test_sel_reused_id_with_new_timestamp(self):
@@ -270,7 +281,11 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(sum(cmd=='dmesg -c' for _,_,cmd in self.fake.calls),3)
         self.assertTrue((self.root/'tray1_n1'/'pre_pci.txt').exists())
         self.assertFalse((self.root/'tray1_n1'/'pre').exists())
-        self.assertTrue((self.root/'tray1_n1'/'loop0002'/'post_sel.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0002'/'sel.txt').exists())
+        loop_files = {path.name for path in (self.root/'tray1_n1'/'loop0002').iterdir()}
+        self.assertFalse(any(name.startswith('boot_poll') for name in loop_files))
+        self.assertFalse(any(name.endswith('_before_cycle.txt') or name.endswith('_after_cycle.txt') for name in loop_files))
+        self.assertFalse(any(name.startswith('post_') for name in loop_files))
 
     def test_wrong_hostname_prevents_any_mutation(self):
         self.fake.mismatch = True
@@ -375,7 +390,7 @@ class EngineTests(unittest.TestCase):
         self.ready()
         result = self.session.one_loop(1)
         self.assertIn('SENSOR_RECOVERED',[i['code'] for i in result['issues']])
-        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'post_sensor_confirm.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sensor_confirm.txt').exists())
 
     def test_sensor_transport_failure_is_not_missing_hardware(self):
         self.ready()
@@ -450,7 +465,8 @@ class EngineTests(unittest.TestCase):
         self.fake.ssh=ssh
         result=self.session.one_loop(1)
         self.assertIn('DMESG_HARDWARE',[i['code'] for i in result['issues']])
-        self.assertIn('Uncorrected',(self.root/'tray1_n1'/'loop0001'/'post_dmesg_clear.txt').read_text())
+        self.assertNotIn('Uncorrected',(self.root/'tray1_n1'/'loop0001'/'dmesg_clear.txt').read_text())
+        self.assertTrue(any(item['code'] == 'DMESG_HARDWARE' for item in result['issues']))
 
     def test_campaign_reports_are_consistent_and_escaped(self):
         self.assertEqual(self.run_campaign(),1)
@@ -466,6 +482,9 @@ class EngineTests(unittest.TestCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',page)
         self.assertIn('KNOWN',page)
         self.assertTrue((output/'known_issues.md').exists())
+        console_log = (output/'console.log').read_text()
+        self.assertEqual(console_log.count('| PRE |'), 1)
+        self.assertIn('| log clearing | complete', console_log)
         self.assertEqual(rebuild(output)['state'],'COMPLETE')
 
     def test_run_id_uses_utc_on_a_host_eight_hours_ahead(self):
@@ -477,7 +496,7 @@ class EngineTests(unittest.TestCase):
             self.run_campaign()
         output=next(self.options.output.iterdir())
         self.assertTrue(output.name.startswith('neutrino_20260929_080000Z_'),output.name)
-        self.assertIn('Time zone: UTC',(output/'console.log').read_text())
+        self.assertIn('Time zone: UTC+8',(output/'console.log').read_text())
 
     def test_graceful_stop_keeps_current_loop_post(self):
         def callback():

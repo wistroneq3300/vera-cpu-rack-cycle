@@ -4,3 +4,4 @@ Rules match exact project, issue code and component (`*` matches any). First mat
 
 | Project | Code | Component | Classification | Reason | Active |
 | --- | --- | --- | --- | --- | --- |
+| neutrino | BF4_MISSING | BF4 | KNOWN | BF4 card has not arrived; still mandatory. Remove this rule after installation. | yes |

@@ -8,13 +8,16 @@ import json
 import re
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROLES = ("bmc", "os", "lily_bmc", "lily_os")
 
+LOG_TIMEZONE = timezone(timedelta(hours=8), name="UTC+8")
+
 def now():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    """Return operator-facing timestamps in the rack lab timezone (UTC+8)."""
+    return datetime.now(LOG_TIMEZONE).isoformat(timespec="seconds")
 
 def atomic_write(path, text):
     path = Path(path)
@@ -247,10 +250,11 @@ def config_issues(text, code):
         items.append(issue("CONFIG_FAILED", "hardware", "Hardware script returned RESULT|FAIL"))
     if "RESULT|" not in text:
         items.append(issue("CONFIG_INCOMPLETE", "hardware", "Hardware script did not return a final structured result"))
-    # Fallback for older scripts that scan links but do not emit ISSUE|PCIE_DOWNGRADE.
-    # When the script ran its own link check, trust its structured verdict: it
-    # deliberately ignores devices (e.g. NVMe x2) that are not real downgrades.
-    if "[Evidence] PCIe-links" not in text and not any(i['code'] == 'PCIE_DOWNGRADE' for i in items) \
+    # Fallback for older scripts that scan links but do not emit
+    # ISSUE|PCIE_DOWNGRADE. A visible downgrade is always actionable; the
+    # structured issue guard prevents duplicate findings when the script
+    # already reported it.
+    if not any(i['code'] == 'PCIE_DOWNGRADE' for i in items) \
             and re.search(r"down[\s-]*grad|degrad", text, re.I):
         items.append(issue("PCIE_DOWNGRADE", "PCIe", "Hardware script reported link downgrade"))
     return items
