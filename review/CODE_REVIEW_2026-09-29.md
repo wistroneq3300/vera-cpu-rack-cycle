@@ -15,64 +15,43 @@
 - 抓不到資料 = FAIL，不靜默通過
 - 報告與 journal 分離、可 rebuild
 
-但**它不是「已驗證可用」**。我找到 **2 個真 bug、3 個需決策的設計問題、若干次要問題**。以下按嚴重度排列。
+但**它不是「已驗證可用」**。我找到 **2 個真 bug、若干次要問題**；其中 2 個真 bug 都已處理（BUG-1 依政策刪 rule、BUG-2 已修），BUG-3 撤回（非 bug）。以下按嚴重度排列。
 
 ---
 
 ## 1. 真 bug（建議修）
 
-### 🔴 BUG-1：`BF4_MISSING` 被列為 KNOWN 但仍讓 campaign 永遠 FAIL
+### ✅ BUG-1（已依政策解決）：`BF4_MISSING` 被列為 KNOWN 但仍讓 campaign 永遠 FAIL
 
-**現象**：`issue_policy.md` 把 `BF4_MISSING` 標成 `KNOWN`，但 `health()` 只看 severity（KNOWN 不降 severity）。所以 n2/n3/n4 每個 loop 都是 **FAIL**，整個 campaign 健康度**永遠 FAIL**。
+**現象**：`issue_policy.md` 原本把 `BF4_MISSING` 標成 `KNOWN`，但 `health()` 只看 severity（KNOWN 不降 severity）。所以 n2/n3/n4 每個 loop 都是 **FAIL**，整個 campaign 健康度**永遠 FAIL**。
 
-實測：
-```
-BF4_MISSING classify -> KNOWN, severity 仍 FAIL
-campaign health = FAIL   # 永遠
-```
+**使用者決策**：BF4 **是必要的**——有 → PASS、沒有 → FAIL。
+**處理**：**刪除該 KNOWN rule**。`vera_rack.sh` 底層邏輯本來就正確（無 BF4 → `BF4_MISSING` → FAIL），刪 rule 後回歸純 FAIL。
 
-**與你的預期不符**：專案記憶寫「BF4 config 失敗…報告會自動排除」。實際上報告**不會排除**，只是標 KNOWN 讓你人工過濾；健康度仍是 FAIL。
-
-**這是設計還是 bug？** `issue_policy.md` 明寫「Classification never changes severity or health」——所以是**有意設計**。但它讓「campaign 結論」失去意義（永遠 FAIL）。**需要你決策**（見第 3 節）。
+**驗證**：有 BF4 → 無 issue → PASS；無 BF4 → `BF4_MISSING` = NEW/FAIL。
 
 ---
 
-### 🟠 BUG-2：`parse_sensors` 靜默丟棄不含 `|` 的壞行
+### ✅ BUG-2（已修）：`parse_sensors` 靜默丟棄不含 `|` 的行
 
-**位置**：`cycle_core.py:141-143`
+**位置**：`cycle_core.py:138-157`
 
-```python
-for line in text.splitlines():
-    if "|" not in line:
-        continue          # ← 整行直接丟掉，不記錄
-```
+原本 `if "|" not in line: continue` 會把**非空、無 `|` 的行整行丟掉**，與 docstring 宣稱「保留不完整行避免靜默通過」矛盾。
 
-docstring 宣稱「Keep incomplete table rows so the evaluator cannot silently pass them」，但**不含 `|` 的行會被靜默丟棄**。
+**實際風險**：`ipmitool sensor list` 可能 **rc=0 但 stdout 混入診斷行**（例如 `Error: Unable to establish IPMI v2 / RMCP+ session`）。該行無 `|` → 被靜默丟棄 → sensor 清單悄悄變短 → 可能誤觸 `SENSOR_MISSING`。
 
-**風險**：BMC 用 `ipmitool sensor list` 回傳時，若某行因傳輸問題損壞成純文字（無 `|`），該 sensor 就**從 current 消失** → 觸發 `SENSOR_MISSING` FAIL。**方向是安全的（會 FAIL 不會靜默 PASS）**，但：
-1. 註解與行為不符（誤導維護者）
-2. `SENSOR_MALFORMED` 永遠不會對「無 `|`」的行觸發
-3. 可能產生**假 FAIL**（其實是傳輸雜訊，不是 sensor 真的消失）
-
-**建議**：非空、非標題、無 `|` 的行應記為 `SENSOR_MALFORMED` 的 candidate，或至少在 docstring 說清楚。
+**修法**：非空無 `|` 的行 → 記為 malformed row → `SENSOR_MALFORMED`（FAIL）。空行仍忽略。
+**驗證**：真機 n1/n2/n3 fixture 不變（240 rows / WARN）；新增測試；**51 tests OK**。
 
 ---
 
-### 🟠 BUG-3：`sel_delta` 用整行文字比對，同事件 ID 不同時間戳會誤判為新事件
+### ⚪ BUG-3（撤回，非 bug）：`sel_delta` 用整行比對
 
-**位置**：`cycle_core.py:252-264`
+原本我列為 bug，**重新檢視後撤回**。`sel_delta` 以「整行文字（含 record ID + timestamp）」做 Counter diff，是**刻意的設計**：
+- BMC SEL **record ID 會循環重用**
+- 「同 ID、不同 timestamp」**確實是新事件**，必須保留
 
-用完整行（含 timestamp）做 Counter diff。BMC SEL 的同一筆記錄若 timestamp 有微小差異（或重讀時間不同），會被當成**新事件**。反之，若真事件 ID 重複但內容相同則仍可見（這部分是對的）。
-
-實測：
-```
-prev="1 | 00:01:00 | Power off"
-cur ="1 | 00:02:00 | Power off"   -> delta=1（誤報新事件）
-```
-
-**風險**：SEL delta 會有多餘雜訊。**但影響有限**——SEL 在系統裡明訂「REVIEW REQUIRED: 僅供人工複核，不自動判定」，不會直接造成 FAIL。屬**低嚴重度噪音**。
-
-**建議**：以 record ID（SEL 第一欄）為 key 做 diff，而非整行。
+程式有註解（`cycle_core.py:253`）與專門測試（`test_sel_reused_id_with_new_timestamp`）證明這是**有意為之**。若改成以 ID 為 key，反而會**漏掉**重用 ID 的新事件。**維持原狀。**
 
 ---
 
@@ -90,21 +69,15 @@ cur ="1 | 00:02:00 | Power off"   -> delta=1（誤報新事件）
 
 ---
 
-## 3. 需你決策的設計問題
+## 3. 設計問題（已決策）
 
-### D-1：BF4 缺席到底算不算 FAIL？（最重要）
+### ✅ D-1（已決策）：BF4 缺席算 FAIL
+使用者政策：**BF4 是必要的，有 → PASS、沒有 → FAIL**。做法：刪除 KNOWN rule（已完成）。
 
-三個選項：
-- **(a) 維持現狀**：標 KNOWN，健康度仍 FAIL。你每次要人工忽略。✅ 最保守
-- **(b) 讓 KNOWN 不影響 campaign health**：`status()` 只對 `NEW` 的 FAIL 算 FAIL。⚠️ 改了語意，需同步報告文案
-- **(c) BF4 到貨後刪掉那條 policy rule**：回到乾淨 FAIL。✅ 業界標準做法
+### ⚪ D-2（撤回）：`sel_delta` 改成以 ID 為 key？
+**不改**。原判斷有誤——現行「整行比對」是刻意處理 SEL record ID 循環重用，改成 ID-key 反而會漏事件。見 BUG-3 說明。
 
-**我的建議**：**(a) + (c)**。不要改 KNOWN 的語意（會掩蓋未來真問題），而是在 BF4 到貨後刪 rule。若你現在就想讓 campaign「看起來 PASS」，只能改 (b)，但那削弱了工具的核心價值。
-
-### D-2：`sel_delta` 是否要改成以 ID 為 key？
-建議改（見 BUG-3），但優先度低。
-
-### D-3：是否加 `--loops` 之外的「自動停止於第一個 FAIL」？
+### 🟡 D-3（待你決定）：是否加「自動停止於第一個 FAIL」？
 目前任何 FAIL 都不會自動中止（設計上是「跑完 N 輪」）。若你要「一有硬體 FAIL 就停」，需新功能。
 
 ---
@@ -119,7 +92,7 @@ cur ="1 | 00:02:00 | Power off"   -> delta=1（誤報新事件）
 | `config_issues` | 真機條件 stub 跑新版 `vera_rack.sh` | ✅ 只出 `BF4_MISSING`，格式正確 |
 | `classify` + `aggregate_issues` | 端到端 | ✅ KNOWN 標記、occurrence 累計正確 |
 | `vera_rack.sh` 門檻 | 真機 lspci/mst | ✅ PCIeFAB 21/USB 1/BMC 1/NIC 22/DIMM 16 |
-| 測試套件 | Linux | ✅ 50 tests OK |
+| 測試套件 | Linux | ✅ 51 tests OK |
 | `TemporaryDirectory` rename | 實測 | ✅ 成功路徑不會因 cleanup 崩潰 |
 | stub shell 相容 | dash/bash/sh | ✅ 三 shell 通過 |
 
@@ -137,11 +110,12 @@ cur ="1 | 00:02:00 | Power off"   -> delta=1（誤報新事件）
 
 ## 6. 建議行動順序
 
-1. **決策 D-1**（BF4 政策）—— 影響你怎麼解讀每份報告
-2. 修 **BUG-2**（parse_sensors 註解/壞行處理）—— 小改、降假 FAIL 風險
-3. 修 **BUG-3**（sel_delta 以 ID 為 key）—— 小改、降噪音
+1. ~~決策 D-1（BF4 政策）~~ ✅ 已完成——刪 rule
+2. ~~修 BUG-2（parse_sensors 壞行）~~ ✅ 已完成——malformed 化
+3. ~~修 BUG-3（sel_delta）~~ ⚪ 撤回——非 bug
 4. **等客人走後**做真機端到端 1 輪驗證——無法省
 5. 次要問題（M-1..M-7）可延後
+6. （可選）決策 D-3「一有 FAIL 就停」
 
 ---
 
