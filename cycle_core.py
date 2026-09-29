@@ -136,10 +136,16 @@ def classify(items, project, rules):
     return items
 
 def parse_sensors(text):
-    """Keep incomplete table rows so the evaluator cannot silently pass them."""
+    """Keep incomplete and puzzling rows so the evaluator cannot silently pass them."""
     rows = []
     for line in text.splitlines():
+        if not line.strip():
+            continue
         if "|" not in line:
+            # ipmitool exit code 0 does not guarantee table rows; a stray
+            # diagnostic line must surface instead of quietly shrinking the list.
+            rows.append(dict(name=line.strip(), reading="", unit="", status="",
+                             format_error=f"Expected a table row; received: {line.strip()}"))
             continue
         cells = [v.strip() for v in line.split("|")]
         fields = cells + [""] * max(0, 4 - len(cells))

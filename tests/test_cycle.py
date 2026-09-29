@@ -115,6 +115,14 @@ class PureTests(unittest.TestCase):
                 self.assertEqual(health(items),'FAIL')
                 self.assertIn('SENSOR_MALFORMED',[item['code'] for item in items])
 
+    def test_pipeless_diagnostic_line_is_malformed_but_blank_is_ignored(self):
+        rows=parse_sensors('Temp | 30 | C | ok\nError: Unable to establish IPMI v2 / RMCP+ session\n')
+        self.assertEqual(len(rows),2)
+        items=sensor_issues(rows)
+        self.assertEqual(health(items),'FAIL')
+        self.assertIn('SENSOR_MALFORMED',[item['code'] for item in items])
+        self.assertEqual(health(sensor_issues(parse_sensors('Temp | 30 | C | ok\n\n   \n'))),'PASS')
+
     def test_aggregation_preserves_failure_and_campaign_classification(self):
         # The mechanism is exercised with a rule declared here, not the shipped
         # policy file, so it stays valid whatever the production policy contains.
