@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from pathlib import Path
 from urllib.parse import quote
 
@@ -73,7 +74,10 @@ def render_html(campaign):
         occurrences = []
         for event in item['occurrences']:
             i = indices[item['node']]
-            phase_id = f"node-{i}-" + ('pre' if event['phase'] == 'PRE' else 'loop-' + event['phase'].split()[-1])
+            loop = re.search(r'(\d+)\s*$', event['phase'])
+            # The panel anchor for a loop record is "loop-<n>" (see record_html);
+            # "PRE" or an unparsable phase must fall back to the PRE anchor.
+            phase_id = f"node-{i}-" + (f"loop-{loop.group(1)}" if event['phase'] != 'PRE' and loop else 'pre')
             occurrences.append(f'<tr><td><a href="#{phase_id}" data-panel="node-{i}">{esc(event["phase"])}</a></td><td>{esc(event["detail"])}</td><td>{evidence_link(event["evidence"])}</td></tr>')
         issue_rows.append(f'''<details class="issue-row" data-severity="{esc(item['severity'])}" data-classification="{esc(item['classification'])}"><summary>{badge(item['severity'])}<span class="issue-title">{esc(item['node'])} / {esc(item['component'])}</span> {badge(item['classification'])}<span class="issue-meta">{esc(item['code'])} · {len(item['occurrences'])} finding(s)</span></summary><div class="detail-body"><p>{esc(item['detail'])}</p><p class="muted">{esc(item.get('known_reason',''))}</p><div class="tablewrap"><table><thead><tr><th scope="col">Phase</th><th scope="col">Finding</th><th scope="col">Evidence</th></tr></thead><tbody>{''.join(occurrences)}</tbody></table></div></div></details>''')
     issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option></select></label></div><p id="issue-count" aria-live="polite" class="muted">{len(items)} matching issues</p>{''.join(issue_rows)}<p id="no-matches" class="empty" {'hidden' if items else ''}>No matching issues. Clear the filters to show all findings.</p></div></section>'''

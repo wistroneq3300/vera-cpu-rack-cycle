@@ -309,8 +309,14 @@ class NodeSession:
                     else:
                         self.add(record, "POWER_OFF_TIMEOUT", "cycle", "ACPI shutdown did not reach confirmed off state; no power-on command sent")
             else:
-                command = "reboot" if mode == "reboot" else "ipmitool power cycle" if channel == "inband" else "power cycle"
-                state = self.dispatch(record, "cycle_command", "os" if channel == "inband" else "oob", command, sudo=channel == "inband")
+                inband = channel == "inband"
+                if mode == "reboot":
+                    command = "reboot"
+                elif inband:
+                    command = "ipmitool power cycle"
+                else:
+                    command = "power cycle"
+                state = self.dispatch(record, "cycle_command", "os" if inband else "oob", command, sudo=inband)
             if state in {"SENT", "RESPONSE_LOST"}:
                 recovered = self.wait_boot(record, old_boot, deadline)
             else:
