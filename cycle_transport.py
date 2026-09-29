@@ -1,5 +1,6 @@
 """Bounded SSH and outband operations. Passwords never enter argv or evidence."""
 from __future__ import annotations
+
 import os
 import shlex
 import shutil
@@ -27,10 +28,14 @@ class IdentityUnsafe(RuntimeError):
 
 class Transport:
     def __init__(self, credentials, known_hosts):
-        self.credentials = credentials
+        # Treat an omitted password and an explicit None identically. SSH key
+        # authentication/passwordless sudo must not fail during string encoding.
+        self.credentials = {role: "" if password is None else password
+                            for role, password in credentials.items()}
         self.known_hosts = Path(known_hosts)
 
     def _connect(self, target, role, timeout):
+        # Report rebuilding and CLI help do not require Paramiko to be installed.
         import paramiko
         client = paramiko.SSHClient()
         # Campaign-isolated TOFU; later key changes fail. Hostname is separately
@@ -53,6 +58,7 @@ class Transport:
             client.close()
             raise IdentityUnsafe(f"{role}: authentication or SSH host key validation failed") from exc
         except BaseException:
+            # Clean up even on cancellation, then preserve the original exception.
             client.close()
             raise
         finally:
@@ -136,7 +142,7 @@ class Transport:
                 "-U", os.environ.get("BMC_USER", "root"), "-E", *shlex.split(command)]
         start = time.monotonic()
         try:
-            result = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=timeout)
+            result = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=timeout, check=False)
             return Command(result.returncode, result.stdout + result.stderr, duration=time.monotonic() - start)
         except subprocess.TimeoutExpired as exc:
             data = (exc.stdout or b"") + (exc.stderr or b"")
@@ -154,7 +160,7 @@ class Transport:
         for args in (["apt-get", "update"], ["apt-get", "install", "-y", "ipmitool"]):
             try:
                 result = subprocess.run(prefix + args, capture_output=True, text=True, timeout=600,
-                                        env={**os.environ, "DEBIAN_FRONTEND": "noninteractive"})
+                                        env={**os.environ, "DEBIAN_FRONTEND": "noninteractive"}, check=False)
             except (OSError, subprocess.TimeoutExpired) as exc:
                 return Command(127, str(exc))
             output.append(result.stdout + result.stderr)

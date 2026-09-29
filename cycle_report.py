@@ -1,9 +1,11 @@
 """All report formats derive from the same records and evaluator."""
 from __future__ import annotations
+
 import html
 import json
 from pathlib import Path
 from urllib.parse import quote
+
 from cycle_core import aggregate_issues, atomic_write, health, now, write_json
 
 ASSETS = Path(__file__).parent

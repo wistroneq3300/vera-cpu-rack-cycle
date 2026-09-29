@@ -1,12 +1,28 @@
 """Campaign node execution, with immutable PRE and durable evidence."""
 from __future__ import annotations
+
 import re
 import shlex
 import time
 from pathlib import Path
-from cycle_core import (now, atomic_write, write_json, issue, health, parse_pci,
-                        parse_sensors, missing_sensors, compare_sensors, sensor_issues,
-                        pci_issues, config_issues, dmesg_issues, sel_delta, classify)
+
+from cycle_core import (
+    atomic_write,
+    classify,
+    compare_sensors,
+    config_issues,
+    dmesg_issues,
+    health,
+    issue,
+    missing_sensors,
+    now,
+    parse_pci,
+    parse_sensors,
+    pci_issues,
+    sel_delta,
+    sensor_issues,
+    write_json,
+)
 from cycle_transport import IdentityUnsafe
 
 PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
@@ -189,7 +205,7 @@ class NodeSession:
                 self.add(record, "SCRIPT_UPLOAD_FAILED", "hardware", str(exc))
                 self.node["blocked"].append("Cannot run the verified hardware script")
             self.capture(record)
-            if not record["pci"] or not record["sensors"]:
+            if not record["pci"] or not any(not row.get('format_error') for row in record["sensors"]):
                 self.node["blocked"].append("PRE PCI or sensor baseline is unavailable")
             self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
         except Exception as exc:
@@ -245,7 +261,12 @@ class NodeSession:
 
     def dispatch(self, record, label, role, cmd, sudo=False, timeout=30):
         result = self.command(record, label, role, cmd, sudo=sudo, timeout=timeout, check=False)
-        state = "SENT" if record['commands'][label]['valid'] else result.state if result.state in {"RESPONSE_LOST", "NOT_ISSUED"} else "COMMAND_FAILED"
+        if record['commands'][label]['valid']:
+            state = "SENT"
+        elif result.state in {"RESPONSE_LOST", "NOT_ISSUED"}:
+            state = result.state
+        else:
+            state = "COMMAND_FAILED"
         record["action"].append(dict(command=cmd, role=role, state=state, code=result.code))
         if state in {"NOT_ISSUED", "COMMAND_FAILED"}:
             self.add(record, "CYCLE_COMMAND_FAILED", "cycle", f"{cmd}: {state}, exit {result.code}")

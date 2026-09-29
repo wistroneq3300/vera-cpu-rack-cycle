@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Outside-host Vera campaign runner. Run without arguments for the wizard."""
 from __future__ import annotations
+
 import argparse
 import getpass
-import json
 import math
 import os
 import signal
@@ -12,12 +12,22 @@ import tempfile
 import threading
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from datetime import datetime, timezone
 from pathlib import Path
-from cycle_core import (ROLES, atomic_write, digest, health, inventory_blocks, issue,
-                        load_inventory, now, parse_policy, select_targets, classify)
-from cycle_engine import NodeSession, new_record
+
+from cycle_core import (
+    ROLES,
+    atomic_write,
+    digest,
+    inventory_blocks,
+    issue,
+    load_inventory,
+    now,
+    parse_policy,
+    select_targets,
+)
+from cycle_engine import NodeSession
 from cycle_report import rebuild, status, write_reports
 from cycle_runtime import EndpointLocks, RunRegistry, request_stop
 from cycle_transport import Transport
@@ -51,7 +61,7 @@ def show_result(console, node, record):
     for item in record['issues']:
         key = (item['severity'], item['code'], item['component'], item['detail'], item.get('classification', 'NEW'))
         groups[key] = groups.get(key, 0) + 1
-    for (severity, code, component, detail, classification), count in groups.items():
+    for (severity, _code, component, detail, classification), count in groups.items():
         text = ' '.join(detail.split())[:300]
         console(f"  {severity} [{classification}] {component}: {text}" + (f" (repeated {count} times)" if count > 1 else ''))
     for reason in node['blocked']:
@@ -61,7 +71,6 @@ def parallel(function, sessions, console, label):
     """Bounded wait with concise progress; never dump remote command output."""
     with ThreadPoolExecutor(max_workers=min(32, max(1, len(sessions)))) as pool:
         futures = {pool.submit(function, s): s for s in sessions}
-        from concurrent.futures import wait, FIRST_COMPLETED
         pending = set(futures)
         while pending:
             done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
@@ -83,7 +92,7 @@ def parallel(function, sessions, console, label):
 
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
-    run_id = f"{options.project}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    run_id = f"{options.project}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%SZ')}_{uuid.uuid4().hex[:6]}"
     output = options.output.resolve() / run_id
     locks = EndpointLocks(runtime_root)
     stop = threading.Event()
@@ -100,6 +109,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         policy_text = options.issue_policy.read_text(encoding='utf-8')
         rules = parse_policy(policy_text)
         console(f"Run ID: {run_id}")
+        console("Time zone: UTC (Z in Run ID; +00:00 in evidence timestamps)")
         console(f"Planned output: {output}")
         console("Selected targets: " + ', '.join(t.key for t in targets))
         console(f"Mode: {options.cycle_mode}; channel: {options.channel}; loops: {options.loops or 'unlimited'}; hours: {options.hours or 'unlimited'}")
@@ -192,7 +202,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
                     break
                 number += 1
                 console(f"Loop {number}: starting {len(active)} target(s) concurrently")
-                parallel(lambda s: s.one_loop(number), active, console, f'Loop {number}')
+                parallel(lambda s, n=number: s.one_loop(n), active, console, f'Loop {number}')
                 write_reports(output, data)
             data['finished'] = now()
             write_reports(output, data)

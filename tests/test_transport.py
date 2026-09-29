@@ -1,14 +1,39 @@
 """Transport failure behavior without connecting to an endpoint."""
 import tempfile
+import os
 import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from cycle_core import Target
 from cycle_transport import Transport
 
 class TransportTests(unittest.TestCase):
+    def test_none_password_can_use_passwordless_sudo(self):
+        channel=MagicMock()
+        channel.recv_ready.return_value=False
+        channel.exit_status_ready.return_value=True
+        channel.recv_exit_status.return_value=0
+        client=MagicMock()
+        client.get_transport.return_value.open_session.return_value=channel
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'os':None},Path(temp))
+            with patch.object(transport,'_connect',return_value=client), patch.dict(os.environ,{'OS_USER':'operator'}):
+                result=transport.ssh(Target('tray','n1','192.0.2.1','192.0.2.2'),'os','id -u',sudo=True)
+            self.assertEqual(result.code,0,result.output)
+            channel.sendall.assert_called_once_with(b'\n')
+
+    def test_none_password_produces_string_ipmi_environment(self):
+        def execute(*args,**kwargs):
+            self.assertEqual(kwargs['env']['IPMI_PASSWORD'],'')
+            return MagicMock(returncode=1,stdout='',stderr='Authentication failed')
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'bmc':None},Path(temp))
+            with patch('cycle_transport.subprocess.run',side_effect=execute):
+                result=transport.oob(Target('tray','n1','192.0.2.1','192.0.2.2'),'power status')
+            self.assertEqual(result.code,1)
+
     def test_stalled_exec_ack_is_bounded_and_ambiguous(self):
         closed=threading.Event()
         class Channel:

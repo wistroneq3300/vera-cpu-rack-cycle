@@ -7,6 +7,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -101,6 +102,34 @@ class FakeTransport:
         return Command(0, 'OK')
 
 class PureTests(unittest.TestCase):
+    def test_truncated_sensor_row_cannot_disappear_from_pre(self):
+        rows=parse_sensors(SENSORS+'Temp_CPU2 | 90 | degrees C\n')
+        self.assertEqual(len(rows),3)
+        self.assertEqual(health(sensor_issues(rows)),'FAIL')
+        self.assertTrue(any(i['component']=='Temp_CPU2' for i in sensor_issues(rows)))
+
+    def test_unnamed_and_short_sensor_rows_fail(self):
+        for text in (' | 30 | degrees C | ok', 'Temp | 30', 'Temp | 30 | degrees C'):
+            with self.subTest(text=text):
+                items=sensor_issues(parse_sensors(SENSORS+text))
+                self.assertEqual(health(items),'FAIL')
+                self.assertIn('SENSOR_MALFORMED',[item['code'] for item in items])
+
+    def test_aggregation_preserves_failure_and_campaign_classification(self):
+        rules=parse_policy((BASE/'issue_policy.md').read_text())
+        pre=new_record('PRE')
+        post=new_record('LOOP 1')
+        pre['issues']=classify([issue('BF4_MISSING','BF4','first','WARN')],'neutrino',rules)
+        post['issues']=classify([issue('BF4_MISSING','BF4','second','FAIL')],'neutrino',rules)
+        data={'nodes':[{'key':'tray_n1','pre':pre,'loops':[post]}]}
+        for first,second in ((pre,post),(post,pre)):
+            data['nodes'][0].update(pre=first,loops=[second])
+            merged=aggregate_issues(data)
+            self.assertEqual(len(merged),1)
+            self.assertEqual(merged[0]['severity'],'FAIL')
+            self.assertEqual(merged[0]['classification'],'KNOWN')
+            self.assertEqual(len(merged[0]['occurrences']),2)
+
     def test_duplicate_sensor_cannot_hide_fault(self):
         rows = parse_sensors('Temp | 90 | C | cr\nTemp | 30 | C | ok\n')
         items = sensor_issues(rows)
@@ -265,6 +294,38 @@ class EngineTests(unittest.TestCase):
         self.session.precheck()
         self.assertTrue(self.session.node['blocked'])
 
+    def test_only_malformed_sensors_block_pre_but_partial_table_can_be_reviewed(self):
+        original=self.fake.oob
+        for text,blocked in [('Temp | 30 | degrees C',True),(SENSORS+'Temp_CPU2 | 90 | degrees C',False)]:
+            def oob(t,cmd,timeout=30):
+                return Command(0,text) if cmd=='sensor list' else original(t,cmd,timeout)
+            self.fake.oob=oob
+            session=NodeSession(target(),self.fake,self.root,'test',b'script',digest(b'script'),self.options,[])
+            session.precheck()
+            self.assertEqual(bool(session.node['blocked']),blocked)
+            self.assertEqual(session.node['pre']['status'],'FAIL')
+            self.assertIn('SENSOR_MALFORMED',[i['code'] for i in session.node['pre']['issues']])
+
+    def test_failed_dmesg_clear_still_attempts_sel_without_key_error(self):
+        self.session.precheck()
+        original=self.fake.ssh
+        def ssh(t,role,cmd,timeout=60,sudo=False):
+            return Command(1,'permission denied') if cmd=='dmesg -c' else original(t,role,cmd,timeout,sudo)
+        self.fake.ssh=ssh
+        self.session.start()
+        self.assertFalse(self.session.node['pre']['commands']['start_dmesg_clear']['valid'])
+        self.assertTrue(self.session.node['pre']['commands']['start_sel_clear']['valid'])
+        self.assertEqual(sum(cmd=='sel clear' for _,_,cmd in self.fake.calls),1)
+
+    def test_dispatch_not_issued_and_exception_paths(self):
+        record=self.session.node['pre']
+        with patch.object(self.fake,'ssh',return_value=Command(255,'offline','NOT_ISSUED')):
+            self.assertEqual(self.session.dispatch(record,'cycle_test','os','reboot'),'NOT_ISSUED')
+        with patch.object(self.fake,'ssh',side_effect=ConnectionError('connection failed')):
+            with self.assertRaisesRegex(ConnectionError,'connection failed'):
+                self.session.dispatch(record,'cycle_unreturned','os','reboot')
+        self.assertNotIn('cycle_unreturned',record['commands'])
+
     def test_missing_sensor_reread_and_preserved_warning(self):
         self.fake.sensor_drop = True
         self.ready()
@@ -362,6 +423,17 @@ class EngineTests(unittest.TestCase):
         self.assertIn('KNOWN',page)
         self.assertTrue((output/'known_issues.md').exists())
         self.assertEqual(rebuild(output)['state'],'COMPLETE')
+
+    def test_run_id_uses_utc_on_a_host_eight_hours_ahead(self):
+        fixed=datetime(2026,9,29,8,0,0,tzinfo=timezone.utc)
+        def clock(tz=None):
+            return fixed.astimezone(tz) if tz is not None else (fixed+timedelta(hours=8)).replace(tzinfo=None)
+        with patch('neutrin_cycle.datetime') as mocked_clock:
+            mocked_clock.now.side_effect=clock
+            self.run_campaign()
+        output=next(self.options.output.iterdir())
+        self.assertTrue(output.name.startswith('neutrino_20260929_080000Z_'),output.name)
+        self.assertIn('Time zone: UTC',(output/'console.log').read_text())
 
     def test_graceful_stop_keeps_current_loop_post(self):
         def callback():

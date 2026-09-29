@@ -1,12 +1,13 @@
 """Pure inventory, baseline and issue evaluation. No remote side effects."""
 from __future__ import annotations
+
 import csv
 import hashlib
 import ipaddress
 import json
 import re
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -122,7 +123,7 @@ def parse_policy(text):
     for line in text.splitlines():
         cells = [v.strip() for v in line.strip().strip("|").split("|")]
         if len(cells) == 6 and cells[3] in {"KNOWN", "NEW"} and cells[5].lower() == "yes":
-            rules.append(dict(zip(("project", "code", "component", "classification", "reason", "active"), cells)))
+            rules.append(dict(zip(("project", "code", "component", "classification", "reason", "active"), cells, strict=True)))
     return rules
 
 def classify(items, project, rules):
@@ -135,11 +136,18 @@ def classify(items, project, rules):
     return items
 
 def parse_sensors(text):
+    """Keep incomplete table rows so the evaluator cannot silently pass them."""
     rows = []
     for line in text.splitlines():
+        if "|" not in line:
+            continue
         cells = [v.strip() for v in line.split("|")]
-        if len(cells) >= 4 and cells[0]:
-            rows.append(dict(name=cells[0], reading=cells[1], unit=cells[2], status=cells[3].lower()))
+        fields = cells + [""] * max(0, 4 - len(cells))
+        row = dict(name=fields[0] or "(unnamed sensor)", reading=fields[1],
+                   unit=fields[2], status=fields[3].lower())
+        if len(cells) < 4 or not cells[0]:
+            row["format_error"] = f"Expected sensor name, reading, unit and status; received: {line.strip()}"
+        rows.append(row)
     return rows
 
 def sensor_issues(rows):
@@ -154,6 +162,9 @@ def sensor_issues(rows):
         if count > 1:
             found.append(issue("SENSOR_DUPLICATE", name, f"{count} rows share this sensor name; every row is evaluated", "WARN"))
     for r in rows:
+        if r.get("format_error"):
+            found.append(issue("SENSOR_MALFORMED", r["name"], r["format_error"]))
+            continue
         state = r["status"]
         if state in failures:
             found.append(issue("SENSOR_CRITICAL", r["name"], f"Status {state}; reading {r['reading']}"))

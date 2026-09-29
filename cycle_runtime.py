@@ -1,5 +1,6 @@
 """Per-endpoint interprocess locks and owner-only graceful stop requests."""
 from __future__ import annotations
+
 import hashlib
 import ipaddress
 import json
@@ -7,7 +8,9 @@ import os
 import re
 import stat
 from pathlib import Path
+
 from cycle_core import now, write_json
+
 
 def shared_root():
     return Path(os.environ.get("VERA_RUNTIME_DIR", "/tmp/vera-cycle-runtime" if os.name != "nt" else str(Path(os.environ["TEMP"]) / "vera-cycle-runtime")))
@@ -42,12 +45,14 @@ class EndpointLocks:
                     os.fchmod(fd, 0o666)
                 try:
                     if os.name == "nt":
+                        # Windows-only module; Linux uses flock below.
                         import msvcrt
                         if path.stat().st_size == 0:
                             handle.write(b" ")
                         handle.seek(0)
                         msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
                     else:
+                        # POSIX-only module; keep Windows offline tests importable.
                         import fcntl
                         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 except OSError as exc:
