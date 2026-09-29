@@ -232,14 +232,24 @@ def compare_sensors(baseline, initial, confirmation=None):
     if confirmation is not None:
         items += sensor_issues(confirmation)
     remaining = missing_sensors(baseline, confirmation) if confirmation is not None else missing
+    baseline_by_name = {}
+    for row in baseline:
+        baseline_by_name.setdefault(row["name"], []).append(row)
     for name, count in missing.items():
+        gone = "\n".join(_snippet(r) for r in baseline_by_name.get(name, []))
         if remaining[name]:
-            items.append(issue("SENSOR_MISSING", name, f"Missing {remaining[name]} baseline row(s) after confirmation"))
+            items.append(issue("SENSOR_MISSING", name,
+                               f"Missing {remaining[name]} baseline row(s) after confirmation",
+                               snippet=gone))
         else:
-            items.append(issue("SENSOR_RECOVERED", name, f"Missing {count} row(s) returned on immediate reread", "WARN"))
+            items.append(issue("SENSOR_RECOVERED", name,
+                               f"Missing {count} row(s) returned on immediate reread", "WARN",
+                               snippet=gone))
     # Confirmation can reveal a different disappeared row; never silently discard it.
     for name, count in (remaining - missing).items():
-        items.append(issue("SENSOR_MISSING", name, f"Missing {count} baseline row(s) in confirmation"))
+        gone = "\n".join(_snippet(r) for r in baseline_by_name.get(name, []))
+        items.append(issue("SENSOR_MISSING", name,
+                           f"Missing {count} baseline row(s) in confirmation", snippet=gone))
     return items
 
 def parse_pci(text):
@@ -247,23 +257,65 @@ def parse_pci(text):
     for line in text.splitlines():
         match = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s+.*?\[([0-9a-f]{4}:[0-9a-f]{4})\]", line, re.I)
         if match:
-            rows[match[1].lower()] = match[2].lower()
+            rows[match[1].lower()] = dict(id=match[2].lower(), raw=line.strip())
     return rows
 
 def pci_issues(baseline, current):
     found = []
     for bdf in sorted(baseline.keys() | current.keys()):
-        if baseline.get(bdf) != current.get(bdf):
-            found.append(issue("PCI_DRIFT", bdf, f"PRE {baseline.get(bdf, 'absent')} -> POST {current.get(bdf, 'absent')}"))
+        old, new = baseline.get(bdf), current.get(bdf)
+        if old != new:
+            old_id = old["id"] if old else "absent"
+            new_id = new["id"] if new else "absent"
+            lines = []
+            if old: lines.append(f"PRE  {old['raw']}")
+            if new: lines.append(f"POST {new['raw']}")
+            found.append(issue("PCI_DRIFT", bdf, f"PRE {old_id} -> POST {new_id}",
+                               snippet="\n".join(lines)))
     return found
+
+def _check_snippet(line):
+    """Turn a ``CHECK|<component>|key=value|...`` line into a one-line pointer
+    to what the hardware script measured. A missing device has no offending
+    row to quote, so the measured counts are the useful evidence."""
+    fields = line.split("|")
+    if len(fields) < 3:
+        return ""
+    values = {}
+    for field in fields[2:]:
+        if "=" in field:
+            key, _, value = field.partition("=")
+            values[key] = value
+    if not values:
+        return ""
+    actual = values.pop("actual", "")
+    expected = values.pop("minimum", values.pop("exact", ""))
+    if not actual and not expected:
+        return f"{fields[1]}: " + ", ".join(f"{k}={v}" for k, v in values.items())
+    head = f"measured {fields[1]} actual={actual}" + (f", expected {expected}" if expected else "")
+    sources = values.pop("sources", "")
+    extras = ", ".join(f"{k}={v}" for k, v in values.items())
+    tail = "; ".join(x for x in (extras, f"sources: {sources}" if sources else "") if x)
+    return head + (f" — {tail}" if tail else "")
 
 def config_issues(text, code):
     items = []
+    checks = {}
     for line in text.splitlines():
-        if line.startswith("ISSUE|"):
+        if line.startswith("CHECK|"):
+            fields = line.split("|")
+            if len(fields) >= 3:
+                snippet = _check_snippet(line)
+                checks.setdefault(fields[1], snippet)
+                # Some checks (for example PCIE_DOWNGRADE) key the issue by BDF,
+                # not by the check name, so index those under the BDF too.
+                for field in fields[2:]:
+                    if field.startswith("bdf="):
+                        checks.setdefault(field[4:], snippet)
+        elif line.startswith("ISSUE|"):
             fields = line.split("|", 3)
             if len(fields) == 4:
-                items.append(issue(fields[1], fields[2], fields[3]))
+                items.append(issue(fields[1], fields[2], fields[3], snippet=checks.get(fields[2], "")))
     if code != 0 and not items:
         items.append(issue("CONFIG_FAILED", "hardware", f"Hardware script exited {code}"))
     if "RESULT|FAIL" in text and not items:
@@ -281,7 +333,12 @@ def config_issues(text, code):
 
 def dmesg_issues(text):
     pattern = re.compile(r"AER:.*(?:Uncorrected|Fatal)|Machine check events logged|Hardware Error|nvme.*(?:I/O.*(?:error|timeout)|controller is down)|Memory failure:|Kernel panic|BUG:|Call Trace:", re.I)
-    return [issue("DMESG_HARDWARE", "dmesg", line.strip()) for line in text.splitlines() if pattern.search(line)]
+    found = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        if pattern.search(line):
+            found.append(issue("DMESG_HARDWARE", "dmesg", line.strip(),
+                               snippet=f"dmesg line {lineno}: {line.strip()}"))
+    return found
 
 def sel_delta(previous, current):
     # Complete record text includes record ID and timestamp; reused IDs remain visible.

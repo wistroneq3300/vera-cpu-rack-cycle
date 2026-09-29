@@ -190,8 +190,43 @@ class PureTests(unittest.TestCase):
     def test_pci_domains_and_ids(self):
         parsed = parse_pci(PCI)
         self.assertEqual(len(parsed), 2)
-        self.assertEqual(parsed['0001:01:00.0'], '10de:2f95')
+        self.assertEqual(parsed['0001:01:00.0']['id'], '10de:2f95')
         self.assertEqual(len(pci_issues(parsed, parse_pci(PCI.replace('1234:5678','1234:9999')))), 1)
+
+    def test_pci_drift_quotes_pre_and_post_lines(self):
+        before = parse_pci('0001:01:00.0 PCI bridge [0604]: Fabric [10de:2f95]\n')
+        after = parse_pci('0001:01:00.0 PCI bridge [0604]: Fabric [10de:9999]\n')
+        item = pci_issues(before, after)[0]
+        self.assertIn('PRE ', item['snippet'])
+        self.assertIn('10de:2f95', item['snippet'])
+        self.assertIn('POST', item['snippet'])
+        self.assertIn('10de:9999', item['snippet'])
+
+    def test_dmesg_issue_points_at_line_number(self):
+        text = 'first line\nAER: Uncorrected (Fatal) error\nanother\n'
+        item = dmesg_issues(text)[0]
+        self.assertEqual(item['code'], 'DMESG_HARDWARE')
+        self.assertIn('dmesg line 2:', item['snippet'])
+        self.assertIn('Uncorrected', item['snippet'])
+
+    def test_missing_sensor_quotes_baseline_row(self):
+        baseline = parse_sensors(SENSORS)
+        current = parse_sensors('Temp | 30 | degrees C | ok | na\n')
+        item = next(i for i in compare_sensors(baseline, current, current) if i['code'] == 'SENSOR_MISSING')
+        self.assertIn('Fan', item['snippet'])
+        self.assertIn('line 2:', item['snippet'])
+
+    def test_downgrade_issue_carries_lnksta(self):
+        text = ('CHECK|PCIE_DOWNGRADE|bdf=0000:01:00.0|lnksta=Speed 32GT/s, Width x2 (downgraded)\n'
+                'ISSUE|PCIE_DOWNGRADE|0000:01:00.0|NVMe: LnkSta: Speed 32GT/s, Width x2 (downgraded)\n'
+                'RESULT|FAIL\n')
+        item = next(i for i in config_issues(text, 1) if i['code'] == 'PCIE_DOWNGRADE')
+        self.assertIn('lnksta=Speed 32GT/s, Width x2', item['snippet'])
+
+    def test_structural_issues_have_no_snippet(self):
+        # A script that never answered has no evidence row to point at.
+        item = config_issues('RESULT|FAIL\n', 1)[0]
+        self.assertEqual(item['snippet'], '')
 
     def test_pcie_downgrade_is_always_a_failure(self):
         text = (
@@ -208,6 +243,21 @@ class PureTests(unittest.TestCase):
         self.assertEqual(health(config_issues('', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|FAIL', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|PASS', 0)), 'PASS')
+
+    def test_config_issue_carries_check_measurement_as_snippet(self):
+        # Missing hardware has no offending row; the CHECK measurement is the
+        # evidence the issue card shows.
+        text = ('CHECK|BF4|actual=0|minimum=1|mst_bluefield=0|pci_bluefield=0\n'
+                'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\n'
+                'RESULT|FAIL\n')
+        item = next(i for i in config_issues(text, 1) if i['code'] == 'BF4_MISSING')
+        self.assertIn('actual=0', item['snippet'])
+        self.assertIn('expected 1', item['snippet'])
+
+    def test_config_issue_without_check_has_empty_snippet(self):
+        text = 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n'
+        item = next(i for i in config_issues(text, 1) if i['code'] == 'BF4_MISSING')
+        self.assertEqual(item['snippet'], '')
 
     def test_bf4_absent_is_known_failure_under_shipped_policy(self):
         # The missing card is known to the operator, but it remains a real FAIL.

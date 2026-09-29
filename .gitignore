@@ -10,3 +10,4 @@ campaigns/
 .impeccable/mocks/
 test-results/
 .venv/
+.openhands/

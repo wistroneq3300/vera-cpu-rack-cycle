@@ -56,10 +56,22 @@ class HardwareTests(unittest.TestCase):
                 self.assertEqual(result.returncode,1,result.stdout+result.stderr)
                 self.assertIn('ISSUE|BF4_MISSING',result.stdout)
 
+    def test_bf4_check_reports_source_counts(self):
+        # A missing device has no offending row to quote, so the CHECK line must
+        # carry where the card was looked for and how many were found there.
+        result=self.run_fixture(bf4='BlueField-3')
+        self.assertIn('CHECK|BF4|actual=0|minimum=1|mst_bluefield=0|pci_bluefield=0',result.stdout)
+
+    def test_bf4_present_passes_and_counts(self):
+        result=self.run_fixture(bf4='BlueField-4')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('CHECK|BF4|actual=1|minimum=1|mst_bluefield=1',result.stdout)
+
     def test_downgrade_is_failure_with_bdf(self):
         result=self.run_fixture(downgrade=True)
         self.assertEqual(result.returncode,1,result.stdout+result.stderr)
         self.assertIn('ISSUE|PCIE_DOWNGRADE|0000:01:00.0',result.stdout)
+        self.assertIn('CHECK|PCIE_DOWNGRADE|bdf=0000:01:00.0|lnksta=',result.stdout)
 
 if __name__=='__main__':
     unittest.main()

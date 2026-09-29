@@ -17,8 +17,8 @@ fail() {
     FAILURES=$((FAILURES + 1))
 }
 minimum() {
-    local component="$1" actual="$2" expected="$3" code="${4:-DEVICE_MISSING}"
-    printf 'CHECK|%s|actual=%s|minimum=%s\n' "$component" "$actual" "$expected"
+    local component="$1" actual="$2" expected="$3" code="${4:-DEVICE_MISSING}" note="${5:-}"
+    printf 'CHECK|%s|actual=%s|minimum=%s%s\n' "$component" "$actual" "$expected" "${note:+|$note}"
     if ((actual < expected)); then fail "$code" "$component" "Expected at least $expected; detected $actual"; fi
 }
 collect() {
@@ -62,9 +62,13 @@ nic_bf4_check() {
     fi
     minimum NIC "$nic" "$NIC_MIN"
     # BF3, generic BlueField/DPU and non-Vera MST devices are not BF4 evidence.
-    bf4=$(printf '%s\n%s\n' "$data" "$PCI" | grep -Ei '(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)' || :)
-    if [[ -n "$bf4" ]]; then minimum BF4 1 "$BF4_MIN" BF4_MISSING
-    else minimum BF4 0 "$BF4_MIN" BF4_MISSING; fi
+    # Count the two independent sources separately so a missing card reports
+    # exactly where it was looked for, not just that the total was zero.
+    local mst_bf4 pci_bf4
+    mst_bf4=$(printf '%s\n' "$data" | grep -Eic '(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)' || :)
+    pci_bf4=$(printf '%s\n' "$PCI"  | grep -Eic '(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)' || :)
+    bf4=$((mst_bf4 + pci_bf4))
+    minimum BF4 "$bf4" "$BF4_MIN" BF4_MISSING "mst_bluefield=$mst_bf4|pci_bluefield=$pci_bf4|sources=mst status -v,lspci -nn"
 }
 pci_count() {
     local component="$1" pattern="$2" expected="$3" qty
@@ -85,6 +89,7 @@ link_check() {
         fi
         [[ "$line" == *LnkSta:* ]] || continue
         printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad' || continue
+        printf 'CHECK|PCIE_DOWNGRADE|bdf=%s|lnksta=%s\n' "$bdf" "${line#"${line%%[![:space:]]*}"}"
         fail PCIE_DOWNGRADE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
     done <<< "$data"
 }
