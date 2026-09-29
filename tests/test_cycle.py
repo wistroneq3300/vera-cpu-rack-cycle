@@ -116,7 +116,9 @@ class PureTests(unittest.TestCase):
                 self.assertIn('SENSOR_MALFORMED',[item['code'] for item in items])
 
     def test_aggregation_preserves_failure_and_campaign_classification(self):
-        rules=parse_policy((BASE/'issue_policy.md').read_text())
+        # The mechanism is exercised with a rule declared here, not the shipped
+        # policy file, so it stays valid whatever the production policy contains.
+        rules=parse_policy('| neutrino | BF4_MISSING | BF4 | KNOWN | local test rule | yes |')
         pre=new_record('PRE')
         post=new_record('LOOP 1')
         pre['issues']=classify([issue('BF4_MISSING','BF4','first','WARN')],'neutrino',rules)
@@ -188,10 +190,11 @@ class PureTests(unittest.TestCase):
         self.assertEqual(health(config_issues('RESULT|FAIL', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|PASS', 0)), 'PASS')
 
-    def test_known_remains_failure(self):
+    def test_bf4_absent_is_new_failure_under_shipped_policy(self):
+        # Policy decision: BF4 is expected. Absent BF4 is a real, unclassified FAIL.
         rule = parse_policy((BASE / 'issue_policy.md').read_text())
         items = classify([issue('BF4_MISSING','BF4','missing')], 'neutrino', rule)
-        self.assertEqual(items[0]['classification'], 'KNOWN')
+        self.assertEqual(items[0]['classification'], 'NEW')
         self.assertEqual(health(items), 'FAIL')
 
     def test_sel_reused_id_with_new_timestamp(self):
