@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T05:28:24.198Z",
+  "title": "Design System: Vera CPU Rack Cycle",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Engineering green",
+        "tonalRamp": [
+          "oklch(15.00% 0.10113 162.83)",
+          "oklch(26.43% 0.10113 162.83)",
+          "oklch(37.86% 0.10113 162.83)",
+          "oklch(49.29% 0.10113 162.83)",
+          "oklch(60.71% 0.10113 162.83)",
+          "oklch(72.14% 0.10113 162.83)",
+          "oklch(83.57% 0.10113 162.83)",
+          "oklch(95.00% 0.10113 162.83)"
+        ]
+      },
+      "brand-dark": {
+        "role": "primary",
+        "displayName": "Deep engineering green",
+        "tonalRamp": [
+          "oklch(15.00% 0.07150 168.19)",
+          "oklch(26.43% 0.07150 168.19)",
+          "oklch(37.86% 0.07150 168.19)",
+          "oklch(49.29% 0.07150 168.19)",
+          "oklch(60.71% 0.07150 168.19)",
+          "oklch(72.14% 0.07150 168.19)",
+          "oklch(83.57% 0.07150 168.19)",
+          "oklch(95.00% 0.07150 168.19)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Report ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02807 218.94)",
+          "oklch(26.43% 0.02807 218.94)",
+          "oklch(37.86% 0.02807 218.94)",
+          "oklch(49.29% 0.02807 218.94)",
+          "oklch(60.71% 0.02807 218.94)",
+          "oklch(72.14% 0.02807 218.94)",
+          "oklch(83.57% 0.02807 218.94)",
+          "oklch(95.00% 0.02807 218.94)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Secondary ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02553 222.21)",
+          "oklch(26.43% 0.02553 222.21)",
+          "oklch(37.86% 0.02553 222.21)",
+          "oklch(49.29% 0.02553 222.21)",
+          "oklch(60.71% 0.02553 222.21)",
+          "oklch(72.14% 0.02553 222.21)",
+          "oklch(83.57% 0.02553 222.21)",
+          "oklch(95.00% 0.02553 222.21)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Worksheet divider",
+        "tonalRamp": [
+          "oklch(15.00% 0.01078 196.96)",
+          "oklch(26.43% 0.01078 196.96)",
+          "oklch(37.86% 0.01078 196.96)",
+          "oklch(49.29% 0.01078 196.96)",
+          "oklch(60.71% 0.01078 196.96)",
+          "oklch(72.14% 0.01078 196.96)",
+          "oklch(83.57% 0.01078 196.96)",
+          "oklch(95.00% 0.01078 196.96)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Worksheet paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 0.00)",
+          "oklch(26.43% 0.00000 0.00)",
+          "oklch(37.86% 0.00000 0.00)",
+          "oklch(49.29% 0.00000 0.00)",
+          "oklch(60.71% 0.00000 0.00)",
+          "oklch(72.14% 0.00000 0.00)",
+          "oklch(83.57% 0.00000 0.00)",
+          "oklch(95.00% 0.00000 0.00)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Laboratory canvas",
+        "tonalRamp": [
+          "oklch(15.00% 0.00345 174.48)",
+          "oklch(26.43% 0.00345 174.48)",
+          "oklch(37.86% 0.00345 174.48)",
+          "oklch(49.29% 0.00345 174.48)",
+          "oklch(60.71% 0.00345 174.48)",
+          "oklch(72.14% 0.00345 174.48)",
+          "oklch(83.57% 0.00345 174.48)",
+          "oklch(95.00% 0.00345 174.48)"
+        ]
+      },
+      "fail": {
+        "role": "semantic",
+        "displayName": "Failure ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.15237 25.38)",
+          "oklch(26.43% 0.15237 25.38)",
+          "oklch(37.86% 0.15237 25.38)",
+          "oklch(49.29% 0.15237 25.38)",
+          "oklch(60.71% 0.15237 25.38)",
+          "oklch(72.14% 0.15237 25.38)",
+          "oklch(83.57% 0.15237 25.38)",
+          "oklch(95.00% 0.15237 25.38)"
+        ]
+      },
+      "fail-bg": {
+        "role": "semantic",
+        "displayName": "Failure wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.01650 26.65)",
+          "oklch(26.43% 0.01650 26.65)",
+          "oklch(37.86% 0.01650 26.65)",
+          "oklch(49.29% 0.01650 26.65)",
+          "oklch(60.71% 0.01650 26.65)",
+          "oklch(72.14% 0.01650 26.65)",
+          "oklch(83.57% 0.01650 26.65)",
+          "oklch(95.00% 0.01650 26.65)"
+        ]
+      },
+      "warn": {
+        "role": "semantic",
+        "displayName": "Warning ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.10284 73.45)",
+          "oklch(26.43% 0.10284 73.45)",
+          "oklch(37.86% 0.10284 73.45)",
+          "oklch(49.29% 0.10284 73.45)",
+          "oklch(60.71% 0.10284 73.45)",
+          "oklch(72.14% 0.10284 73.45)",
+          "oklch(83.57% 0.10284 73.45)",
+          "oklch(95.00% 0.10284 73.45)"
+        ]
+      },
+      "warn-bg": {
+        "role": "semantic",
+        "displayName": "Warning wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.03932 91.20)",
+          "oklch(26.43% 0.03932 91.20)",
+          "oklch(37.86% 0.03932 91.20)",
+          "oklch(49.29% 0.03932 91.20)",
+          "oklch(60.71% 0.03932 91.20)",
+          "oklch(72.14% 0.03932 91.20)",
+          "oklch(83.57% 0.03932 91.20)",
+          "oklch(95.00% 0.03932 91.20)"
+        ]
+      },
+      "ok-bg": {
+        "role": "semantic",
+        "displayName": "Positive wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.01906 162.93)",
+          "oklch(26.43% 0.01906 162.93)",
+          "oklch(37.86% 0.01906 162.93)",
+          "oklch(49.29% 0.01906 162.93)",
+          "oklch(60.71% 0.01906 162.93)",
+          "oklch(72.14% 0.01906 162.93)",
+          "oklch(83.57% 0.01906 162.93)",
+          "oklch(95.00% 0.01906 162.93)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Keyboard focus green",
+        "tonalRamp": [
+          "oklch(15.00% 0.11367 164.10)",
+          "oklch(26.43% 0.11367 164.10)",
+          "oklch(37.86% 0.11367 164.10)",
+          "oklch(49.29% 0.11367 164.10)",
+          "oklch(60.71% 0.11367 164.10)",
+          "oklch(72.14% 0.11367 164.10)",
+          "oklch(83.57% 0.11367 164.10)",
+          "oklch(95.00% 0.11367 164.10)"
+        ]
+      },
+      "badge-neutral-bg": {
+        "role": "neutral",
+        "displayName": "Neutral badge wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.00601 223.46)",
+          "oklch(26.43% 0.00601 223.46)",
+          "oklch(37.86% 0.00601 223.46)",
+          "oklch(49.29% 0.00601 223.46)",
+          "oklch(60.71% 0.00601 223.46)",
+          "oklch(72.14% 0.00601 223.46)",
+          "oklch(83.57% 0.00601 223.46)",
+          "oklch(95.00% 0.00601 223.46)"
+        ]
+      },
+      "badge-neutral-ink": {
+        "role": "neutral",
+        "displayName": "Neutral badge ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02770 221.45)",
+          "oklch(26.43% 0.02770 221.45)",
+          "oklch(37.86% 0.02770 221.45)",
+          "oklch(49.29% 0.02770 221.45)",
+          "oklch(60.71% 0.02770 221.45)",
+          "oklch(72.14% 0.02770 221.45)",
+          "oklch(83.57% 0.02770 221.45)",
+          "oklch(95.00% 0.02770 221.45)"
+        ]
+      },
+      "known-bg": {
+        "role": "semantic",
+        "displayName": "Known issue wash",
+        "tonalRamp": [
+          "oklch(15.00% 0.01493 260.73)",
+          "oklch(26.43% 0.01493 260.73)",
+          "oklch(37.86% 0.01493 260.73)",
+          "oklch(49.29% 0.01493 260.73)",
+          "oklch(60.71% 0.01493 260.73)",
+          "oklch(72.14% 0.01493 260.73)",
+          "oklch(83.57% 0.01493 260.73)",
+          "oklch(95.00% 0.01493 260.73)"
+        ]
+      },
+      "known-ink": {
+        "role": "semantic",
+        "displayName": "Known issue ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.06321 252.53)",
+          "oklch(26.43% 0.06321 252.53)",
+          "oklch(37.86% 0.06321 252.53)",
+          "oklch(49.29% 0.06321 252.53)",
+          "oklch(60.71% 0.06321 252.53)",
+          "oklch(72.14% 0.06321 252.53)",
+          "oklch(83.57% 0.06321 252.53)",
+          "oklch(95.00% 0.06321 252.53)"
+        ]
+      },
+      "new-ink": {
+        "role": "semantic",
+        "displayName": "New issue ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.12785 26.74)",
+          "oklch(26.43% 0.12785 26.74)",
+          "oklch(37.86% 0.12785 26.74)",
+          "oklch(49.29% 0.12785 26.74)",
+          "oklch(60.71% 0.12785 26.74)",
+          "oklch(72.14% 0.12785 26.74)",
+          "oklch(83.57% 0.12785 26.74)",
+          "oklch(95.00% 0.12785 26.74)"
+        ]
+      },
+      "table-bg": {
+        "role": "neutral",
+        "displayName": "Table surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.00344 174.48)",
+          "oklch(26.43% 0.00344 174.48)",
+          "oklch(37.86% 0.00344 174.48)",
+          "oklch(49.29% 0.00344 174.48)",
+          "oklch(60.71% 0.00344 174.48)",
+          "oklch(72.14% 0.00344 174.48)",
+          "oklch(83.57% 0.00344 174.48)",
+          "oklch(95.00% 0.00344 174.48)"
+        ]
+      },
+      "tab-hover": {
+        "role": "neutral",
+        "displayName": "Tab hover surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.01005 164.86)",
+          "oklch(26.43% 0.01005 164.86)",
+          "oklch(37.86% 0.01005 164.86)",
+          "oklch(49.29% 0.01005 164.86)",
+          "oklch(60.71% 0.01005 164.86)",
+          "oklch(72.14% 0.01005 164.86)",
+          "oklch(83.57% 0.01005 164.86)",
+          "oklch(95.00% 0.01005 164.86)"
+        ]
+      },
+      "disclosure-hover": {
+        "role": "neutral",
+        "displayName": "Disclosure hover surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.00412 157.18)",
+          "oklch(26.43% 0.00412 157.18)",
+          "oklch(37.86% 0.00412 157.18)",
+          "oklch(49.29% 0.00412 157.18)",
+          "oklch(60.71% 0.00412 157.18)",
+          "oklch(72.14% 0.00412 157.18)",
+          "oklch(83.57% 0.00412 157.18)",
+          "oklch(95.00% 0.00412 157.18)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Report headline",
+        "purpose": "Run review title; 29px at the narrow breakpoint."
+      },
+      "title": {
+        "displayName": "Worksheet title",
+        "purpose": "Section titles within report sheets."
+      },
+      "body": {
+        "displayName": "Engineering body",
+        "purpose": "Readable offline system text; 14px at the narrow breakpoint."
+      },
+      "label": {
+        "displayName": "Status label",
+        "purpose": "Compact written status and classification."
+      },
+      "mono": {
+        "displayName": "Evidence text",
+        "purpose": "Run identifiers, paths and raw logs."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Print button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Ordinary report action with a visible keyboard focus state.",
+      "html": "<button class=\"ds-button\" type=\"button\">Print report</button>",
+      "css": ".ds-button{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;border:1px solid var(--line, #d5dfdf);border-radius:var(--radius,6px);background:var(--paper, #fff);color:var(--ink, #182c32);padding:9px 13px;cursor:pointer}.ds-button:hover{background:var(--ok-bg, #e4f3eb)}.ds-button:focus-visible{outline:3px solid #00815b;outline-offset:3px}"
+    },
+    {
+      "name": "Issue search",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Visible label, native search input and the report focus treatment.",
+      "html": "<label class=\"ds-search-label\">Search node, component or finding<input class=\"ds-search\" type=\"search\" placeholder=\"Search issues\"></label>",
+      "css": ".ds-search-label{display:grid;gap:5px;font-family:\"Segoe UI\",Arial,sans-serif;font-size:13px;color:var(--muted, #52656c)}.ds-search{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;border:1px solid var(--line, #d5dfdf);border-radius:var(--radius,6px);background:var(--paper, #fff);color:var(--ink, #182c32);padding:9px 13px;width:280px;max-width:100%;caret-color:var(--brand, #006b49)}.ds-search:focus-visible{outline:3px solid #00815b;outline-offset:3px}"
+    },
+    {
+      "name": "Severity select",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Native select used by issue filters; no custom hover variant.",
+      "html": "<label class=\"ds-select-label\">Severity<select class=\"ds-select\"><option>All severities</option><option>FAIL</option><option>WARN</option></select></label>",
+      "css": ".ds-select-label{display:grid;gap:5px;font-family:\"Segoe UI\",Arial,sans-serif;font-size:13px;color:var(--muted, #52656c)}.ds-select{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;border:1px solid var(--line, #d5dfdf);border-radius:var(--radius,6px);background:var(--paper, #fff);color:var(--ink, #182c32);padding:9px 13px;cursor:pointer}.ds-select:focus-visible{outline:3px solid #00815b;outline-offset:3px}"
+    },
+    {
+      "name": "Campaign tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Selected and default visual states. The report script supplies roving focus and panel selection.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Campaign views\"><button class=\"ds-tab ds-tab-selected\" type=\"button\" aria-current=\"page\">Overview</button><button class=\"ds-tab\" type=\"button\">Node 01</button><button class=\"ds-tab\" type=\"button\">Issues (2)</button></nav>",
+      "css": ".ds-tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line, #d5dfdf);padding-top:8px}.ds-tab{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;white-space:nowrap;flex-shrink:0;border:0;border-radius:0;background:transparent;color:var(--ink, #182c32);padding:12px 18px;border-bottom:3px solid transparent;cursor:pointer}.ds-tab-selected{background:var(--paper, #fff);border-bottom-color:var(--brand, #006b49);font-weight:650;color:var(--brand-dark, #064b38)}.ds-tab:hover{background:#e4ece8}.ds-tab:focus-visible{outline:3px solid #00815b;outline-offset:3px}"
+    },
+    {
+      "name": "Status and classification badges",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Status text stays visible; KNOWN and NEW classification do not replace severity.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-fail\">FAIL</span><span class=\"ds-badge ds-warn\">WARN</span><span class=\"ds-badge ds-pass\">PASS</span><span class=\"ds-badge ds-known\">KNOWN</span><span class=\"ds-badge ds-new\">NEW</span></div>",
+      "css": ".ds-badge{display:inline-block;border-radius:4px;padding:3px 8px;font-family:\"Segoe UI\",Arial,sans-serif;font-size:12px;line-height:1.6;font-weight:700;letter-spacing:.025em;white-space:nowrap;background:#e8edef;color:#34484f}.ds-fail{background:var(--fail-bg, #fff0ee);color:var(--fail, #9d2929)}.ds-warn{background:var(--warn-bg, #fff5d8);color:var(--warn, #815400)}.ds-pass{background:var(--ok-bg, #e4f3eb);color:var(--brand-dark, #064b38)}.ds-known{background:#e8eef8;color:#365272}.ds-new{background:var(--fail-bg, #fff0ee);color:#963832}"
+    },
+    {
+      "name": "Outcome worksheet",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "Flat paper worksheet with separate execution and health labels. Example values are illustrative.",
+      "html": "<section class=\"ds-sheet\"><h2 class=\"ds-title\">Campaign outcome</h2><div class=\"ds-outcomes\"><div><span class=\"ds-label\">Execution</span><span class=\"ds-state ds-complete\">COMPLETE</span></div><div><span class=\"ds-label\">Health</span><span class=\"ds-state ds-fail\">FAIL</span></div></div></section>",
+      "css": ".ds-sheet{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;background:var(--paper, #fff);color:var(--ink, #182c32);border:1px solid var(--line, #d5dfdf);border-radius:var(--radius,6px);padding:26px}.ds-title{font-size:23px;line-height:1.3;font-weight:650;margin:0 0 18px}.ds-outcomes{display:flex;gap:18px;align-items:flex-start}.ds-label{display:block;font-size:12px;color:var(--muted, #52656c);margin-bottom:5px}.ds-state{display:inline-block;border-radius:4px;padding:3px 8px;font-family:\"Segoe UI\",Arial,sans-serif;font-size:12px;line-height:1.6;font-weight:700;letter-spacing:.025em;white-space:nowrap;}.ds-complete{background:var(--ok-bg, #e4f3eb);color:var(--brand-dark, #064b38)}.ds-fail{background:var(--fail-bg, #fff0ee);color:var(--fail, #9d2929)}"
+    },
+    {
+      "name": "Phase evidence disclosure",
+      "kind": "custom",
+      "refersTo": "disclosure",
+      "description": "Native disclosure with summary hover, visible focus, and an honest unavailable-evidence state.",
+      "html": "<details class=\"ds-detail\"><summary class=\"ds-summary\"><strong>PRE</strong> <span class=\"ds-phase-badge\">FAIL</span></summary><div class=\"ds-detail-body\"><p>Original evidence</p><p>Evidence unavailable</p></div></details>",
+      "css": ".ds-detail{font-family:\"Segoe UI\",Arial,sans-serif;font-size:15px;line-height:1.55;color:var(--ink, #182c32);border-top:1px solid var(--line, #d5dfdf);border-bottom:1px solid var(--line, #d5dfdf)}.ds-summary{cursor:pointer;padding:17px 4px;overflow-wrap:anywhere}.ds-summary:hover{background:#f5f8f6}.ds-summary:focus-visible{outline:3px solid #00815b;outline-offset:3px}.ds-phase-badge{display:inline-block;border-radius:4px;padding:3px 8px;font-family:\"Segoe UI\",Arial,sans-serif;font-size:12px;line-height:1.6;font-weight:700;letter-spacing:.025em;white-space:nowrap;margin:0 8px;background:var(--fail-bg, #fff0ee);color:var(--fail, #9d2929)}.ds-detail-body{padding:0 16px 20px}.ds-detail-body p{margin:8px 0 16px;max-width:75ch}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engineering Worksheet",
+    "overview": "This system expresses the approved Wistron-inspired engineering direction through restrained green accents, light laboratory worksheet surfaces and readable evidence. It is an internal report identity, not a claim to reproduce an official Wistron brand specification or logo.\n\nQuiet, flat containers let factual results carry the visual weight. System fonts and locally embedded styles keep long reviews readable without network access. The implemented source is `report.css`, `report.js` and `cycle_report.py`; the Operate surface composition and review sequence live in `report_direction.md`.",
+    "keyCharacteristics": [
+      "Restrained green identity with light, bordered worksheets.",
+      "Readable system typography and tabular numerals.",
+      "Explicit status text with separate health and execution labels.",
+      "Native disclosures and local evidence links."
+    ],
+    "rules": [
+      {
+        "name": "The Explicit Status Rule",
+        "body": "Always retain written status labels; color alone cannot communicate a result. Health, execution completeness and known/new classification remain separate concepts.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Evidence Rule",
+        "body": "Preserve wrap opportunities for long IDs and paths, and keep raw evidence visually distinct from the human-readable summary.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Worksheet Rule",
+        "body": "Keep report sections flat and use the established surface and divider vocabulary to group evidence.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the extracted colors and visible text labels for status.",
+      "**Do** keep health and execution completeness separately labeled.",
+      "**Do** retain keyboard focus, native disclosure behavior and contained table scrolling.",
+      "**Do** keep the report and its evidence folders together for offline review."
+    ],
+    "donts": [
+      "**Don't** present KNOWN classification as a pass exemption.",
+      "**Don't** introduce remote fonts or assets into the offline report.",
+      "**Don't** claim these inspired colors or the text header are an official brand specification.",
+      "**Don't** replace recorded findings with decorative or unmeasured charts."
+    ]
+  }
+}

@@ -1,0 +1,151 @@
+[
+  {
+    "name": "BF4 present still prevents config success",
+    "observed": "[Info] BlueField-4 (DPU)\nBlueField4\n\n\u001b[32m[Pass]\u001b[0m\n\n\u001b[31m[Fail]\u001b[0m\n\n\n\n\nDETECTED=1 ERROR_TAG=1"
+  },
+  {
+    "name": "16 empty DIMM slots counted as populated",
+    "observed": "[Info] DIMM (LPDDR5X)\nNo.  Locator           Manu        PN                         SN            Size            Type          Configured-Speed\nCOUNT=16 LOST="
+  },
+  {
+    "name": "non-Vera NIC falsely detected as BF4",
+    "observed": "[Info] BlueField-4 (DPU)\nConnectX7\nBF4_COUNT=1"
+  },
+  {
+    "name": "sensor ok->cr passes",
+    "observed": {
+      "sensor_diff": true
+    }
+  },
+  {
+    "name": "sensor ok->nr passes",
+    "observed": {
+      "sensor_diff": true
+    }
+  },
+  {
+    "name": "sensor ok->na passes",
+    "observed": {
+      "sensor_diff": true
+    }
+  },
+  {
+    "name": "sensor ok->ns passes",
+    "observed": {
+      "sensor_diff": true
+    }
+  },
+  {
+    "name": "duplicate sensor healthy row overwrites critical",
+    "observed": {
+      "Temp": "ok"
+    }
+  },
+  {
+    "name": "config exit code ignored",
+    "observed": "exit 2 accepted"
+  },
+  {
+    "name": "missing mandatory checks pass",
+    "observed": {
+      "steps": {},
+      "issues": [],
+      "status": "PASS"
+    }
+  },
+  {
+    "name": "WARN fails runtime",
+    "observed": {
+      "steps": {
+        "sensor_diff": true
+      },
+      "issues": [
+        {
+          "step": "sensor_diff",
+          "kind": "WARN",
+          "detail": "transient"
+        }
+      ],
+      "status": "FAILED"
+    }
+  },
+  {
+    "name": "config NVMe loss hidden",
+    "observed": "FAILED input -> health report PASS"
+  },
+  {
+    "name": "boot timeout health PASS",
+    "observed": "FAILED input -> health report PASS"
+  },
+  {
+    "name": "uncaught worker error health PASS",
+    "observed": "FAILED input -> health report PASS"
+  },
+  {
+    "name": "fatal AER found but health PASS",
+    "observed": "dmesg scan finds fatal AER, verdict stays PASS"
+  },
+  {
+    "name": "OOB timeout exposes password",
+    "observed": "TimeoutExpired string includes password argument (synthetic credential only)"
+  },
+  {
+    "name": "sensor read failure returned as success",
+    "observed": {
+      "exit": 0,
+      "names": []
+    }
+  },
+  {
+    "name": "distinct trays collide in output",
+    "observed": [
+      "node1",
+      "node1"
+    ]
+  },
+  {
+    "name": "dryrun clears SEL",
+    "observed": [
+      [
+        "bmc",
+        "192.0.2.1",
+        "ipmitool sel clear 2>&1; echo SEL_CLEARED"
+      ]
+    ]
+  },
+  {
+    "name": "dryrun unchanged total failure called stable",
+    "observed": "=== n1 (192.0.2.2) baseline 對照 ===\nbaseline: MST=0 BF4=0 lspci卡=0 NVMe=0 dmesg錯=0 SEL=0 power=Unknown\nloop  status    MST  BF4  vs_baseline\n\n1     FAIL        0    0  無差異\n\n[n1] 結論: 1 輪中 0 輪有差異 -> 穩定\n"
+  },
+  {
+    "name": "dryrun drops domainless PCI address",
+    "observed": "01:00.0 -> empty set"
+  },
+  {
+    "name": "failed preflight still issues power and gets overwritten",
+    "observed": {
+      "cycle_calls": [
+        "cycle issued"
+      ],
+      "final_config": true,
+      "status": "PASS"
+    }
+  },
+  {
+    "name": "runtime ignores fatal dmesg",
+    "observed": "fully mocked loop containing fatal AER returns PASS"
+  },
+  {
+    "name": "CLI preflight performs no connectivity checks",
+    "observed": "without --cycle only parses inventory and returns 0"
+  },
+  {
+    "name": "auto rewritten to inband and nonexistent node silently dropped",
+    "observed": {
+      "channel": "inband",
+      "nodes": [
+        "n1"
+      ]
+    }
+  }
+]

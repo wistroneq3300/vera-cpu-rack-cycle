@@ -4,3 +4,9 @@ __pycache__/
 screenlog.*
 cycle_test*/
 dryrun_*/
+campaigns/
+.vera-pre-*/
+.impeccable/review/
+.impeccable/mocks/
+test-results/
+.venv/

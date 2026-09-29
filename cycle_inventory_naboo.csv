@@ -1,1 +1,1 @@
-tray,node,bmc_ip,os_ip
+tray,node,bmc_ip,os_ip,bmc_hostname,os_hostname,lily_bmc_ip,lily_os_ip,lily_bmc_hostname,lily_os_hostname

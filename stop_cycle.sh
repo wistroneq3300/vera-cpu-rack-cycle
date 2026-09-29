@@ -1,17 +1,9 @@
-#!/bin/bash
-# Stop any running neutrin_cycle.py / dryrun_sim.py campaign.
-# Usage: ./stop_cycle.sh
-
-echo "Stopping neutrin_cycle.py ..."
-pkill -9 -f neutrin_cycle.py
-pkill -9 -f dryrun_sim.py
-sleep 2
-
-left=$(pgrep -af neutrin_cycle.py)
-if [ -n "$left" ]; then
-    echo "STILL RUNNING:"
-    echo "$left"
-    exit 1
+#!/usr/bin/env bash
+# Request a graceful stop of one campaign owned by the current user.
+set -eu
+if [[ $# -ne 1 ]]; then
+    echo 'Usage: ./stop_cycle.sh <run_id>' >&2
+    exit 2
 fi
-
-echo "All campaign processes stopped."
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+exec python3 "$SCRIPT_DIR/neutrin_cycle.py" --stop "$1"
