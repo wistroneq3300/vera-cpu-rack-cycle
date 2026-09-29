@@ -33,7 +33,7 @@ def confirm(name, condition, detail):
 
 
 def shell_probe(body):
-    definitions = (ROOT / "vera_rack.sh").read_text(encoding="utf-8").split("### Start ###")[0]
+    definitions = (ROOT / "neutrino_config.sh").read_text(encoding="utf-8").split("### Start ###")[0]
     env = dict(os.environ)
     env["PATH"] = str(Path(args.shell).resolve().parent) + os.pathsep + env.get("PATH", "")
     return subprocess.run([args.shell], input=definitions + "\n" + body,
@@ -150,7 +150,7 @@ echo "BF4_COUNT=$BF4_Qty"
     from contextlib import ExitStack
     from unittest.mock import MagicMock
     loop_args = SimpleNamespace(output=out / "mock_campaign", cycle_mode="power_cycle", channel="inband",
-                                config_script=ROOT / "vera_rack.sh", boot_timeout=1)
+                                config_script=ROOT / "neutrino_config.sh", boot_timeout=1)
     loop_target = nc.Target("t", "n1", "192.0.2.1", "192.0.2.2")
     fake_client = MagicMock()
     fake_loop_ssh = Mock()

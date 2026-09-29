@@ -9,7 +9,7 @@ This is the implementation contract from the operator discussion, not a list of 
 - Preserve PRE dmesg and SEL before clearing once on campaign start. Capture/clear dmesg after each loop. SEL stays cumulative for the entire campaign; record deltas for human event interpretation.
 - Complete the requested run despite HW/FW failures. Stop only an unrecoverable/unsafe target, retain all evidence and continue other targets. Graceful stop finishes current POST. Incomplete execution cannot be reported as a complete campaign.
 - Sensor faults are never overwritten by duplicate names. Critical/non-recoverable and unreadable values fail; non-critical warns. Immediately confirm missing sensors; persistent disappearance fails.
-- SOCAMM installed count must equal 16. BF4 is mandatory and only explicit BF4 identity qualifies. PCIe downgrade fails. Keep expected quantities in vera_rack.sh.
+- SOCAMM installed count must equal 16. BF4 is mandatory and only explicit BF4 identity qualifies. PCIe downgrade fails. Keep expected quantities in the selected `<project>_config.sh`.
 - Snapshot the local hardware script once, hash it and upload it to an isolated run path. No stale remote script fallback.
 - Identity comes from named CSV hostname columns, not inferred names or MACs. Missing real names must be filled by the operator.
 - Tray-qualified paths and labels, unique Run ID, endpoint locks across local users, targeted stop. Different endpoints can run concurrently. Locks cannot silently fail open.

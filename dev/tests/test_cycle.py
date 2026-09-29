@@ -316,7 +316,7 @@ class EngineTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.options = SimpleNamespace(project='neutrino',cycle_mode='power_cycle',channel='inband',
                                        boot_timeout=.03,poll_interval=.001,loops=2,hours=0,cycle=True,
-                                       config_script=BASE/'vera_rack.sh',issue_policy=BASE/'issue_policy.md',output=self.root/'output')
+                                       config_script=BASE/'neutrino_config.sh',issue_policy=BASE/'issue_policy.md',output=self.root/'output')
         self.fake = FakeTransport({}, self.root/'ssh')
         self.session = NodeSession(target(),self.fake,self.root,'test',b'script',digest(b'script'),self.options,
                                    parse_policy(self.options.issue_policy.read_text()))

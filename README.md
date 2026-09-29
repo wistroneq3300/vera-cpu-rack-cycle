@@ -6,7 +6,7 @@ Run reboot, DC power-cycle and auxiliary AC-cycle campaigns from one **external 
 
 ```bash
 python3 -m pip install -r requirements.txt
-chmod +x vera_rack.sh stop_cycle.sh
+chmod +x neutrino_config.sh naboo_config.sh stop_cycle.sh
 python3 neutrin_cycle.py
 ```
 
@@ -60,7 +60,7 @@ PRE and each loop verify expected hostnames before actions. During recovery, tra
 
 ## Hardware verdicts
 
-`vera_rack.sh` owns the expected counts. It runs all selected checks, emits `ISSUE|code|component|reason`, and returns nonzero if any fail. Options `-S`, `-N`, `-B`, `-F` select shorter inventory sets; normal campaigns use the full script.
+`<project>_config.sh` owns the expected counts. The wizard automatically loads `neutrino_config.sh` or `naboo_config.sh` after the project is selected. Each script runs all selected checks, emits `ISSUE|code|component|reason`, and returns nonzero if any fail. Options `-S`, `-N`, `-B`, `-F` select shorter inventory sets; normal campaigns use the full script.
 
 - CPU at least 2; **installed SOCAMM exactly 16** (empty memory slots are not counted).
 - NVMe at least 2 controllers (multiple namespaces are deduplicated), Vera MST endpoints at least 22, NVIDIA PCI bridges at least 20, USB controller at least 1, AST1150 at least 1.
@@ -70,7 +70,7 @@ PRE and each loop verify expected hostnames before actions. During recovery, tra
 - Sensors `cr/critical/nr/non-recoverable` and lower/upper critical variants fail; `nc/non-critical` warns. `ns/na/no reading` and unrecognized statuses fail for threshold sensors. `discrete` sensors use hexadecimal bit-field statuses such as `0x0100`; those statuses are normal unless the output explicitly reports a critical/unreadable state. Two documented Vera no-value rows are ignored for health only: `CorUti*` with both reading/status `na`, and a replacement-character name with an empty unit and both fields `na`; their raw rows remain in evidence. Generic `na` remains FAIL. Incomplete table rows remain visible and fail with `SENSOR_MALFORMED`; a completely malformed table remains a PRE FAIL finding for operator review. Duplicate names are reported and every row evaluated. Missing rows are immediately re-read: recovered warns, still missing fails. Without globally unique sensor IDs, loss detection uses name multiplicities rather than overwriting duplicates.
 - Specific kernel hardware/fatal diagnostics fail; complete dmesg is preserved. Firmware versions are recorded; there is no expected-version/downgrade policy yet.
 
-The local hardware script is snapshotted once, SHA-256 verified after upload and executed from a unique remote run path. PRE/POST do not depend on an old shared `~/vera_rack.sh`. Editing the source affects later runs only.
+The selected project config script is snapshotted once as `<project>_config.snapshot.sh`, SHA-256 verified after upload and executed from a unique remote run path. PRE/POST do not depend on an old shared project script. Editing the source affects later runs only.
 
 ## Inventory and parallel users
 
@@ -112,7 +112,7 @@ campaigns/<run_id>/
   CYCLE_REVIEW_REPORT.html / CYCLE_REVIEW_REPORT.md
   known_issues.md / new_issues.md
   issue_policy.snapshot.md
-  vera_rack.snapshot.sh
+  <project>_config.snapshot.sh
   pre_orchestrator_dependencies.txt
   <tray>_<node>/
     pre_report.json
@@ -132,10 +132,10 @@ There is no extra PRE directory. Loop files are always retained. All formats use
 
 ```bash
 python3 -m unittest discover -s dev/tests -v
-bash -n vera_rack.sh stop_cycle.sh
+bash -n neutrino_config.sh naboo_config.sh stop_cycle.sh
 python3 dev/tests/make_demo.py
 ```
 
-Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node dev/tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
+Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
 
 This refactor was verified offline on Windows with Python, Git Bash and Chrome. Deployment is intended for Linux; real rack acceptance still needs actual hostnames, installed MFT, platform BMC paths, real command responses and a controlled run. Existing `dev/review/offline_review.py` documents **pre-refactor** defects and is not the current regression suite. `dev/dryrun_sim.py` is an independent legacy utility, unchanged here; its named CSV reader continues to use the original inventory fields and does not inherit the campaign lock/confirmation behavior.

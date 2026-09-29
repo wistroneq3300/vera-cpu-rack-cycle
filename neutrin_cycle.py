@@ -36,6 +36,11 @@ from cycle_transport import Transport
 
 BASE = Path(__file__).resolve().parent
 
+
+def project_config_path(project):
+    """Return the project-owned hardware configuration script."""
+    return BASE / f'{project}_config.sh'
+
 # Colour the words that decide whether a run needs a human look: FAIL and NEW
 # stand out on the terminal, while the log file keeps the plain text so it
 # stays greppable. Disabled when the output is not a terminal or when NO_COLOR
@@ -231,7 +236,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             console.attach(output / 'console.log')
             registry = RunRegistry(run_id, runtime_root)
             registry.register(output)
-            atomic_write(output / 'vera_rack.snapshot.sh', script.decode('utf-8'))
+            atomic_write(output / f'{options.project}_config.snapshot.sh', script.decode('utf-8'))
             atomic_write(output / 'issue_policy.snapshot.md', policy_text)
             data = dict(run_id=run_id, project=options.project, started=now(), finished=None,
                         state='RUNNING', stop_reason='', cycle_mode=options.cycle_mode, channel=options.channel,
@@ -378,7 +383,8 @@ def parser():
     p.add_argument('--channel', choices=('inband', 'outband'), default='inband')
     p.add_argument('--boot-timeout', type=float, default=900)
     p.add_argument('--poll-interval', type=float, default=10)
-    p.add_argument('--config-script', type=Path, default=BASE / 'vera_rack.sh')
+    p.add_argument('--config-script', type=Path,
+                   help='Override the selected project config script')
     p.add_argument('--issue-policy', type=Path, default=BASE / 'issue_policy.md')
     p.add_argument('--output', type=Path, default=BASE / 'campaigns')
     p.add_argument('--cycle', action='store_true', help='Run cycles after PRE and explicit confirmation; wizard enables this')
@@ -409,6 +415,10 @@ def main(argv=None):
                 raise ValueError('Invalid project')
             options.inventory = options.inventory or BASE / f'cycle_inventory_{options.project}.csv'
             targets = load_inventory(options.inventory)
+        if options.config_script is None:
+            options.config_script = project_config_path(options.project)
+        if not options.config_script.is_file():
+            raise ValueError(f'Project config script not found: {options.config_script}')
         targets = select_targets(targets, options.node or ['all'])
         if options.cycle_mode not in {'reboot', 'power_cycle', 'aux_cycle'} or options.channel not in {'inband', 'outband'}:
             raise ValueError('Invalid mode or channel')

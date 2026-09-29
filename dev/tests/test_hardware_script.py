@@ -1,4 +1,4 @@
-"""Run vera_rack.sh against PATH stubs, never the host's hardware tools."""
+"""Run neutrino_config.sh against PATH stubs, never the host's hardware tools."""
 import os
 import shutil
 import subprocess
@@ -25,6 +25,7 @@ class HardwareTests(unittest.TestCase):
               'lspci':f'''case "$1" in
                     -Dvv) printf '0000:01:00.0 Controller\\n LnkSta: Speed 16GT/s, Width x8 {'(downgraded)' if downgrade else ''}\\n';;
                     *) i=1; while [ "$i" -le 20 ]; do printf '0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]\\n'; i=$((i+1)); done
+                       echo '0000:04:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]'
                        echo '0000:02:00.0 USB controller [0c03]: controller [1234:5678]'
                        echo '0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]';;
                   esac''',
@@ -35,7 +36,7 @@ class HardwareTests(unittest.TestCase):
                 file.write_text('#!/usr/bin/env sh\n'+content+'\n',encoding='utf-8',newline='\n')
                 file.chmod(0o755)
             env={**os.environ,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
-            result=subprocess.run([SHELL,str(BASE/'vera_rack.sh')],env=env,capture_output=True,text=True,timeout=45)
+            result=subprocess.run([SHELL,str(BASE/'neutrino_config.sh')],env=env,capture_output=True,text=True,timeout=45,check=False)
             return result
 
     def test_populated_16_pass_and_namespace_dedup(self):
