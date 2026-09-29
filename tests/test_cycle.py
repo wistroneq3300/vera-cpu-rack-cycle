@@ -154,6 +154,22 @@ class PureTests(unittest.TestCase):
             'FAIL',
         )
 
+    def test_known_vera_no_reading_rows_are_ignored_but_generic_na_fails(self):
+        rows = parse_sensors(
+            'PrMo0CP1CorUti11 | na | discrete | na | na\n'
+            'PrMo0CP1CorUti24 | na | percent | na | na\n'
+            '\ufffd\ufffd\ufffd\ufffd | na |  | na | na\n'
+        )
+        self.assertEqual(sensor_issues(rows), [])
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('Fan | na | percent | na'))),
+            'FAIL',
+        )
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('\ufffd\ufffd\ufffd\ufffd | na | percent | na'))),
+            'FAIL',
+        )
+
     def test_sensor_missing_and_reread(self):
         pre = parse_sensors(SENSORS)
         initial = pre[:1]
