@@ -1,0 +1,65 @@
+# Cycle review
+
+Run ID: neutrino_20260929_235538+0800_962db2
+
+Execution: COMPLETE
+
+Health: FAIL
+
+Requested limits: {'loops': 3, 'hours': 0.0}
+
+Completed node-loops: 9
+
+Stop reason: Requested run limit reached
+
+Unique issues: 10
+
+Target: L105-21R_n1
+
+Completed loops: 3
+
+Blocked: No
+
+Stop reason: 
+
+PRE: FAIL (4 findings)
+
+LOOP 1: FAIL (4 findings)
+
+LOOP 2: FAIL (4 findings)
+
+LOOP 3: FAIL (4 findings)
+
+Target: L105-21R_n2
+
+Completed loops: 3
+
+Blocked: No
+
+Stop reason: 
+
+PRE: FAIL (3 findings)
+
+LOOP 1: FAIL (3 findings)
+
+LOOP 2: FAIL (3 findings)
+
+LOOP 3: FAIL (3 findings)
+
+Target: L105-21R_n3
+
+Completed loops: 3
+
+Blocked: No
+
+Stop reason: 
+
+PRE: FAIL (3 findings)
+
+LOOP 1: FAIL (3 findings)
+
+LOOP 2: FAIL (3 findings)
+
+LOOP 3: FAIL (3 findings)
+
+See CYCLE_REVIEW_REPORT.html for expandable evidence and issue recurrence.

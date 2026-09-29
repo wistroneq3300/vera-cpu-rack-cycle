@@ -1,0 +1,42 @@
+UTC+8: 2026-09-29T23:55:42+08:00
+Role: os
+Command: dmesg
+Exit: 0
+State: RETURNED
+Duration: 0.21s
+
+[   35.546743] systemd-sysv-generator[12238]: SysV service '/etc/init.d/cachefilesd' lacks a native systemd unit file, automatically generating a unit file for compatibility.
+[   35.546766] systemd-sysv-generator[12238]: Please update package to include a native systemd unit file.
+[   35.546769] systemd-sysv-generator[12238]: \xe2\x9a\xa0\xef\xb8\x8f This compatibility logic is deprecated, expect removal soon. \xe2\x9a\xa0\xef\xb8\x8f
+[   36.413041] fbcon: Taking over console
+[   36.421602] Console: switching to colour frame buffer device 128x48
+[   41.213942] ipmi_ssif i2c-IPI0001:00: ipmi_ssif: Error fetching SSIF: -121 0 00, your system probably doesn't support this command so using defaults
+[   41.519785] ipmi_ssif i2c-IPI0001:00: ipmi_ssif: Unable to clear message flags: 0 3 c1
+[   42.085249] ipmi_ssif i2c-IPI0001:00: IPMI message handler: Found new BMC (man_id: 0x001647, prod_id: 0x0003, dev_id: 0x02)
+[   43.163700] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Trying ACPI-specified SSIF interface at i2c address 0x10, adapter NVDA2017:03, slave address 0x0
+[   58.538943] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Error fetching SSIF: -121 0 00, your system probably doesn't support this command so using defaults
+[   58.722527] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Unable to clear message flags: 0 3 c1
+[   59.227988] ipmi_ssif i2c-IPI0001:01: IPMI message handler: interfacing existing BMC (man_id: 0x001647, prod_id: 0x0003, dev_id: 0x02)
+[ 6060.249205] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x1 bus: 0x0
+[ 6060.249216] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0x2 bus: 0x0
+[ 6060.249224] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0x2 bus: 0x20
+[ 6060.249227] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0x3 bus: 0x0
+[ 6060.249229] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0x3 bus: 0x80
+[ 6060.249231] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x0
+[ 6060.249233] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x40
+[ 6060.249236] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x80
+[ 6060.249237] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0xc0
+[ 6060.249239] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x5 bus: 0x0
+[ 6060.249241] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x6 bus: 0x0
+[ 6060.249248] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x9 bus: 0x0
+[ 6060.249250] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0xa bus: 0x0
+[ 6060.249252] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0xa bus: 0x20
+[ 6060.249254] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0xb bus: 0x0
+[ 6060.249256] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0xb bus: 0x80
+[ 6060.249258] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x0
+[ 6060.249261] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x40
+[ 6060.249263] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x80
+[ 6060.249265] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0xc0
+[ 6060.249268] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0xd bus: 0x0
+[ 6060.249270] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0xe bus: 0x0
+[ 9197.939245] ipmi_ssif i2c-IPI0001:00: IPMI message handler: BMC returned incorrect response, expected netfn 7 cmd 25, got netfn 7 cmd 1

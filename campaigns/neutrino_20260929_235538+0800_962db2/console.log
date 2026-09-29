@@ -1,0 +1,147 @@
+2026-09-29T23:55:38+08:00 Run ID: neutrino_20260929_235538+0800_962db2
+2026-09-29T23:55:38+08:00 Time zone: UTC+8 (+0800 in Run ID, +08:00 in console/evidence timestamps)
+2026-09-29T23:55:38+08:00 Planned output: /root/vera-cycle/campaigns/neutrino_20260929_235538+0800_962db2
+2026-09-29T23:55:38+08:00 Selected targets: L105-21R_n1, L105-21R_n2, L105-21R_n3
+2026-09-29T23:55:38+08:00 Mode: aux_cycle; channel: inband; loops: 3; hours: unlimited
+2026-09-29T23:55:38+08:00 Auxiliary AC cycle uses the BMC standby controller for either selected channel.
+2026-09-29T23:55:38+08:00 PRE started. Missing standard tools will be installed with apt when available; mst is not installed by this program.
+2026-09-29T23:55:58+08:00 L105-21R_n1 | PRE | FAIL
+2026-09-29T23:55:58+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T23:55:58+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-29T23:55:58+08:00   FAIL 0004:01:00.0: Non-Volatile memory controller: KIOXIA Corporation NVMe SSD Controller XD8 (rev 01) (prog-if 02 [NVM Express]): LnkSta: Speed 32GT/s, Width x2 (downgraded)
+2026-09-29T23:55:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:55:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:55:58+08:00 L105-21R_n3 | PRE | FAIL
+2026-09-29T23:55:58+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T23:55:58+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-29T23:55:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:55:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:56:03+08:00 L105-21R_n2 | PRE | FAIL
+2026-09-29T23:56:03+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-09-29T23:56:03+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-29T23:56:03+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:56:03+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-29T23:56:55+08:00 Operator decision: START
+2026-09-29T23:56:55+08:00 Campaign started. Output: /root/vera-cycle/campaigns/neutrino_20260929_235538+0800_962db2
+2026-09-29T23:56:55+08:00 Stop after the current POST: ./stop_cycle.sh neutrino_20260929_235538+0800_962db2
+2026-09-29T23:56:56+08:00 L105-21R_n1 | log clearing | complete
+2026-09-29T23:56:56+08:00 L105-21R_n3 | log clearing | complete
+2026-09-29T23:56:56+08:00 L105-21R_n2 | log clearing | complete
+2026-09-29T23:56:56+08:00 Loop 1: starting 3 target(s) concurrently
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n3 | aux cycle sent
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n3 | waiting OS boot
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n1 | aux cycle sent
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n1 | waiting OS boot
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n2 | aux cycle sent
+2026-09-29T23:56:57+08:00 Loop 1: L105-21R_n2 | waiting OS boot
+2026-09-29T23:57:26+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-29T23:57:56+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-29T23:58:26+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-29T23:58:56+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-29T23:59:26+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-29T23:59:56+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:00:26+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:00:56+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:01:26+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:01:31+08:00 Loop 1: L105-21R_n1 | OS up, system check running
+2026-09-30T00:01:35+08:00 Loop 1: L105-21R_n3 | OS up, system check running
+2026-09-30T00:01:36+08:00 Loop 1: L105-21R_n2 | OS up, system check running
+2026-09-30T00:01:52+08:00 Loop 1: L105-21R_n1 | system check done (FAIL)
+2026-09-30T00:01:52+08:00 Loop 1: L105-21R_n1 | DONE (FAIL)
+2026-09-30T00:01:52+08:00 L105-21R_n1 | LOOP 1 | FAIL
+2026-09-30T00:01:52+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:01:52+08:00   FAIL 0004:01:00.0: Non-Volatile memory controller: KIOXIA Corporation NVMe SSD Controller XD8 (rev 01) (prog-if 02 [NVM Express]): LnkSta: Speed 32GT/s, Width x2 (downgraded)
+2026-09-30T00:01:52+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:52+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:56+08:00 Loop 1: L105-21R_n3 | system check done (FAIL)
+2026-09-30T00:01:56+08:00 Loop 1: L105-21R_n3 | DONE (FAIL)
+2026-09-30T00:01:56+08:00 L105-21R_n3 | LOOP 1 | FAIL
+2026-09-30T00:01:56+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:01:56+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:56+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:56+08:00 Loop 1: L105-21R_n2 | system check done (FAIL)
+2026-09-30T00:01:56+08:00 Loop 1: L105-21R_n2 | DONE (FAIL)
+2026-09-30T00:01:56+08:00 L105-21R_n2 | LOOP 1 | FAIL
+2026-09-30T00:01:56+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:01:56+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:56+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:01:56+08:00 Loop 2: starting 3 target(s) concurrently
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n1 | aux cycle sent
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n1 | waiting OS boot
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n3 | aux cycle sent
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n3 | waiting OS boot
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n2 | aux cycle sent
+2026-09-30T00:01:57+08:00 Loop 2: L105-21R_n2 | waiting OS boot
+2026-09-30T00:02:26+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:02:56+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:03:26+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:03:56+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:04:26+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:04:56+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:05:26+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:05:56+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:06:26+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:06:31+08:00 Loop 2: L105-21R_n1 | OS up, system check running
+2026-09-30T00:06:35+08:00 Loop 2: L105-21R_n2 | OS up, system check running
+2026-09-30T00:06:36+08:00 Loop 2: L105-21R_n3 | OS up, system check running
+2026-09-30T00:06:53+08:00 Loop 2: L105-21R_n1 | system check done (FAIL)
+2026-09-30T00:06:53+08:00 Loop 2: L105-21R_n1 | DONE (FAIL)
+2026-09-30T00:06:53+08:00 L105-21R_n1 | LOOP 2 | FAIL
+2026-09-30T00:06:53+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:06:53+08:00   FAIL 0004:01:00.0: Non-Volatile memory controller: KIOXIA Corporation NVMe SSD Controller XD8 (rev 01) (prog-if 02 [NVM Express]): LnkSta: Speed 32GT/s, Width x2 (downgraded)
+2026-09-30T00:06:53+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:53+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:56+08:00 Loop 2: L105-21R_n2 | system check done (FAIL)
+2026-09-30T00:06:56+08:00 Loop 2: L105-21R_n2 | DONE (FAIL)
+2026-09-30T00:06:56+08:00 L105-21R_n2 | LOOP 2 | FAIL
+2026-09-30T00:06:56+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:06:56+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:56+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:56+08:00 Loop 2: L105-21R_n3 | system check done (FAIL)
+2026-09-30T00:06:56+08:00 Loop 2: L105-21R_n3 | DONE (FAIL)
+2026-09-30T00:06:56+08:00 L105-21R_n3 | LOOP 2 | FAIL
+2026-09-30T00:06:56+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:06:56+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:56+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:06:56+08:00 Loop 3: starting 3 target(s) concurrently
+2026-09-30T00:06:57+08:00 Loop 3: L105-21R_n1 | aux cycle sent
+2026-09-30T00:06:57+08:00 Loop 3: L105-21R_n1 | waiting OS boot
+2026-09-30T00:06:58+08:00 Loop 3: L105-21R_n2 | aux cycle sent
+2026-09-30T00:06:58+08:00 Loop 3: L105-21R_n2 | waiting OS boot
+2026-09-30T00:06:58+08:00 Loop 3: L105-21R_n3 | aux cycle sent
+2026-09-30T00:06:58+08:00 Loop 3: L105-21R_n3 | waiting OS boot
+2026-09-30T00:07:26+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:07:56+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:08:26+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:08:56+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:09:26+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:09:56+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:10:26+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:10:56+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:11:26+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-09-30T00:11:33+08:00 Loop 3: L105-21R_n1 | OS up, system check running
+2026-09-30T00:11:38+08:00 Loop 3: L105-21R_n2 | OS up, system check running
+2026-09-30T00:11:38+08:00 Loop 3: L105-21R_n3 | OS up, system check running
+2026-09-30T00:11:55+08:00 Loop 3: L105-21R_n1 | system check done (FAIL)
+2026-09-30T00:11:55+08:00 Loop 3: L105-21R_n1 | DONE (FAIL)
+2026-09-30T00:11:55+08:00 L105-21R_n1 | LOOP 3 | FAIL
+2026-09-30T00:11:55+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:11:55+08:00   FAIL 0004:01:00.0: Non-Volatile memory controller: KIOXIA Corporation NVMe SSD Controller XD8 (rev 01) (prog-if 02 [NVM Express]): LnkSta: Speed 32GT/s, Width x2 (downgraded)
+2026-09-30T00:11:55+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:55+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:58+08:00 Loop 3: L105-21R_n2 | system check done (FAIL)
+2026-09-30T00:11:58+08:00 Loop 3: L105-21R_n2 | DONE (FAIL)
+2026-09-30T00:11:58+08:00 L105-21R_n2 | LOOP 3 | FAIL
+2026-09-30T00:11:58+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:11:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:59+08:00 Loop 3: L105-21R_n3 | system check done (FAIL)
+2026-09-30T00:11:59+08:00 Loop 3: L105-21R_n3 | DONE (FAIL)
+2026-09-30T00:11:59+08:00 L105-21R_n3 | LOOP 3 | FAIL
+2026-09-30T00:11:59+08:00   FAIL BF4: Expected at least 1; detected 0
+2026-09-30T00:11:59+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:59+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name with differing values; review each row
+2026-09-30T00:11:59+08:00 ============================================================
+2026-09-30T00:11:59+08:00 FINISHED: COMPLETE | Health: FAIL | Completed node-loops: 9
+2026-09-30T00:11:59+08:00 Report: /root/vera-cycle/campaigns/neutrino_20260929_235538+0800_962db2/CYCLE_REVIEW_REPORT.html
+2026-09-30T00:11:59+08:00 ============================================================
