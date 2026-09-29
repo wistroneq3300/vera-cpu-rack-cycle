@@ -1,6 +1,7 @@
 """Campaign node execution, with immutable PRE and durable evidence."""
 from __future__ import annotations
 
+from datetime import datetime
 import re
 import shlex
 import time
@@ -53,7 +54,6 @@ class NodeSession:
         self.progress = None
         self.node = dict(key=target.key, target=target.__dict__, blocked=[], active=True,
                          pre=new_record("PRE"), loops=[], completed=0, stop_reason="", stage="")
-        self.previous_sel = ""
         self.baseline = None
         self.pre_issue_keys = set()
 
@@ -92,6 +92,8 @@ class NodeSession:
 
     def finish(self, record):
         record.update(status=health(record["issues"]), finished=now())
+        began = record.get("cycle_started", record["started"])
+        record["duration_seconds"] = max(0, (datetime.fromisoformat(record["finished"]) - datetime.fromisoformat(began)).total_seconds())
         self.persist(record)
         return record
 
@@ -110,14 +112,16 @@ class NodeSession:
             body = result.output if include_output else "[Command output suppressed; status retained in this evidence file.]\n"
             atomic_write(path, f"UTC+8: {now()}\nRole: {role}\nCommand: {cmd}\nExit: {result.code}\nState: {result.state}\nDuration: {result.duration:.2f}s\n\n{body}")
             record["evidence"].append(evidence)
-        ipmi_error = role == "oob" and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
+        ipmi_error = (role == "oob" or cmd.startswith("ipmitool ")) and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
         valid = result.code == 0 and not ipmi_error
         if record_command:
-            record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": valid}
+            record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": valid, "output_excerpt": result.output[-2000:] if not valid else ""}
         if check and result.code != 0:
             self.add(record, "COLLECTION_FAILED", stem, f"Exit {result.code} ({result.state}); see evidence", evidence=evidence)
+            record['issues'][-1]['snippet'] = result.output[-2000:]
         elif check and ipmi_error:
             self.add(record, "IPMI_REPORTED_ERROR", stem, "IPMI reported a transport/command error despite exit zero; see evidence", evidence=evidence)
+            record['issues'][-1]['snippet'] = result.output[-2000:]
         self.persist(record)
         return result
 
@@ -171,7 +175,7 @@ class NodeSession:
                     record["issues"] += dmesg_issues(result.output)
                     if post:
                         cleared = self.command(record, "dmesg_clear", "os", "dmesg -c", sudo=True,
-                                               include_output=False)
+                                               include_output=False, save_evidence=False)
                         # Read-and-clear also saves messages arriving between the
                         # first read and clearing; -C alone would discard them.
                         if cleared.code == 0:
@@ -205,14 +209,16 @@ class NodeSession:
                 record['issues'] += sensor_issues(record['sensors'])
         else:
             record["issues"] += sensor_issues(record["sensors"])
-        sel = self.command(record, "sel", "oob", "sel elist")
-        if record['commands']['sel']['valid']:
-            delta = sel_delta(self.previous_sel, sel.output)
-            self.previous_sel = sel.output
-            path = self.folder(record) / ("sel_delta.txt" if post else "pre_sel_delta.txt")
-            atomic_write(path, delta or "No new SEL records.\n")
-            record["evidence"].append(path.relative_to(self.root).as_posix())
-            record["sel_review"] = "REVIEW REQUIRED: cumulative SEL and delta are evidence; event correctness is not automatically judged."
+        sel = self.sel_command(record, "sel", "list", save_evidence=post)
+        if post:
+            valid = record['commands']['sel']['valid'] and record.get('sel_before_valid', False)
+            record['sel_status'] = 'REVIEW REQUIRED' if valid else 'COLLECTION FAILED'
+            record['sel_events'] = sel_delta(record.get('sel_before', ''), sel.output).splitlines() if valid else None
+            if valid:
+                path = self.folder(record) / "sel_delta.txt"
+                atomic_write(path, "\n".join(record['sel_events']) or "No new SEL records.\n")
+                record['evidence'].append(path.relative_to(self.root).as_posix())
+            record.pop('sel_before', None)
         self.command(record, "bmc_firmware", "oob", "mc info")
         power = self.command(record, "power", "oob", "power status")
         record["power_on"] = record['commands']['power']['valid'] and bool(re.search(r"Chassis Power is on", power.output, re.I))
@@ -224,7 +230,7 @@ class NodeSession:
         for item in record["issues"]:
             if not item.get("evidence"):
                 component = item["component"]
-                stem = "sensor" if item["code"].startswith("SENSOR") else "pci" if item["code"] == "PCI_DRIFT" else "dmesg" if component == "dmesg" else "hardware"
+                stem = component if component in record['commands'] else "sensor" if item["code"].startswith("SENSOR") else "pci" if item["code"] == "PCI_DRIFT" else "dmesg" if component == "dmesg" else "hardware"
                 item["evidence"] = record["commands"].get(stem, {}).get("evidence", "")
 
     def precheck(self):
@@ -259,20 +265,37 @@ class NodeSession:
         self.finish(record)
         return self.node
 
+    def sel_command(self, record, stem, action, **kwargs):
+        inband = self.options.channel == 'inband'
+        result = self.command(record, stem, 'os' if inband else 'oob',
+                              ('ipmitool sel ' if inband else 'sel ') + action,
+                              sudo=inband, **kwargs)
+        if action == 'list' and record['commands'][stem]['valid']:
+            lines = [line.strip() for line in result.output.splitlines() if line.strip()]
+            empty = len(lines) == 1 and lines[0].lower().rstrip('.') == 'sel has no entries'
+            records = bool(lines) and all(re.match(r'^[0-9a-f]+\s*\|', line, re.I) for line in lines)
+            if not empty and not records:
+                record['commands'][stem].update(valid=False, output_excerpt=result.output[-2000:])
+                self.add(record, 'SEL_FORMAT_ERROR', stem, 'SEL list returned empty or unrecognized output; event count is unavailable', evidence=record['commands'][stem]['evidence'])
+                record['issues'][-1]['snippet'] = result.output[-2000:] or '(empty output)'
+                self.persist(record)
+        return result
+
     def start(self):
         record = self.node["pre"]
-        # Clear only successfully captured evidence. Do not erase unread evidence.
-        for stem, role, cmd, sudo in (("dmesg", "os", "dmesg -c", True), ("sel", "oob", "sel clear", False)):
-            if record["commands"].get(stem, {}).get("valid"):
-                result = self.command(record, "start_" + stem + "_clear", role, cmd, sudo=sudo,
-                                      include_output=(stem != "dmesg"))
-                if stem == 'dmesg' and result.code == 0:
+        for stem in ('dmesg', 'sel'):
+            if not record['commands'].get(stem, {}).get('valid'):
+                self.add(record, 'CLEAR_SKIPPED', stem, 'PRE capture failed; original evidence was not cleared')
+                continue
+            if stem == 'sel':
+                self.sel_command(record, 'start_sel_clear', 'clear', save_evidence=False)
+            else:
+                result = self.command(record, 'start_dmesg_clear', 'os', 'dmesg -c',
+                                      sudo=True, save_evidence=False)
+                if result.code == 0:
                     existing = {(i['code'], i['detail']) for i in record['issues']}
                     record['issues'] += [i for i in dmesg_issues(result.output) if (i['code'], i['detail']) not in existing]
-                if stem == "sel" and record['commands']['start_sel_clear']['valid']:
-                    self.previous_sel = ""
-            else:
-                self.add(record, "CLEAR_SKIPPED", stem, "PRE capture failed; original evidence was not cleared")
+        self.pre_issue_keys = {(i['code'], i['component']) for i in record['issues']}
         self.finish(record)
 
     def wait_boot(self, record, old_boot, deadline):
@@ -310,6 +333,7 @@ class NodeSession:
         return False
 
     def dispatch(self, record, label, role, cmd, sudo=False, timeout=30):
+        record.setdefault("cycle_started", now())
         result = self.command(record, label, role, cmd, sudo=sudo, timeout=timeout, check=False)
         if record['commands'][label]['valid']:
             state = "SENT"
@@ -333,6 +357,9 @@ class NodeSession:
             for role, _, _ in self.target.endpoints():
                 self.identity(record, role, role + "_before_cycle",
                               save_evidence=False, record_command=False)
+            before = self.sel_command(record, 'sel_before', 'list', save_evidence=False)
+            record['sel_before_valid'] = record['commands']['sel_before']['valid']
+            record['sel_before'] = before.output if record['sel_before_valid'] else ''
             old_boot = record["identities"]["os"]["boot_id"]
             record["recovery"]["old_boot_id"] = old_boot
             deadline = time.monotonic() + self.options.boot_timeout
@@ -410,7 +437,7 @@ class NodeSession:
             if not isinstance(exc, IdentityUnsafe):
                 try:
                     self.identity(record, "bmc", "bmc_failure_identity")
-                    self.command(record, "failure_sel", "oob", "sel elist")
+                    self.sel_command(record, "failure_sel", "list")
                     self.command(record, "failure_power", "oob", "power status")
                 except Exception as bmc_exc:
                     self.add(record, "BMC_UNAVAILABLE", "recovery", str(bmc_exc))

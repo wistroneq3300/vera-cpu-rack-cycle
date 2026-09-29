@@ -62,6 +62,8 @@ class FakeTransport:
             name = 'wrong-host' if self.mismatch else getattr(t, role + '_hostname')
             boot = f'00000000-0000-0000-0000-{self.boots.get(t.key, 0):012d}'
             return Command(0, f'HOSTNAME={name}\nBOOT_ID={boot}\n')
+        if cmd.startswith('ipmitool sel '):
+            return self.oob(t, cmd.removeprefix('ipmitool '), timeout)
         if cmd.startswith('sha256sum '):
             return Command(0, digest(self.uploaded[t.key]) + ' file')
         if cmd == 'id -u':
@@ -97,7 +99,7 @@ class FakeTransport:
             return self.action(t)
         if cmd == 'power status':
             return Command(0, 'Chassis Power is ' + ('off' if self.power_off else 'on'))
-        if cmd == 'sel elist':
+        if cmd == 'sel list':
             return Command(0, '1 | 09/29/2026 | 10:00:00 | System boot | Asserted\n')
         return Command(0, 'OK')
 
@@ -231,10 +233,20 @@ class PureTests(unittest.TestCase):
         item = config_issues('RESULT|FAIL\n', 1)[0]
         self.assertEqual(item['snippet'], '')
 
+    def test_identical_duplicate_sensor_stays_visible(self):
+        items = sensor_issues(parse_sensors(SENSORS + SENSORS.splitlines()[0] + '\n'))
+        self.assertEqual(health(items), 'WARN')
+        self.assertEqual(sum(i['code'] == 'SENSOR_DUPLICATE' for i in items), 1)
+
+    def test_raw_bridge_downgrade_not_an_endpoint_issue(self):
+        text = '0000:01:00.0 PCI bridge\n Capabilities: Express Root Port\n LnkSta: Width x4 (downgraded)\nRESULT|PASS'
+        self.assertEqual(config_issues(text, 0), [])
+
     def test_pcie_downgrade_is_always_a_failure(self):
         text = (
             '[Evidence] PCIe-links\n'
             '0004:01:00.0 Non-Volatile memory controller: KIOXIA NVMe\n'
+            '\tCapabilities: [80] Express (v2) Endpoint\n'
             '\tLnkSta: Speed 32GT/s, Width x2 (downgraded)\n'
             'RESULT|PASS\n'
         )
@@ -329,6 +341,48 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(self.session.node['blocked'])
         self.session.start()
 
+    def test_sel_uses_before_snapshot_not_previous_post(self):
+        self.ready()
+        old = '1 | 09/30/2026 | 10:00:00 | Old event | Asserted\n'
+        between = '2 | 09/30/2026 | 10:05:00 | Between loops | Asserted\n'
+        fresh = '1 | 09/30/2026 | 10:10:00 | Boot event | Asserted\n'
+        replies = iter([old + between, old + between + fresh])
+        original = self.fake.oob
+        def oob(t, cmd, timeout=30):
+            return Command(0, next(replies)) if cmd == 'sel list' else original(t, cmd, timeout)
+        self.fake.oob = oob
+        record = self.session.one_loop(1)
+        self.assertEqual(record['sel_events'], [fresh.strip()])
+        self.assertNotIn('sel_before', record)
+        self.assertFalse(list((self.root/'tray1_n1').glob('pre_sel*')))
+        self.assertFalse((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel.txt').exists())
+        self.assertGreaterEqual(record['duration_seconds'], 0)
+
+    def test_sel_channel_and_clear_once(self):
+        for channel in ('inband', 'outband'):
+            with self.subTest(channel=channel):
+                self.options.channel = channel
+                self.fake.calls.clear()
+                self.ready()
+                self.session.one_loop(1)
+                self.session.one_loop(2)
+                # Fake SSH delegates IPMI to its response helper; inspect SSH
+                # calls to establish the requested transport independently.
+                os_calls = [cmd for _, role, cmd in self.fake.calls if role == 'os' and cmd.startswith('ipmitool sel')]
+                self.assertEqual(bool(os_calls), channel == 'inband')
+                clear_calls = [cmd for _, role, cmd in self.fake.calls if role == 'oob' and cmd == 'sel clear']
+                self.assertEqual(len(clear_calls), 1)
+
+    def test_unrecognized_sel_never_looks_like_zero_events(self):
+        self.ready()
+        original = self.fake.oob
+        self.fake.oob = lambda t, cmd, timeout=30: Command(0, '') if cmd == 'sel list' else original(t, cmd, timeout)
+        record = self.session.one_loop(1)
+        self.assertIsNone(record['sel_events'])
+        self.assertEqual(record['sel_status'], 'COLLECTION FAILED')
+        self.assertIn('SEL_FORMAT_ERROR', [i['code'] for i in record['issues']])
+
     def test_original_pre_and_all_loops_despite_failure(self):
         self.fake.pci_drift = True
         self.ready()
@@ -382,7 +436,7 @@ class EngineTests(unittest.TestCase):
         self.ready()
         original=self.fake.oob
         def oob(t,cmd,timeout=30):
-            if cmd=='sel elist':
+            if cmd=='sel list':
                 return Command(0,'SEL has no entries\nGet SEL Info command failed')
             return original(t,cmd,timeout)
         self.fake.oob=oob
@@ -392,7 +446,7 @@ class EngineTests(unittest.TestCase):
     def test_pre_sel_error_is_never_cleared(self):
         original=self.fake.oob
         def oob(t,cmd,timeout=30):
-            if cmd=='sel elist':
+            if cmd=='sel list':
                 return Command(0,'SEL has no entries\nGet SEL Info command failed')
             return original(t,cmd,timeout)
         self.fake.oob=oob
@@ -526,7 +580,7 @@ class EngineTests(unittest.TestCase):
         self.fake.ssh=ssh
         result=self.session.one_loop(1)
         self.assertIn('DMESG_HARDWARE',[i['code'] for i in result['issues']])
-        self.assertNotIn('Uncorrected',(self.root/'tray1_n1'/'loop0001'/'dmesg_clear.txt').read_text())
+        self.assertFalse((self.root/'tray1_n1'/'loop0001'/'dmesg_clear.txt').exists())
         self.assertTrue(any(item['code'] == 'DMESG_HARDWARE' for item in result['issues']))
 
     def test_campaign_reports_are_consistent_and_escaped(self):
@@ -568,6 +622,21 @@ class EngineTests(unittest.TestCase):
         data=json.loads((next(self.options.output.iterdir())/'campaign.json').read_text())
         self.assertEqual(data['state'],'INCOMPLETE')
         self.assertEqual(data['nodes'][0]['completed'],1)
+
+    def test_busy_endpoint_blocks_before_any_remote_command(self):
+        locks = EndpointLocks(self.root/'runtime')
+        locks.acquire(target(), 'already-running')
+        output = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(output):
+                result = campaign(self.options, [target()], {}, confirm=lambda _: 'yes',
+                                  transport_factory=lambda *_: self.fake, runtime_root=self.root/'runtime')
+        finally:
+            locks.close()
+        self.assertEqual(result, 2)
+        self.assertEqual(self.fake.calls, [])
+        self.assertIn('BLOCKED', output.getvalue())
+        self.assertIn('locked by another campaign', output.getvalue())
 
     def test_partial_blocked_scope_needs_confirmation(self):
         other=Target('tray2','n2','192.0.2.3','192.0.2.4','','')
@@ -623,7 +692,7 @@ class ConsolePaintTests(unittest.TestCase):
 
     def test_system_and_phase_slots_are_coloured(self):
         out = self.paint('T L105-21R_n3 | LOOP 2 | FAIL')
-        self.assertIn('\033[1;36mL105-21R_n3\033[0m', out)   # system: cyan
+        self.assertIn('\033[1;34mL105-21R_n3\033[0m', out)   # system: cyan
         self.assertIn('\033[1;35mLOOP 2\033[0m', out)        # phase: magenta
         self.assertIn('\033[1;31mFAIL\033[0m', out)          # status word: red
 
@@ -640,8 +709,8 @@ class ConsolePaintTests(unittest.TestCase):
 
     def test_header_labels_are_coloured_but_timestamps_are_not(self):
         out = self.paint('2026-09-29T23:16:17+08:00 Mode: aux_cycle; channel: inband; loops: 5')
-        for label in ('Mode:', 'channel:', 'loops:'):
-            self.assertIn('\033[1;36m' + label + '\033[0m', out)
+        self.assertIn('\033[1;35maux_cycle\033[0m', out)
+        self.assertIn('\033[1;36m5\033[0m', out)
         self.assertNotIn('\033[1;36m2026', out)          # timestamp not recoloured
         self.assertNotIn('\033[1;36m23:', out)
 

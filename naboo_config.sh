@@ -7,7 +7,7 @@ CPU_MIN=2
 DIMM_EXPECTED=16
 NVMe_MIN=2
 NIC_MIN=22
-BF4_MIN=1
+BF4_EXPECTED=1
 PCIEFAB_MIN=20
 USB_MIN=1
 BMC_MIN=1
@@ -29,29 +29,31 @@ collect() {
     printf -v "$variable" '%s' "$value"
     printf '\n[Evidence] %s\n%s\n' "$component" "$value"
     if ((rc != 0)); then fail COLLECTION_FAILED "$component" "Command exited $rc"; fi
+    return "$rc"
 }
 cpu_check() {
     local data qty
-    collect data CPU dmidecode -t processor
+    collect data CPU dmidecode -t processor || return
     qty=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Status:.*Populated/ && !/Unpopulated/ {n++} END {print n+0}')
     minimum CPU "$qty" "$CPU_MIN"
 }
 dimm_check() {
     local data qty
-    collect data DIMM dmidecode -t memory
+    collect data DIMM dmidecode -t memory || return
     qty=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Size:[[:space:]]+[0-9]+[[:space:]]+(MB|GB|TB)/ {if ($2+0>0) n++} END {print n+0}')
     printf 'CHECK|DIMM|actual=%s|exact=%s\n' "$qty" "$DIMM_EXPECTED"
     if ((qty != DIMM_EXPECTED)); then fail DIMM_COUNT DIMM "Expected exactly $DIMM_EXPECTED installed SOCAMM devices; detected $qty"; fi
 }
 nvme_check() {
     local data qty
-    collect data NVMe nvme list
+    collect data NVMe nvme list || return
     qty=$(printf '%s\n' "$data" | awk '$1 ~ /^\/dev\/nvme[0-9]+n[0-9]+$/ {v=$1; sub(/n[0-9]+$/, "", v); a[v]=1} END {for (v in a) n++; print n+0}')
     minimum NVMe "$qty" "$NVMe_MIN"
 }
 nic_bf4_check() {
     local data nic bf4_cards bf4_ports modules
-    collect data MST mst status -v
+    local mst_valid=true
+    collect data MST mst status -v || mst_valid=false
     # Count Vera devices from the mst device table. The MST column is only
     # populated when the MST kernel module is loaded, so keying on '/dev/mst/'
     # alone reports 0 NICs on a healthy host whose module is not yet loaded.
@@ -60,51 +62,62 @@ nic_bf4_check() {
     if ((nic == 0)) && printf '%s\n' "$data" | grep -q 'MST PCI module is not loaded'; then
         fail MST_MODULE MST "MST kernel module is not loaded; Vera NIC count is unavailable (run: mst start)"
     fi
-    minimum NIC "$nic" "$NIC_MIN"
-    # BF4 is detected from lspci only. MST rows describe ports/functions and
-    # can double-count one physical dual-port card. Prefer a physical slot or
-    # serial identity from lspci -Dvmm; if the platform does not expose one,
-    # use the explicit Dual BlueField-4 product name to collapse two ports.
+    if "$mst_valid"; then minimum NIC "$nic" "$NIC_MIN"; fi
+    # The PCI function count is not the physical card count. Require a shared
+    # VPD board serial for every BF4 function; never guess from port count.
+    if [[ "$PCI_VALID" != true ]]; then return; fi
     bf4_ports=$(printf '%s\n' "$PCI" | awk '/^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ && /(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)/ {n++} END {print n+0}')
-    bf4_cards=0
-    local verbose phy serial
-    verbose=$(lspci -Dvmm 2>/dev/null || :)
-    phy=$(printf '%s\n' "$verbose" | awk -v RS='' '/(^|\n)Device:.*(BlueField[ -]?4|BF4)/ && /(^|\n)PhySlot:/ {for (i=1;i<=NF;i++) if ($i == "PhySlot:") print $(i+1)}' | sort -u)
-    serial=$(printf '%s\n' "$verbose" | awk -v RS='' '/(^|\n)Device:.*(BlueField[ -]?4|BF4)/ && /(^|\n)Serial:/ {for (i=1;i<=NF;i++) if ($i == "Serial:") print $(i+1)}' | sort -u)
-    if [[ -n "$phy" ]]; then
-        bf4_cards=$(printf '%s\n' "$phy" | awk 'NF {n++} END {print n+0}')
-    elif [[ -n "$serial" ]]; then
-        bf4_cards=$(printf '%s\n' "$serial" | awk 'NF {n++} END {print n+0}')
-    elif ((bf4_ports > 0)); then
-        # The current Naboo card is explicitly identified as Dual BF4.
-        # This fallback keeps two lspci functions from becoming two cards.
-        local ports_per_card=1
-        if printf '%s\n' "$PCI" | grep -qiE 'Dual[ -]+BlueField[ -]?4'; then ports_per_card=2; fi
-        bf4_cards=$(( (bf4_ports + ports_per_card - 1) / ports_per_card ))
+    if ((bf4_ports == 0)); then
+        printf 'CHECK|BF4|actual=0|exact=%s|pci_functions=0\n' "$BF4_EXPECTED"
+        if ((BF4_EXPECTED != 0)); then fail BF4_MISSING BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected 0"; fi
+        return
     fi
-    printf 'CHECK|BF4|cards=%s|ports=%s\n' "$bf4_cards" "$bf4_ports"
-    minimum BF4 "$bf4_cards" "$BF4_MIN" BF4_MISSING
+    local verbose identities identified
+    collect verbose BF4-identity lspci -Dvvv || return
+    identities=$(printf '%s\n' "$verbose" | awk '
+      function flush() {if (bf4) print bdf "|" serial}
+      /^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ {
+        flush(); bdf=$1; serial=""; bf4=($0 ~ /(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)/)
+      }
+      bf4 && /\[SN\][[:space:]]+Serial number:/ {
+        serial=$0; sub(/^.*Serial number:[[:space:]]*/, "", serial); sub(/[[:space:]]*$/, "", serial)
+      }
+      END {flush()}')
+    printf 'CHECK|BF4_IDENTITIES|bdf_and_board_serial=%s\n' "${identities//$'\n'/, }"
+    identified=$(printf '%s\n' "$identities" | awk -F '|' '$2 != "" && tolower($2) !~ /^(unknown|n\/a|none|0+)$/ {n++} END {print n+0}')
+    if ((identified != bf4_ports)); then
+        fail BF4_IDENTITY_UNAVAILABLE BF4 "Detected $bf4_ports PCI functions, but only $identified have a VPD board serial; physical card count cannot be confirmed"
+        return
+    fi
+    bf4_cards=$(printf '%s\n' "$identities" | cut -d '|' -f2 | sort -u | awk 'END {print NR}')
+    printf 'CHECK|BF4|actual=%s|exact=%s|pci_functions=%s|source=lspci VPD board serial\n' "$bf4_cards" "$BF4_EXPECTED" "$bf4_ports"
+    if ((bf4_cards != BF4_EXPECTED)); then
+        fail BF4_COUNT BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected $bf4_cards from $bf4_ports PCI functions"
+    fi
 }
 pci_count() {
     local component="$1" pattern="$2" expected="$3" qty
+    [[ "$PCI_VALID" == true ]] || return
     qty=$(printf '%s\n' "$PCI" | grep -Eic "$pattern" || :)
     minimum "$component" "$qty" "$expected"
 }
 link_check() {
-    local data bdf="unknown" name="" class="" line
-    collect data PCIe-links lspci -Dvv
-    # Device name comes from the header line, kept here so a downgrade can be
-    # reported with something an operator recognises instead of a bare BDF.
+    local data bdf="unknown" name="" line endpoint=false
+    collect data PCIe-links lspci -Dvv || return
     while IFS= read -r line; do
         if [[ "$line" =~ ^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ]]; then
-            bdf=${line%% *}
-            name=${line#* }                       # e.g. 'Non-Volatile memory controller: KIOXIA ...'
-            class=${name%%:*}                     # e.g. 'Non-Volatile memory controller'
+            bdf=${line%% *}; name=${line#* }; endpoint=false
             continue
         fi
-        [[ "$line" == *LnkSta:* ]] || continue
-        printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad' || continue
-        fail PCIE_DOWNGRADE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
+        if [[ "$line" =~ Express.*(Legacy[[:space:]]+)?Endpoint ]]; then endpoint=true; fi
+        [[ "$endpoint" == true && "$line" == *LnkSta:* ]] || continue
+        if printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad'; then
+            printf 'CHECK|PCIE_DOWNGRADE|bdf=%s|lnksta=%s\n' "$bdf" "$line"
+            fail PCIE_DOWNGRADE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
+        elif printf '%s\n' "$line" | grep -qiE 'Speed[[:space:]]+unknown|Width[[:space:]]+x0([^0-9]|$)'; then
+            printf 'CHECK|PCIE_LINK_UNAVAILABLE|bdf=%s|lnksta=%s\n' "$bdf" "$line"
+            fail PCIE_LINK_UNAVAILABLE "$bdf" "${name}: ${line#"${line%%[![:space:]]*}"}"
+        fi
     done <<< "$data"
 }
 firmware() {
@@ -116,7 +129,8 @@ firmware() {
 }
 mode="${1:-all}"
 case "$mode" in all|-S|-N|-B|-F) ;; *) echo 'Usage: naboo_config.sh [-S|-N|-B|-F]'; exit 2;; esac
-if [[ "$mode" != -F ]]; then collect PCI PCI-inventory lspci -Dnn; fi
+PCI_VALID=true
+if [[ "$mode" != -F ]]; then collect PCI PCI-inventory lspci -Dnn || PCI_VALID=false; fi
 case "$mode" in
     all) cpu_check; dimm_check; nvme_check; nic_bf4_check
          pci_count PCIeFAB 'NVIDIA.*bridge|bridge.*NVIDIA' "$PCIEFAB_MIN"

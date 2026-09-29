@@ -201,16 +201,10 @@ def sensor_issues(rows):
     for name, count in counts.items():
         if count <= 1:
             continue
-        # Vera BMC firmware lists some sensors more than once. Identical repeats
-        # are a known firmware quirk, not a finding; only warn when the rows
-        # disagree (different reading/unit/status), which is actionable.
-        signatures = {(r["reading"].strip(), r["unit"].strip(), r["status"].strip())
-                      for r in rows if r["name"] == name}
-        if len(signatures) > 1:
-            dup_rows = [r for r in rows if r["name"] == name]
-            found.append(issue("SENSOR_DUPLICATE", name,
-                               f"{count} rows share this sensor name with differing values; review each row", "WARN",
-                               snippet="\n".join(_snippet(r) for r in dup_rows)))
+        dup_rows = [r for r in rows if r["name"] == name]
+        found.append(issue("SENSOR_DUPLICATE", name,
+                           f"{count} rows share this sensor name; review each row", "WARN",
+                           snippet="\n".join(_snippet(r) for r in dup_rows)))
     for r in rows:
         if r.get("format_error"):
             found.append(issue("SENSOR_MALFORMED", r["name"], r["format_error"], snippet=_snippet(r)))
@@ -333,13 +327,19 @@ def config_issues(text, code):
         items.append(issue("CONFIG_FAILED", "hardware", "Hardware script returned RESULT|FAIL"))
     if "RESULT|" not in text:
         items.append(issue("CONFIG_INCOMPLETE", "hardware", "Hardware script did not return a final structured result"))
-    # Fallback for older scripts that scan links but do not emit
-    # ISSUE|PCIE_DOWNGRADE. A visible downgrade is always actionable; the
-    # structured issue guard prevents duplicate findings when the script
-    # already reported it.
-    if not any(i['code'] == 'PCIE_DOWNGRADE' for i in items) \
-            and re.search(r"down[\s-]*grad|degrad", text, re.I):
-        items.append(issue("PCIE_DOWNGRADE", "PCIe", "Hardware script reported link downgrade"))
+    # Legacy scripts may omit structured issues. Restrict the fallback to an
+    # explicitly identified endpoint's LnkSta, never bridges or general prose.
+    bdf, endpoint = "", False
+    for line in text.splitlines():
+        header = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s", line, re.I)
+        if header:
+            bdf, endpoint = header[1], False
+        elif re.search(r"Express.*(?:Legacy\s+)?Endpoint", line):
+            endpoint = True
+        elif endpoint and "LnkSta:" in line:
+            link_code = "PCIE_DOWNGRADE" if re.search(r"down[\s-]*grad|degrad", line, re.I) else "PCIE_LINK_UNAVAILABLE" if re.search(r"Speed\s+unknown|Width\s+x0\b", line, re.I) else None
+            if link_code and not any(i['code'] == link_code and i['component'] == bdf for i in items):
+                items.append(issue(link_code, bdf, line.strip(), snippet=line.strip()))
     return items
 
 def dmesg_issues(text):

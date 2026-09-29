@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import getpass
 import ipaddress
 import json
 import os
@@ -39,7 +40,19 @@ class EndpointLocks:
         try:
             for addr in sorted({str(ipaddress.ip_address(ip)) for _, ip, _ in target.endpoints()}):
                 path = self.root / ("endpoint-" + hashlib.sha256(addr.encode()).hexdigest() + ".lock")
-                fd = os.open(path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o666)
+                # Open existing shared files without O_CREAT: Linux protected_regular
+                # rejects O_CREAT on another user's file in a sticky directory.
+                flags = os.O_RDWR | getattr(os, "O_NOFOLLOW", 0)
+                try:
+                    fd = os.open(path, flags)
+                except FileNotFoundError:
+                    try:
+                        fd = os.open(path, flags | os.O_CREAT | os.O_EXCL, 0o666)
+                    except FileExistsError:
+                        fd = os.open(path, flags)
+                if not stat.S_ISREG(os.fstat(fd).st_mode):
+                    os.close(fd)
+                    raise RuntimeError(f"Unsafe endpoint lock: {path}")
                 handle = os.fdopen(fd, "r+b", buffering=0)
                 if os.name != "nt" and os.fstat(fd).st_uid == os.getuid():
                     os.fchmod(fd, 0o666)
@@ -56,11 +69,18 @@ class EndpointLocks:
                         import fcntl
                         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 except OSError as exc:
+                    owner = ""
+                    try:
+                        handle.seek(0)
+                        data = json.loads(handle.read(4096))
+                        owner = f" (run {data['run_id']}, node {data['node']}, user {data.get('user', 'unknown')})"
+                    except (OSError, ValueError, KeyError):
+                        pass
                     handle.close()
-                    raise RuntimeError(f"Endpoint {addr} is locked by another campaign") from exc
+                    raise RuntimeError(f"Endpoint {addr} is locked by another campaign{owner}; no commands sent to this target") from exc
                 acquired.append(handle)
                 handle.seek(0)
-                handle.write(json.dumps(dict(run_id=run_id, node=target.key, pid=os.getpid(), utc=now())).encode())
+                handle.write(json.dumps(dict(run_id=run_id, node=target.key, user=getpass.getuser(), pid=os.getpid(), utc=now())).encode())
                 handle.truncate()
             self.handles.extend(acquired)
         except BaseException:

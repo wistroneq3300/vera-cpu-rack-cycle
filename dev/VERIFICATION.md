@@ -24,3 +24,22 @@ Verified on 2026-09-29 in the local Windows workspace. No rack SSH, power action
 Linux cross-user flock and directory permissions, actual BMC `/usr/bin/powerctrl.sh` / `stbypowerctrl.sh` behavior, ACPI soft-off/on timing, MFT/BF4 model identification, actual dmidecode/IPMI formats and package-repository availability require a controlled rack run. Locks coordinate one shared Linux orchestrator, not independent control machines. The checked-in inventory intentionally blocks missing hostnames. No claim of live-rack acceptance is made.
 
 `review/offline_review.py` is historical pre-refactor analysis, not the current regression suite. The independent legacy `dryrun_sim.py` was not changed.
+
+
+## 2026-09-30 implementation verification
+
+- Offline unittest discovery: **81 tests run, 80 passed, 1 skipped**. The skipped test requires Linux root to drop to a different UID; this Windows host cannot execute that acceptance test. No rack endpoints were contacted.
+- Real sensor fixtures, fake transport PRE/POST, all cycle modes, SEL channel selection and one-time clearing, loop-before/POST event deltas (including reused IDs), malformed/empty SEL handling, immutable PRE comparisons, duplicate sensor visibility, and endpoint-only PCIe verdicts covered.
+- Shell fixture tests ran with bundled GNU Bash 5.2 (`sh.exe` in Git for Windows), not skipped. Both project configs and stop script passed syntax checking. BF4 tests cover one board serial across two PCI functions, two distinct card identities, missing serial evidence, BF3 rejection and exact expected count.
+- Separate-process locks reject overlapping endpoints, allow different endpoints and allow reacquisition after release. A campaign-level regression confirms a busy target prints BLOCKED before any remote command. Linux cross-user file-opening behavior is fixed by avoiding O_CREAT on existing shared files; cross-UID acceptance remains to be run on Linux.
+- Desktop Chrome: three views, filters, phase navigation, keyboard tab navigation and no horizontal document overflow. A synthetic **128-node** report passes search/selection/natural ordering and print coverage checks. No browser errors. This validates UI scale only, not simultaneous rack load.
+- Python compile checks passed. HTML screenshots were visually inspected. The wizard and inventory files were preserved.
+- Actual BF4 hardware acceptance remains necessary: lspci must expose the same VPD board serial on the functions belonging to one physical card. Missing identity is an explicit FAIL, never a guessed card quantity.
+
+Reproduce browser checks after generating demo and demo128 fixtures:
+
+```bash
+python3 dev/tests/make_demo.py
+python3 dev/tests/make_demo.py test-results/demo128 128
+node dev/tests/check_report.cjs test-results/demo/CYCLE_REVIEW_REPORT.html test-results/demo128/CYCLE_REVIEW_REPORT.html
+```

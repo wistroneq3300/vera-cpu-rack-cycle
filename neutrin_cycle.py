@@ -30,7 +30,7 @@ from cycle_core import (
     select_targets,
 )
 from cycle_engine import NodeSession
-from cycle_report import rebuild, status, write_reports
+from cycle_report import duration, elapsed, rebuild, status, write_reports
 from cycle_runtime import EndpointLocks, RunRegistry, request_stop
 from cycle_transport import Transport
 
@@ -48,12 +48,7 @@ def project_config_path(project):
 COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m', 'KNOWN': '\033[90m',
            'WARN': '\033[1;33m', 'OK': '\033[1;32m', 'PASS': '\033[1;32m', 'DONE': '\033[1;32m',
            'COMPLETE': '\033[1;32m', 'INCOMPLETE': '\033[1;33m', 'STOPPED': '\033[1;31m',
-           'BLOCKED': '\033[1;31m', 'PENDING': '\033[90m'}
-# Run-header labels that introduce a value. The label is recoloured (not the
-# value) so every "Label: value" line reads as a definition.
-HEADER_LABELS = ('Run ID', 'Time zone', 'Planned output', 'Selected targets',
-                 'Mode', 'channel', 'loops', 'hours', 'Identity', 'Operator decision',
-                 'Campaign started', 'Stop after', 'Output', 'Excluded targets')
+           'BLOCKED': '\033[1;35m', 'PENDING': '\033[90m'}
 BLUE = '\033[1;34m'
 CYAN = '\033[1;36m'
 MAGENTA = '\033[1;35m'
@@ -63,6 +58,7 @@ COLOUR_ON = sys.stdout.isatty() and not os.environ.get('NO_COLOR')
 class Console:
     def __init__(self):
         self.lines = []
+        self.node_names = []
         self.path = None
         self.lock = threading.Lock()
 
@@ -79,20 +75,21 @@ class Console:
         if not COLOUR_ON:
             return line
         # A result line is "<timestamp> <system> | <phase> | <status>". Colour
-        # the system slug (cyan) and the phase slug (magenta) so the eye can
+        # the system slug (blue) and the phase slug (magenta) so the eye can
         # answer "which system, which loop" without reading the sentence. Both
         # are anchored between the pipes, so ordinary prose is never recoloured.
         line = re.sub(r'(?<= )(\S+) \| (PRE|POST|LOOP \d+)( \|)',
-                      lambda m: f'{CYAN}{m.group(1)}{RESET} | {MAGENTA}{m.group(2)}{RESET}{m.group(3)}',
+                      lambda m: f'{m.group(1) if self.node_names else BLUE + m.group(1) + RESET} | {MAGENTA}{m.group(2)}{RESET}{m.group(3)}',
                       line, count=1)
         # Standalone loop markers, e.g. "Loop 1: waiting for 2 target(s)".
         line = re.sub(r'Loop (\d+)\b', lambda m: f'{MAGENTA}Loop {m.group(1)}{RESET}', line)
-        # Run header labels ("Run ID:", "Mode:", "Selected targets:" ...) get a
-        # bold-cyan prefix so the value is easy to pick out of the prose. Matched
-        # as explicit, known labels rather than a generic "Word:" rule so the
-        # timestamp (which contains colons) is never recoloured.
-        for label in HEADER_LABELS:
-            line = re.sub(rf'\b({re.escape(label)}:) ', f'{CYAN}\\1{RESET} ', line)
+        # Highlight the selected values, not every timestamp or heading.
+        line = re.sub(r'(Selected targets: )([^\n]+)', lambda m: m[1] + BLUE + m[2] + RESET, line)
+        line = re.sub(r'(Mode: )([^;]+)', lambda m: m[1] + MAGENTA + m[2] + RESET, line)
+        line = re.sub(r'((?:loops|hours|Duration|Campaign elapsed): )([^;\n]+)', lambda m: m[1] + CYAN + m[2] + RESET, line)
+        line = line.replace('COLLECTION FAILED', MAGENTA + 'COLLECTION FAILED' + RESET)
+        for name in self.node_names:
+            line = re.sub(rf'(?<![\w;]){re.escape(name)}(?![\w])', lambda m: BLUE + m[0] + RESET, line)
         # The run ID identifies the whole run, so it gets its own colour to be
         # scannable in a long transcript. Matched on the generated shape
         # (<project>_<YYYYmmdd>_<HHMMSS+0800>_<hex>) rather than on the label, so
@@ -109,6 +106,8 @@ class Console:
 
 def show_result(console, node, record):
     console(f"{node['key']} | {record['phase']} | {'BLOCKED' if node['blocked'] else record['status']}")
+    if record.get('duration_seconds') is not None:
+        console('  Duration: ' + duration(record['duration_seconds']))
     if record['phase'] == 'PRE':
         console('  Identity: ' + ' | '.join(f"{role.upper()} SSH {'OK' if role in record['identities'] else 'NOT VERIFIED'}" for role in ('bmc', 'os')))
     groups = {}
@@ -155,6 +154,7 @@ def parallel(function, sessions, console, label, display_result=True):
 
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
+    console.node_names = [t.key for t in targets]
     run_id = f"{options.project}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S%z')}_{uuid.uuid4().hex[:6]}"
     output = options.output.resolve() / run_id
     locks = EndpointLocks(runtime_root)
@@ -163,6 +163,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
     registry = None
     data = None
     finalized = False
+    sessions = []
     # Both keyboard interrupt and TERM are graceful: finish current POST.
     if threading.current_thread() is threading.main_thread():
         for sig in (signal.SIGINT, signal.SIGTERM):
@@ -174,6 +175,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         console(f"Run ID: {run_id}")
         console("Time zone: UTC+8 (+0800 in Run ID, +08:00 in console/evidence timestamps)")
         console(f"Planned output: {output}")
+        console(f"Project config: {options.config_script.resolve()}")
         console("Selected targets: " + ', '.join(t.key for t in targets))
         console(f"Mode: {options.cycle_mode}; channel: {options.channel}; loops: {options.loops or 'unlimited'}; hours: {options.hours or 'unlimited'}")
         if options.cycle_mode == 'reboot' and options.channel == 'outband':
@@ -278,6 +280,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             result = status(data)
             console("=" * 60)
             console(f"FINISHED: {result['completion']} | Health: {result['health']} | Completed node-loops: {result['completed_node_loops']}")
+            console("Campaign elapsed: " + duration(elapsed(data["started"], data["finished"])))
             console(f"Report: {output / 'CYCLE_REVIEW_REPORT.html'}")
             console("=" * 60)
             return 0 if result['completion'] == 'COMPLETE' and result['health'] != 'FAIL' else 1

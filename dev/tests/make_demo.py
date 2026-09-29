@@ -6,11 +6,10 @@ from cycle_core import *
 from cycle_engine import new_record
 from cycle_report import write_reports
 
-def build(output):
+def build(output, count=3):
     nodes=[]
-    rules=parse_policy((Path(__file__).resolve().parents[1]/'issue_policy.md').read_text())
-    for index in range(1,4):
-        t=Target('L105-21R',f'n{index}',f'192.0.2.{index*2-1}',f'192.0.2.{index*2}',f'example-bmc-{index}',f'example-os-{index}')
+    for index in range(1,count+1):
+        t=Target('L105-21R',f'n{index}',f'198.18.{index}.1',f'198.18.{index}.2',f'example-bmc-{index}',f'example-os-{index}')
         node=dict(key=t.key,target=t.__dict__,blocked=[],active=True,completed=3,stop_reason='',pre=new_record('PRE'),loops=[])
         for number in range(4):
             record=node['pre'] if number==0 else new_record(f'LOOP {number}')
@@ -26,20 +25,22 @@ def build(output):
             if index==3 and number==1:
                 record['issues'].append(issue('SENSOR_RECOVERED','Temp_CPU1','One missing sensor row returned on immediate reread','WARN'))
             folder=Path(t.key)/(f'loop{number:04d}' if number else '')
-            prefix='post' if number else 'pre'
-            path=(folder/f'{prefix}_hardware.txt').as_posix()
+            path=(folder/('hardware.txt' if number else 'pre_hardware.txt')).as_posix()
             for item in record['issues']:
                 item['evidence']=path
-            classify(record['issues'],'neutrino',rules)
-            record.update(status=health(record['issues']),started=f'2026-09-29T08:{number*10:02d}:00+00:00',finished=f'2026-09-29T08:{number*10+8:02d}:00+00:00')
+            classify_against_pre(record['issues'], {(i['code'], i['component']) for i in node['pre']['issues']} if number else set())
+            record.update(status=health(record['issues']),started=f'2026-09-29T16:{number*10:02d}:00+08:00',finished=f'2026-09-29T16:{number*10+8:02d}:00+08:00')
             record['evidence']=[path]
-            record['sel_review']='REVIEW REQUIRED: compare cumulative BMC SEL with expected boot events.'
+            record['duration_seconds'] = 480
+            if number:
+                record['sel_events'] = [f'{number} | 09/30/2026 | 16:10:00 | System boot | Asserted']
+                record['sel_status'] = 'REVIEW REQUIRED'
             atomic_write(output/path,'SYNTHETIC EXAMPLE — no hardware operated\n'+ '\n'.join(i['detail'] for i in record['issues'])+'\n')
         nodes.append(node)
-    campaign=dict(run_id='neutrino_DEMO_20260929_160000',project='neutrino',started='2026-09-29T08:00:00+00:00',finished='2026-09-29T08:38:00+00:00',
-                  state='COMPLETE',stop_reason='All 3 requested loops completed on 3 approved nodes.',cycle_mode='power_cycle',channel='inband',limits=dict(loops=3,hours=0),
+    campaign=dict(run_id='neutrino_DEMO_20260929_160000',project='neutrino',started='2026-09-29T16:00:00+08:00',finished='2026-09-29T16:38:00+08:00',
+                  state='COMPLETE',stop_reason=f'All 3 requested loops completed on {count} approved nodes.',cycle_mode='power_cycle',channel='inband',limits=dict(loops=3,hours=0),
                   script_sha256=digest((Path(__file__).resolve().parents[2]/'neutrino_config.sh').read_bytes()),nodes=nodes,synthetic=True)
     write_reports(output,campaign)
 
 if __name__=='__main__':
-    build(Path(sys.argv[1]) if len(sys.argv)>1 else Path('test-results/demo'))
+    build(Path(sys.argv[1]) if len(sys.argv)>1 else Path('test-results/demo'), int(sys.argv[2]) if len(sys.argv)>2 else 3)

@@ -44,7 +44,7 @@ Missing/wrong hostnames, inaccessible identities, overlapping endpoints, locked 
 
 Missing standard OS tools are installed with apt when possible (`pciutils`, `dmidecode`, `nvme-cli`, `ipmitool`, `usbutils`, `iproute2`). Local orchestrator `ipmitool` is installed similarly. Installation output is captured; failure is reported. A full PRE capture follows the installation attempt. MFT/mst must already be in the OS image; the runner does not install it. Cancelling PRE removes local staged evidence and performs no cycle/log clearing; already installed packages remain installed. The run-specific uploaded hardware script may remain under `/tmp` for OS cleanup.
 
-After confirmation, evidence is promoted to the printed output directory. PRE dmesg/SEL must be saved successfully before each respective log is cleared. Both are cleared once at campaign start. Each POST captures dmesg and clears it only after successful capture. **SEL is never cleared inside loops**. Each loop retains cumulative SEL and a delta relative to the previous successful capture. An empty SEL is valid; command/transport errors are not. Event correctness is explicitly **manual review**, not an invented PASS/FAIL rule.
+After confirmation, evidence is promoted to the printed output directory. PRE SEL is read for collection validation but is not saved. Successfully read dmesg and SEL are cleared once at campaign start. Each POST captures dmesg and clears it only after successful capture; clear output is evaluated for interstitial errors without another log file. **SEL is never cleared inside loops**. Each loop compares a snapshot immediately before its cycle action with its POST snapshot. The HTML expands only the newly added events; cumulative SEL stays in the evidence file. Inband uses OS `ipmitool sel list`; outband uses authenticated LANPlus. Empty or malformed command output is a collection failure, not zero events. `SEL has no entries` is a valid empty result. Event correctness remains manual review.
 
 ## Cycle modes
 
@@ -64,8 +64,8 @@ PRE and each loop verify expected hostnames before actions. During recovery, tra
 
 - CPU at least 2; **installed SOCAMM exactly 16** (empty memory slots are not counted).
 - NVMe at least 2 controllers (multiple namespaces are deduplicated), Vera MST endpoints at least 22, NVIDIA PCI bridges at least 20, USB controller at least 1, AST1150 at least 1.
-- BF4 at least 1, identified only by explicit `BlueField-4` / `BlueField4` / `BF4` model text. Generic BlueField, BF3, DPU, ConnectX and arbitrary non-Vera MST devices do not qualify. An unrecognized device remains missing until actual BF4 identity can be verified; no undocumented PCI IDs are guessed.
-- Any reported PCIe `LnkSta` downgrade/degradation fails, even if device count is correct.
+- BF4 exactly `BF4_EXPECTED` physical cards (currently 1 in each project config), identified only by explicit `BlueField-4` / `BlueField4` / `BF4` model text. Generic BlueField, BF3, DPU, ConnectX and arbitrary non-Vera MST devices do not qualify. An unrecognized device remains missing until actual BF4 identity can be verified; no undocumented PCI IDs are guessed. Count distinct VPD `[SN] Serial number` values across all BF4 PCI functions from `lspci -Dvvv`. Functions sharing a board serial count once. Missing/partial serial identity reports `BF4_IDENTITY_UNAVAILABLE`; the script never guesses by dividing function count by two. This requires actual hardware to expose a common board serial for the ports of one card; validate the first installed card against its physical inventory. NIC counting still uses MST.
+- Only PCIe Express endpoints are checked for link verdicts. A `LnkSta` downgrade/degradation fails; unknown speed or width x0 fails separately. Root ports and bridges do not generate link downgrade findings. `LnkCap` being higher than `LnkSta` alone is not a failure.
 - PCI comparison uses full domain:bus:device.function plus vendor/device ID; changed, added and missing entries fail.
 - Sensors `cr/critical/nr/non-recoverable` and lower/upper critical variants fail; `nc/non-critical` warns. `ns/na/no reading` and unrecognized statuses fail for threshold sensors. `discrete` sensors use hexadecimal bit-field statuses such as `0x0100`; those statuses are normal unless the output explicitly reports a critical/unreadable state. Two documented Vera no-value rows are ignored for health only: `CorUti*` with both reading/status `na`, and a replacement-character name with an empty unit and both fields `na`; their raw rows remain in evidence. Generic `na` remains FAIL. Incomplete table rows remain visible and fail with `SENSOR_MALFORMED`; a completely malformed table remains a PRE FAIL finding for operator review. Duplicate names are reported and every row evaluated. Missing rows are immediately re-read: recovered warns, still missing fails. Without globally unique sensor IDs, loss detection uses name multiplicities rather than overwriting duplicates.
 - Specific kernel hardware/fatal diagnostics fail; complete dmesg is preserved. Firmware versions are recorded; there is no expected-version/downgrade policy yet.
@@ -116,7 +116,7 @@ campaigns/<run_id>/
   pre_orchestrator_dependencies.txt
   <tray>_<node>/
     pre_report.json
-    pre_pci.txt / pre_sensor.txt / pre_dmesg.txt / pre_sel.txt / ...
+    pre_pci.txt / pre_sensor.txt / pre_dmesg.txt / ...
     node_summary.txt
     loop0001/
       report.json
@@ -126,7 +126,7 @@ campaigns/<run_id>/
 
 There is no extra PRE directory. Loop files are always retained. All formats use the same evaluator. The HTML has overview/node/issue tabs, collapsible phases, known/new and severity filters, action/recovery records and evidence links. CSS/JS are inline; it opens offline. Keep the HTML with its sibling log folders when sharing evidence links. Text from devices is escaped, not interpreted as HTML. Sample data is labeled **SYNTHETIC**.
 
-`issue_policy.md` is a readable automatic-classification table. Exact project/code/component rules, with `*` wildcard, classify known issues. Unmatched issues are NEW. The current neutrino BF4-missing rule records that the card has not arrived; remove/deactivate it after installation. Every run snapshots the policy. Classification never changes severity; a known FAIL is still FAIL. Recurrences merge by node/code/component and retain their phase and evidence.
+Issue classification is based on this campaign's original PRE: the same node/code/component in POST is KNOWN; a new pair is NEW. PRE itself displays PRE-EXISTING. Known findings still affect health. `issue_policy.md` is retained and snapshotted for compatibility, but does not override baseline classification. Recurrences are grouped within each node, preserving every occurrence and evidence reference.
 
 ## Offline development checks
 
@@ -136,6 +136,14 @@ bash -n neutrino_config.sh naboo_config.sh stop_cycle.sh
 python3 dev/tests/make_demo.py
 ```
 
-Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
+Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node dev/tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
 
 This refactor was verified offline on Windows with Python, Git Bash and Chrome. Deployment is intended for Linux; real rack acceptance still needs actual hostnames, installed MFT, platform BMC paths, real command responses and a controlled run. Existing `dev/review/offline_review.py` documents **pre-refactor** defects and is not the current regression suite. `dev/dryrun_sim.py` is an independent legacy utility, unchanged here; its named CSV reader continues to use the original inventory fields and does not inherit the campaign lock/confirmation behavior.
+
+## Shared controller operation
+
+Different OS users may run the same readable script with independent node selections, cycle modes and output directories. Use a per-user writable `--output` directory. All users on the **same controller** must use the same `VERA_RUNTIME_DIR` (default `/tmp/vera-cycle-runtime`, mode 1777). Overlapping OS/BMC endpoint addresses are locked before PRE or remote mutations. The second run shows BLOCKED with the endpoint and, when readable, the owning campaign/node/user. Disjoint targets remain eligible after the normal PRE confirmation. Different cycle modes do not bypass locks.
+
+These are controller-local locks, not distributed locks. Another controller, a different lock directory, endpoint IP aliases, or another tool issuing power actions is not coordinated by this mechanism. Do not delete active lock files. A campaign snapshots its config, so editing a project config does not alter an already running campaign.
+
+The desktop HTML uses Overview / Nodes / Issues. Nodes are searchable by name, with health filtering and a scrollable selector for large inventories. Overview always retains all selected nodes and findings. Campaign elapsed time runs from campaign start to finish; node elapsed runs from PRE to last POST; completed-loop averages use cycle-command start to POST completion. Missing evidence and failed collection are displayed explicitly. The 128-node UI test does not constitute a 128-node hardware load test.
