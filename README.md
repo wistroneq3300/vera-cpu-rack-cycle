@@ -86,7 +86,15 @@ Run IDs include project, a rack-lab UTC+8 timestamp using `+0800` without a colo
 
 All operators on the **same orchestrator** must use the same runtime path. If `/tmp` is isolated per user/service, provision a shared local directory and set `VERA_RUNTIME_DIR` consistently. Locks do not coordinate separate orchestrator machines. Registry directories are owner-only. Never remove live endpoint lock files or use independent runtime paths to bypass an active run.
 
-The runner prints this exact stop command for its Run ID:
+Open the numbered menu without typing a Run ID:
+
+```bash
+./stop_cycle.sh
+```
+
+Select `1`, `2`, etc. to choose one of the current OS user's running campaigns. The menu shows project, cycle type, channel, nodes, Run ID and start time. Press `1` to confirm the selected campaign, or `0` to go back/exit. It stops the whole selected campaign, not an individual node. A successful request is not completion: the current round (including queued targets) and POST still finish. Pending requests are labeled. Linux excludes exited processes and checks process-start identity on newly registered runs to detect PID reuse. The menu uses the same controller and `VERA_RUNTIME_DIR` as the runner.
+
+The explicit Run ID interface remains available:
 
 ```bash
 ./stop_cycle.sh neutrino_<timestamp>_<suffix>

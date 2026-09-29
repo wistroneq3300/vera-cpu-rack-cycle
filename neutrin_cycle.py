@@ -31,7 +31,7 @@ from cycle_core import (
 )
 from cycle_engine import NodeSession
 from cycle_report import duration, elapsed, rebuild, status, write_reports
-from cycle_runtime import EndpointLocks, RunRegistry, request_stop
+from cycle_runtime import EndpointLocks, RunRegistry, list_running, request_stop
 from cycle_transport import Transport
 
 BASE = Path(__file__).resolve().parent
@@ -237,7 +237,8 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             transport.known_hosts = output / '.ssh'
             console.attach(output / 'console.log')
             registry = RunRegistry(run_id, runtime_root)
-            registry.register(output)
+            registry.register(output, project=options.project, cycle_mode=options.cycle_mode,
+                              channel=options.channel, nodes=[s.target.key for s in runnable])
             atomic_write(output / f'{options.project}_config.snapshot.sh', script.decode('utf-8'))
             atomic_write(output / 'issue_policy.snapshot.md', policy_text)
             data = dict(run_id=run_id, project=options.project, started=now(), finished=None,
@@ -298,6 +299,59 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         locks.close()
         for sig, handler in prior_handlers.items():
             signal.signal(sig, handler)
+
+def stop_menu(root=None, input_func=None):
+    read = input_func or input
+    while True:
+        runs = list_running(root)
+        print('\nStop Cycle - Your running campaigns')
+        if not runs:
+            print('No running campaigns found for this OS user on this controller.')
+            return 0
+        for number, run in enumerate(runs, 1):
+            nodes = run.get('nodes', [])
+            preview = ', '.join(nodes[:8]) or 'Not recorded'
+            if len(nodes) > 8:
+                preview += f' ... ({len(nodes)} nodes total)'
+            print(f"\n  {number}. {run.get('project', 'Unknown')} | {run.get('cycle_mode', 'Unknown')} | {run.get('channel', 'Unknown')}")
+            print(f"     Nodes: {preview}")
+            print(f"     Run ID: {run['run_id']}")
+            print(f"     Started: {run.get('utc', 'Not recorded')}")
+            if run['stop_requested']:
+                print('     STOP REQUESTED - waiting for the current round and POST to finish')
+        print('\n  0. Exit')
+        try:
+            reply = read('Select campaign number [0]: ').strip()
+            if reply in {'', '0'}:
+                return 0
+            if not reply.isascii() or not reply.isdecimal() or not 1 <= int(reply) <= len(runs):
+                print('INVALID: enter a listed number.')
+                continue
+            run = runs[int(reply) - 1]
+            print(f"\nSelected: {run['run_id']}")
+            print('Nodes: ' + (', '.join(run.get('nodes', [])) or 'Not recorded'))
+            print(f"Output: {run['output']}")
+            print('Stop the entire selected campaign after this round and POST finish.')
+            print('  1. Request stop\n  0. Back')
+            while True:
+                answer = read('Select [0]: ').strip()
+                if answer in {'', '0', '1'}:
+                    break
+                print('INVALID: enter 1 or 0.')
+            if answer != '1':
+                continue
+            try:
+                info = request_stop(run['run_id'], root)
+            except (OSError, ValueError) as exc:
+                print(f'Cannot request stop: {exc}')
+                continue
+            print(f"Stop requested for {run['run_id']}. This is a request, not completion.")
+            print(f"The current round and POST will finish. Output: {info['output']}")
+            return 0
+        except (EOFError, KeyboardInterrupt):
+            print('\nCancelled. No stop request sent.')
+            return 0
+
 
 def choose(title, options, default):
     """Numbered menu. Accepts the number, or the option text (case-insensitive).
@@ -392,7 +446,7 @@ def parser():
     p.add_argument('--output', type=Path, default=BASE / 'campaigns')
     p.add_argument('--cycle', action='store_true', help='Run cycles after PRE and explicit confirmation; wizard enables this')
     p.add_argument('--keep-going', action='store_true', help=argparse.SUPPRESS)
-    p.add_argument('--stop', metavar='RUN_ID', help='Owner-only request to finish current POST and stop')
+    p.add_argument('--stop', metavar='RUN_ID', nargs='?', const='', help='Open numbered stop menu, or stop the specified Run ID')
     p.add_argument('--report', type=Path, metavar='CAMPAIGN_DIR', help='Rebuild a stopped campaign report from its journal; do not use during a live run')
     return p
 
@@ -401,7 +455,9 @@ def main(argv=None):
     p = parser()
     options = p.parse_args(arguments)
     try:
-        if options.stop:
+        if options.stop is not None:
+            if not options.stop:
+                return stop_menu()
             info = request_stop(options.stop)
             print(f"Stop requested for {options.stop}. Current POST will finish. Output: {info['output']}")
             return 0

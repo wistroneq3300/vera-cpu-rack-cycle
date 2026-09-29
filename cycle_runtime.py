@@ -101,8 +101,9 @@ class RunRegistry:
         self.path.mkdir(mode=0o700)
         self.run_id = run_id
 
-    def register(self, output):
-        write_json(self.path / "owner.json", dict(run_id=self.run_id, pid=os.getpid(), output=str(output), state="RUNNING", utc=now()))
+    def register(self, output, **metadata):
+        write_json(self.path / "owner.json", dict(**metadata, run_id=self.run_id, pid=os.getpid(),
+                   output=str(output), state="RUNNING", utc=now(), process_token=process_token(os.getpid())))
 
     def requested(self):
         return (self.path / "stop.request").exists()
@@ -112,6 +113,69 @@ class RunRegistry:
         data = json.loads(path.read_text())
         data.update(state=state, finished=now())
         write_json(path, data)
+
+def process_token(pid):
+    """Linux process start identity, including boot identity to reject PID reuse."""
+    if os.name == 'nt':
+        return None
+    try:
+        fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+        return Path('/proc/sys/kernel/random/boot_id').read_text().strip() + ':' + fields[19]
+    except (OSError, IndexError):
+        return None
+
+
+def process_running(data):
+    if os.name == 'nt':
+        # Windows os.kill(pid, 0) is not a safe POSIX liveness probe.
+        return True
+    try:
+        pid = int(data['pid'])
+        if pid <= 0:
+            return False
+        os.kill(pid, 0)
+    except (ProcessLookupError, ValueError, KeyError, TypeError):
+        return False
+    except PermissionError:
+        return False
+    token = data.get('process_token')
+    return not token or token == process_token(pid)
+
+
+def list_running(root=None):
+    """Read only the current user's active registrations; never contact nodes."""
+    root = Path(root) if root is not None else shared_root()
+    runs = []
+    for path in root.glob('run-*'):
+        try:
+            if path.is_symlink() or not path.is_dir():
+                continue
+            if os.name != 'nt' and path.stat().st_uid != os.getuid():
+                continue
+            data = json.loads((path / 'owner.json').read_text(encoding='utf-8'))
+            if not isinstance(data, dict) or not isinstance(data.get('output'), str):
+                continue
+            if data.get('state') != 'RUNNING' or not process_running(data):
+                continue
+            data['run_id'] = path.name.removeprefix('run-')
+            # Older registrations stored display metadata only in the journal.
+            if 'nodes' not in data:
+                try:
+                    campaign = json.loads((Path(data['output']) / 'campaign.json').read_text(encoding='utf-8'))
+                    data.update(project=campaign.get('project', 'Unknown'),
+                                cycle_mode=campaign.get('cycle_mode', 'Unknown'),
+                                channel=campaign.get('channel', 'Unknown'),
+                                nodes=[n['key'] for n in campaign.get('nodes', []) if not n.get('blocked')])
+                except (OSError, ValueError, KeyError, TypeError):
+                    pass
+            data['stop_requested'] = (path / 'stop.request').exists()
+            if not isinstance(data.get('nodes', []), list) or not all(isinstance(n, str) for n in data.get('nodes', [])):
+                data['nodes'] = []
+            runs.append(data)
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return sorted(runs, key=lambda r: (r.get('utc', ''), r['run_id']))
+
 
 def request_stop(run_id, root=None):
     if not re.fullmatch(r"[A-Za-z0-9_.+\-]+", run_id):
@@ -124,5 +188,7 @@ def request_stop(run_id, root=None):
     data = json.loads((path / "owner.json").read_text())
     if data["state"] != "RUNNING":
         raise ValueError(f"Campaign already finished: {data['state']}")
+    if not process_running(data):
+        raise ValueError('Campaign process is no longer running; no stop request sent')
     (path / "stop.request").write_text(now(), encoding="ascii")
     return data
