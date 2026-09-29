@@ -131,11 +131,11 @@ There is no extra PRE directory. Loop files are always retained. All formats use
 ## Offline development checks
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s dev/tests -v
 bash -n vera_rack.sh stop_cycle.sh
-python3 tests/make_demo.py
+python3 dev/tests/make_demo.py
 ```
 
-Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
+Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node dev/tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
 
-This refactor was verified offline on Windows with Python, Git Bash and Chrome. Deployment is intended for Linux; real rack acceptance still needs actual hostnames, installed MFT, platform BMC paths, real command responses and a controlled run. Existing `review/offline_review.py` documents **pre-refactor** defects and is not the current regression suite. `dryrun_sim.py` is an independent legacy utility, unchanged here; its named CSV reader continues to use the original inventory fields and does not inherit the campaign lock/confirmation behavior.
+This refactor was verified offline on Windows with Python, Git Bash and Chrome. Deployment is intended for Linux; real rack acceptance still needs actual hostnames, installed MFT, platform BMC paths, real command responses and a controlled run. Existing `dev/review/offline_review.py` documents **pre-refactor** defects and is not the current regression suite. `dev/dryrun_sim.py` is an independent legacy utility, unchanged here; its named CSV reader continues to use the original inventory fields and does not inherit the campaign lock/confirmation behavior.

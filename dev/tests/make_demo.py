@@ -1,14 +1,14 @@
 """Generate synthetic review data without constructing any hardware transport."""
 import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from cycle_core import *
 from cycle_engine import new_record
 from cycle_report import write_reports
 
 def build(output):
     nodes=[]
-    rules=parse_policy((Path(__file__).resolve().parents[1]/'issue_policy.md').read_text())
+    rules=parse_policy((Path(__file__).resolve().parents[2]/'issue_policy.md').read_text())
     for index in range(1,4):
         t=Target('L105-21R',f'n{index}',f'192.0.2.{index*2-1}',f'192.0.2.{index*2}',f'example-bmc-{index}',f'example-os-{index}')
         node=dict(key=t.key,target=t.__dict__,blocked=[],active=True,completed=3,stop_reason='',pre=new_record('PRE'),loops=[])
@@ -38,7 +38,7 @@ def build(output):
         nodes.append(node)
     campaign=dict(run_id='neutrino_DEMO_20260929_160000',project='neutrino',started='2026-09-29T08:00:00+00:00',finished='2026-09-29T08:38:00+00:00',
                   state='COMPLETE',stop_reason='All 3 requested loops completed on 3 approved nodes.',cycle_mode='power_cycle',channel='inband',limits=dict(loops=3,hours=0),
-                  script_sha256=digest((Path(__file__).resolve().parents[1]/'vera_rack.sh').read_bytes()),nodes=nodes,synthetic=True)
+                  script_sha256=digest((Path(__file__).resolve().parents[2]/'vera_rack.sh').read_bytes()),nodes=nodes,synthetic=True)
     write_reports(output,campaign)
 
 if __name__=='__main__':

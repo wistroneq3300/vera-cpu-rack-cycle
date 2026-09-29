@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-BASE=Path(__file__).resolve().parents[1]
+BASE=Path(__file__).resolve().parents[2]
 SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
 
 @unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
