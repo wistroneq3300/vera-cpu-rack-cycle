@@ -139,6 +139,17 @@ def classify(items, project, rules):
                 break
     return items
 
+def classify_against_pre(items, pre_keys):
+    """Classify each issue by comparing against the PRE baseline issue set.
+    An issue whose (code, component) pair already appeared in PRE is KNOWN
+    (pre-existing, not caused by the cycle); otherwise NEW. PRE records pass
+    an empty set so every PRE issue is tagged NEW (the baseline itself)."""
+    for item in items:
+        key = (item["code"], item["component"])
+        item["classification"] = "KNOWN" if key in pre_keys else "NEW"
+        item["known_reason"] = "Present in PRE baseline" if key in pre_keys else ""
+    return items
+
 def parse_sensors(text):
     """Keep incomplete and puzzling rows so the evaluator cannot silently pass them."""
     rows = []
@@ -357,12 +368,19 @@ def sel_delta(previous, current):
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:
+        # Pre-existing findings: this node's (code, component) pairs in PRE. A
+        # finding that reappears in a loop is KNOWN (was there before cycling);
+        # one not present in PRE is NEW (surfaced by the cycle).
+        pre_keys = {(i["code"], i["component"]) for i in node["pre"]["issues"]}
         for record in [node["pre"], *node["loops"]]:
             for item in record["issues"]:
                 key = (node["key"], item["code"], item["component"])
                 entry = merged.setdefault(key, {**item, "node": node["key"], "occurrences": []})
                 if item["severity"] == "FAIL":
                     entry["severity"] = "FAIL"
+                pair = (item["code"], item["component"])
+                entry["classification"] = "KNOWN" if pair in pre_keys else "NEW"
+                entry["known_reason"] = "Present in PRE baseline" if pair in pre_keys else ""
                 entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"],
                                                   evidence=item.get("evidence", ""),
                                                   snippet=item.get("snippet", "")))

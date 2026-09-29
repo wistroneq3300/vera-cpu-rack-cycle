@@ -108,11 +108,11 @@ def show_result(console, node, record):
         console('  Identity: ' + ' | '.join(f"{role.upper()} SSH {'OK' if role in record['identities'] else 'NOT VERIFIED'}" for role in ('bmc', 'os')))
     groups = {}
     for item in record['issues']:
-        key = (item['severity'], item['code'], item['component'], item['detail'], item.get('classification', 'NEW'))
+        key = (item['severity'], item['code'], item['component'], item['detail'])
         groups[key] = groups.get(key, 0) + 1
-    for (severity, _code, component, detail, classification), count in groups.items():
+    for (severity, _code, component, detail), count in groups.items():
         text = ' '.join(detail.split())[:300]
-        console(f"  {severity} [{classification}] {component}: {text}" + (f" (repeated {count} times)" if count > 1 else ''))
+        console(f"  {severity} {component}: {text}" + (f" (repeated {count} times)" if count > 1 else ''))
     for reason in node['blocked']:
         console(f"  BLOCKED: {reason}")
 

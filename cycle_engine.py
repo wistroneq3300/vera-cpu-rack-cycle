@@ -8,7 +8,7 @@ from pathlib import Path
 
 from cycle_core import (
     atomic_write,
-    classify,
+    classify_against_pre,
     compare_sensors,
     config_issues,
     dmesg_issues,
@@ -55,6 +55,7 @@ class NodeSession:
                          pre=new_record("PRE"), loops=[], completed=0, stop_reason="", stage="")
         self.previous_sel = ""
         self.baseline = None
+        self.pre_issue_keys = set()
 
     def stage(self, text):
         """Report the current phase for this node so the operator can see where
@@ -83,7 +84,10 @@ class NodeSession:
             pass
 
     def persist(self, record):
-        classify(record["issues"], self.options.project, self.rules)
+        if record["phase"] == "PRE":
+            classify_against_pre(record["issues"], set())
+        else:
+            classify_against_pre(record["issues"], self.pre_issue_keys)
         write_json(self.folder(record) / ("pre_report.json" if record["phase"] == "PRE" else "report.json"), record)
 
     def finish(self, record):
@@ -248,6 +252,7 @@ class NodeSession:
             if not record["pci"]:
                 self.node["blocked"].append("PRE PCI baseline is unavailable")
             self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
+            self.pre_issue_keys = {(i["code"], i["component"]) for i in record["issues"]}
         except Exception as exc:
             self.node["blocked"].append(str(exc))
             self.add(record, "PRE_BLOCKED", "identity", str(exc))

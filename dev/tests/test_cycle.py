@@ -123,22 +123,25 @@ class PureTests(unittest.TestCase):
         self.assertIn('SENSOR_MALFORMED',[item['code'] for item in items])
         self.assertEqual(health(sensor_issues(parse_sensors('Temp | 30 | C | ok\n\n   \n'))),'PASS')
 
-    def test_aggregation_preserves_failure_and_campaign_classification(self):
-        # The mechanism is exercised with a rule declared here, not the shipped
-        # policy file, so it stays valid whatever the production policy contains.
-        rules=parse_policy('| neutrino | BF4_MISSING | BF4 | KNOWN | local test rule | yes |')
-        pre=new_record('PRE')
-        post=new_record('LOOP 1')
-        pre['issues']=classify([issue('BF4_MISSING','BF4','first','WARN')],'neutrino',rules)
-        post['issues']=classify([issue('BF4_MISSING','BF4','second','FAIL')],'neutrino',rules)
-        data={'nodes':[{'key':'tray_n1','pre':pre,'loops':[post]}]}
-        for first,second in ((pre,post),(post,pre)):
-            data['nodes'][0].update(pre=first,loops=[second])
-            merged=aggregate_issues(data)
-            self.assertEqual(len(merged),1)
-            self.assertEqual(merged[0]['severity'],'FAIL')
-            self.assertEqual(merged[0]['classification'],'KNOWN')
-            self.assertEqual(len(merged[0]['occurrences']),2)
+    def test_aggregation_classifies_by_pre_baseline(self):
+        # An issue present in PRE is KNOWN in the report even if it recurs in a
+        # loop; an issue absent from PRE is NEW. PRE is the baseline by
+        # definition, so the (code, component) pair is what decides.
+        pre = new_record('PRE')
+        loop1 = new_record('LOOP 1')
+        pre['issues'] = [issue('BF4_MISSING', 'BF4', 'missing in pre', 'FAIL')]
+        loop1['issues'] = [
+            issue('BF4_MISSING', 'BF4', 'still missing', 'FAIL'),        # in PRE -> KNOWN
+            issue('DMESG_HARDWARE', '0001:02:00.0', 'AER surfaced', 'FAIL'),  # not in PRE -> NEW
+        ]
+        data = {'nodes': [{'key': 'tray_n1', 'pre': pre, 'loops': [loop1]}]}
+        merged = aggregate_issues(data)
+        by_code = {m['code']: m for m in merged}
+        self.assertEqual(by_code['BF4_MISSING']['classification'], 'KNOWN')
+        self.assertEqual(by_code['DMESG_HARDWARE']['classification'], 'NEW')
+        self.assertEqual(by_code['DMESG_HARDWARE']['known_reason'], '')
+        self.assertEqual(by_code['BF4_MISSING']['known_reason'], 'Present in PRE baseline')
+        self.assertEqual(len(by_code['BF4_MISSING']['occurrences']), 2)
 
     def test_duplicate_sensor_cannot_hide_fault(self):
         rows = parse_sensors('Temp | 90 | C | cr\nTemp | 30 | C | ok\n')
@@ -259,11 +262,19 @@ class PureTests(unittest.TestCase):
         item = next(i for i in config_issues(text, 1) if i['code'] == 'BF4_MISSING')
         self.assertEqual(item['snippet'], '')
 
-    def test_bf4_absent_is_known_failure_under_shipped_policy(self):
-        # The missing card is known to the operator, but it remains a real FAIL.
-        rule = parse_policy((BASE / 'issue_policy.md').read_text())
-        items = classify([issue('BF4_MISSING','BF4','missing')], 'neutrino', rule)
+    def test_classify_against_pre_baseline(self):
+        # A finding present in PRE is KNOWN (pre-existing); one absent is NEW.
+        pre = [issue('BF4_MISSING', 'BF4', 'missing')]
+        pre_keys = {(i['code'], i['component']) for i in pre}
+        items = classify_against_pre([
+            issue('BF4_MISSING', 'BF4', 'still missing', 'FAIL'),
+            issue('DMESG_HARDWARE', '0001:02:00.0', 'uncorrected AER', 'FAIL'),
+        ], pre_keys)
         self.assertEqual(items[0]['classification'], 'KNOWN')
+        self.assertEqual(items[1]['classification'], 'NEW')
+        # A PRE record classifies against an empty baseline -> everything NEW.
+        pre_only = classify_against_pre([issue('BF4_MISSING', 'BF4', 'missing')], set())
+        self.assertEqual(pre_only[0]['classification'], 'NEW')
         self.assertEqual(health(items), 'FAIL')
 
     def test_sel_reused_id_with_new_timestamp(self):
