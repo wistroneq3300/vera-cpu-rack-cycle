@@ -205,8 +205,11 @@ class NodeSession:
                 self.add(record, "SCRIPT_UPLOAD_FAILED", "hardware", str(exc))
                 self.node["blocked"].append("Cannot run the verified hardware script")
             self.capture(record)
-            if not record["pci"] or not any(not row.get('format_error') for row in record["sensors"]):
-                self.node["blocked"].append("PRE PCI or sensor baseline is unavailable")
+            # Sensor parse/health failures remain visible PRE FAIL findings. The
+            # operator must be able to review them and decide whether to run;
+            # only the PCI baseline is required to keep cycle comparisons safe.
+            if not record["pci"]:
+                self.node["blocked"].append("PRE PCI baseline is unavailable")
             self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
         except Exception as exc:
             self.node["blocked"].append(str(exc))

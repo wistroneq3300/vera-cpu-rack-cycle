@@ -294,15 +294,15 @@ class EngineTests(unittest.TestCase):
         self.session.precheck()
         self.assertTrue(self.session.node['blocked'])
 
-    def test_only_malformed_sensors_block_pre_but_partial_table_can_be_reviewed(self):
+    def test_malformed_sensor_table_is_fail_but_operator_can_review_it(self):
         original=self.fake.oob
-        for text,blocked in [('Temp | 30 | degrees C',True),(SENSORS+'Temp_CPU2 | 90 | degrees C',False)]:
+        for text in [('Temp | 30 | degrees C'),(SENSORS+'Temp_CPU2 | 90 | degrees C')]:
             def oob(t,cmd,timeout=30):
                 return Command(0,text) if cmd=='sensor list' else original(t,cmd,timeout)
             self.fake.oob=oob
             session=NodeSession(target(),self.fake,self.root,'test',b'script',digest(b'script'),self.options,[])
             session.precheck()
-            self.assertEqual(bool(session.node['blocked']),blocked)
+            self.assertFalse(session.node['blocked'])
             self.assertEqual(session.node['pre']['status'],'FAIL')
             self.assertIn('SENSOR_MALFORMED',[i['code'] for i in session.node['pre']['issues']])
 
