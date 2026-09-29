@@ -142,6 +142,34 @@ class PureTests(unittest.TestCase):
                 self.assertEqual(health(sensor_issues(parse_sensors(f'Temp | 30 | C | {state}'))), 'FAIL')
         self.assertEqual(health(sensor_issues(parse_sensors('Temp | 30 | C | nc'))), 'WARN')
 
+    def test_discrete_hex_status_is_normal(self):
+        rows = parse_sensors(
+            'NVMeE1SSSD0STS0 | 0x0 | discrete | 0x0100 | na | na\n'
+            'NVMeE1SSSD1STS0 | 0x0 | discrete | 0x0000 | na | na\n'
+        )
+        self.assertEqual(sensor_issues(rows), [])
+        self.assertEqual(health(sensor_issues(rows)), 'PASS')
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('Temp | 0x0 | degrees C | 0x0100'))),
+            'FAIL',
+        )
+
+    def test_known_vera_no_reading_rows_are_ignored_but_generic_na_fails(self):
+        rows = parse_sensors(
+            'PrMo0CP1CorUti11 | na | discrete | na | na\n'
+            'PrMo0CP1CorUti24 | na | percent | na | na\n'
+            '\ufffd\ufffd\ufffd\ufffd | na |  | na | na\n'
+        )
+        self.assertEqual(sensor_issues(rows), [])
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('Fan | na | percent | na'))),
+            'FAIL',
+        )
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('\ufffd\ufffd\ufffd\ufffd | na | percent | na'))),
+            'FAIL',
+        )
+
     def test_sensor_missing_and_reread(self):
         pre = parse_sensors(SENSORS)
         initial = pre[:1]

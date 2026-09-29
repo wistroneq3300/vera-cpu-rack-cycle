@@ -150,6 +150,16 @@ def parse_sensors(text):
         rows.append(row)
     return rows
 
+def _known_no_reading(row, unreadable):
+    """Recognize only documented Vera no-value rows, not generic ``na``."""
+    reading = row["reading"].strip().lower()
+    status = row["status"].strip().lower()
+    if reading not in unreadable or status not in unreadable:
+        return False
+    name = row["name"].casefold()
+    unit = row["unit"].strip()
+    return "coruti" in name or ("\ufffd" in name and not unit)
+
 def sensor_issues(rows):
     found = []
     if not rows:
@@ -170,8 +180,16 @@ def sensor_issues(rows):
             found.append(issue("SENSOR_CRITICAL", r["name"], f"Status {state}; reading {r['reading']}"))
         elif state in warnings:
             found.append(issue("SENSOR_NONCRITICAL", r["name"], f"Status {state}; reading {r['reading']}", "WARN"))
+        elif _known_no_reading(r, unreadable):
+            # Vera emits these platform-defined no-value rows while healthy.
+            # Keep the raw row in evidence, but do not turn it into a failure.
+            continue
         elif state in unreadable or r["reading"].lower() in unreadable:
             found.append(issue("SENSOR_UNREADABLE", r["name"], f"Status {state or '(empty)'}; reading {r['reading']}"))
+        elif r["unit"].strip().lower() == "discrete" and re.fullmatch(r"0x[0-9a-f]+", state):
+            # ipmitool reports discrete states as hexadecimal bit fields (for
+            # example 0x0100); threshold status names do not apply here.
+            continue
         elif state not in {"ok", "0x0000"}:
             found.append(issue("SENSOR_UNRECOGNIZED", r["name"], f"Unrecognized status {state}; review raw sensor output"))
     return found
