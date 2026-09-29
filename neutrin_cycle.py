@@ -43,6 +43,8 @@ BASE = Path(__file__).resolve().parent
 COLOURS = {'FAIL': '\033[1;31m', 'NEW': '\033[1;33m',
            'OK': '\033[1;32m', 'PASS': '\033[1;32m', 'DONE': '\033[1;32m'}
 BLUE = '\033[1;34m'
+CYAN = '\033[1;36m'
+MAGENTA = '\033[1;35m'
 RESET = '\033[0m'
 COLOUR_ON = sys.stdout.isatty() and not os.environ.get('NO_COLOR')
 
@@ -64,6 +66,15 @@ class Console:
     def paint(self, line):
         if not COLOUR_ON:
             return line
+        # A result line is "<timestamp> <system> | <phase> | <status>". Colour
+        # the system slug (cyan) and the phase slug (magenta) so the eye can
+        # answer "which system, which loop" without reading the sentence. Both
+        # are anchored between the pipes, so ordinary prose is never recoloured.
+        line = re.sub(r'(?<= )(\S+) \| (PRE|POST|LOOP \d+)( \|)',
+                      lambda m: f'{CYAN}{m.group(1)}{RESET} | {MAGENTA}{m.group(2)}{RESET}{m.group(3)}',
+                      line, count=1)
+        # Standalone loop markers, e.g. "Loop 1: waiting for 2 target(s)".
+        line = re.sub(r'Loop (\d+)\b', lambda m: f'{MAGENTA}Loop {m.group(1)}{RESET}', line)
         # The run ID identifies the whole run, so it gets its own colour to be
         # scannable in a long transcript. Matched on the generated shape
         # (<project>_<YYYYmmdd>_<HHMMSS+0800>_<hex>) rather than on the label, so

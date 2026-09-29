@@ -16,7 +16,7 @@ from cycle_engine import NodeSession, new_record
 from cycle_report import render_html, rebuild, status
 from cycle_runtime import EndpointLocks, request_stop
 from cycle_transport import Command, IdentityUnsafe
-from neutrin_cycle import BASE, campaign, main
+from neutrin_cycle import BASE, Console, campaign, main
 
 PCI = '0000:01:00.0 Ethernet controller [0200]: Example [1234:5678]\n0001:01:00.0 PCI bridge [0604]: Fabric [10de:2f95]\n'
 SENSORS = 'Temp | 30 | degrees C | ok | na\nFan | 12000 | RPM | ok | na\n'
@@ -603,6 +603,35 @@ class LockTests(unittest.TestCase):
     def test_stop_rejects_traversal(self):
         with self.assertRaises(ValueError):
             request_stop('../x')
+
+class ConsolePaintTests(unittest.TestCase):
+    def paint(self, line):
+        console = Console()
+        with patch('neutrin_cycle.COLOUR_ON', True):
+            return console.paint(line)
+
+    def test_system_and_phase_slots_are_coloured(self):
+        out = self.paint('T L105-21R_n3 | LOOP 2 | FAIL')
+        self.assertIn('\033[1;36mL105-21R_n3\033[0m', out)   # system: cyan
+        self.assertIn('\033[1;35mLOOP 2\033[0m', out)        # phase: magenta
+        self.assertIn('\033[1;31mFAIL\033[0m', out)          # status word: red
+
+    def test_non_result_pipes_are_left_alone(self):
+        out = self.paint('  Identity: BMC SSH OK | OS SSH OK')
+        self.assertNotIn('\033[1;35m', out)                  # no phase slot
+        self.assertIn('\033[1;32mOK\033[0m', out)            # OK still green
+
+    def test_loop_progress_and_run_id(self):
+        out = self.paint('Loop 3: waiting for 1 target(s)')
+        self.assertIn('\033[1;35mLoop 3\033[0m', out)
+        out = self.paint('Run ID: neutrino_20260929_231617+0800_690ec1')
+        self.assertIn('\033[1;34mneutrino_20260929_231617+0800_690ec1\033[0m', out)
+
+    def test_colour_off_returns_plain_text(self):
+        console = Console()
+        with patch('neutrin_cycle.COLOUR_ON', False):
+            line = 'T L105-21R_n1 | PRE | FAIL'
+            self.assertEqual(console.paint(line), line)
 
 if __name__ == '__main__':
     unittest.main()
