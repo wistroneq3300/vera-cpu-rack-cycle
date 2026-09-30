@@ -1,0 +1,8 @@
+UTC+8: 2026-09-30T06:15:13+08:00
+Role: os
+Command: dmesg -c
+Exit: 0
+State: RETURNED
+Duration: 1.23s
+
+[Command output suppressed; status retained in this evidence file.]

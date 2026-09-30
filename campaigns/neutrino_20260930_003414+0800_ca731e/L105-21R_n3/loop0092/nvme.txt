@@ -1,0 +1,11 @@
+UTC+8: 2026-09-30T08:22:00+08:00
+Role: os
+Command: nvme list
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+
+Node                  Generic               SN                   Model                                    Namespace  Usage                      Format           FW Rev  
+--------------------- --------------------- -------------------- ---------------------------------------- ---------- -------------------------- ---------------- --------
+/dev/nvme0n1          /dev/ng0n1            09252FPKF007Z2T0     KIOXIA KXD8DRJ97T68                      0x1          0.00   B /   7.68  TB    512   B +  0 B   1ZET7101
+/dev/nvme1n1          /dev/ng1n1            3124843C1037ETZK     KIOXIA KXDZDRJ91T92                      0x1          8.28  GB /   1.92  TB    512   B +  0 B   1PET7102

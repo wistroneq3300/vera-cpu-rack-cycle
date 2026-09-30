@@ -1,0 +1,12 @@
+UTC+8: 2026-09-30T04:59:09+08:00
+Role: bmc
+Command: /usr/bin/powerctrl.sh power_status
+Exit: 0
+State: RETURNED
+Duration: 0.57s
+
+Power Status:
+  Host State: xyz.openbmc_project.State.Host.HostState.Running
+  Host: Running
+  Chassis State: xyz.openbmc_project.State.Chassis.PowerState.On
+  Chassis Power: On

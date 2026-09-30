@@ -1,0 +1,27 @@
+UTC+8: 2026-09-30T01:10:52+08:00
+Role: oob
+Command: mc info
+Exit: 0
+State: RETURNED
+Duration: 0.24s
+
+Device ID                 : 2
+Device Revision           : 5
+Firmware Revision         : 26.09
+IPMI Version              : 2.0
+Manufacturer ID           : 5703
+Manufacturer Name         : NVIDIA Corporation
+Product ID                : 3 (0x0003)
+Product Name              : Unknown (0x03)
+Device Available          : yes
+Provides Device SDRs      : no
+Additional Device Support :
+    Sensor Device
+    SEL Device
+    FRU Inventory Device
+    Chassis Device
+Aux Firmware Rev Info     : 
+    0xff
+    0x01
+    0x03
+    0x00

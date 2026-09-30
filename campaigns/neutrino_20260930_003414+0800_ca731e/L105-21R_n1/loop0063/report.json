@@ -1,0 +1,2253 @@
+{
+  "phase": "LOOP 63",
+  "started": "2026-09-30T05:50:26+08:00",
+  "finished": "2026-09-30T05:55:22+08:00",
+  "status": "FAIL",
+  "issues": [
+    {
+      "code": "BF4_MISSING",
+      "component": "BF4",
+      "detail": "Expected at least 1; detected 0",
+      "severity": "FAIL",
+      "evidence": "L105-21R_n1/loop0063/hardware.txt",
+      "snippet": "measured BF4 actual=0, expected 1 \u2014 mst_bluefield=0, pci_bluefield=0; sources: mst status -v,lspci -nn",
+      "classification": "KNOWN",
+      "known_reason": "Present in PRE baseline"
+    },
+    {
+      "code": "PCIE_DOWNGRADE",
+      "component": "0004:01:00.0",
+      "detail": "Non-Volatile memory controller: KIOXIA Corporation NVMe SSD Controller XD8 (rev 01) (prog-if 02 [NVM Express]): LnkSta:\tSpeed 32GT/s, Width x2 (downgraded)",
+      "severity": "FAIL",
+      "evidence": "L105-21R_n1/loop0063/hardware.txt",
+      "snippet": "PCIE_DOWNGRADE: bdf=0004:01:00.0, lnksta=LnkSta:\tSpeed 32GT/s, Width x2 (downgraded)",
+      "classification": "KNOWN",
+      "known_reason": "Present in PRE baseline"
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0CPU0EnfEDP0",
+      "detail": "2 rows share this sensor name with differing values; review each row",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0063/sensor.txt",
+      "snippet": "line 9: PrMo0CPU0EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na\nline 10: PrMo0CPU0EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na",
+      "classification": "KNOWN",
+      "known_reason": "Present in PRE baseline"
+    },
+    {
+      "code": "SENSOR_DUPLICATE",
+      "component": "PrMo0CPU1EnfEDP0",
+      "detail": "2 rows share this sensor name with differing values; review each row",
+      "severity": "WARN",
+      "evidence": "L105-21R_n1/loop0063/sensor.txt",
+      "snippet": "line 12: PrMo0CPU1EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na\nline 13: PrMo0CPU1EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na",
+      "classification": "KNOWN",
+      "known_reason": "Present in PRE baseline"
+    }
+  ],
+  "evidence": [
+    "L105-21R_n1/loop0063/cycle_command.txt",
+    "L105-21R_n1/loop0063/pci.txt",
+    "L105-21R_n1/loop0063/pci_tree.txt",
+    "L105-21R_n1/loop0063/pci_verbose.txt",
+    "L105-21R_n1/loop0063/pci_config.txt",
+    "L105-21R_n1/loop0063/disks.txt",
+    "L105-21R_n1/loop0063/nvme.txt",
+    "L105-21R_n1/loop0063/usb.txt",
+    "L105-21R_n1/loop0063/memory.txt",
+    "L105-21R_n1/loop0063/network.txt",
+    "L105-21R_n1/loop0063/dmesg.txt",
+    "L105-21R_n1/loop0063/dmesg_clear.txt",
+    "L105-21R_n1/loop0063/firmware.txt",
+    "L105-21R_n1/loop0063/system.txt",
+    "L105-21R_n1/loop0063/hardware.txt",
+    "L105-21R_n1/loop0063/sensor.txt",
+    "L105-21R_n1/loop0063/sel.txt",
+    "L105-21R_n1/loop0063/sel_delta.txt",
+    "L105-21R_n1/loop0063/bmc_firmware.txt",
+    "L105-21R_n1/loop0063/power.txt",
+    "L105-21R_n1/loop0063/host_power.txt"
+  ],
+  "commands": {
+    "cycle_command": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/cycle_command.txt",
+      "valid": true
+    },
+    "pci": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/pci.txt",
+      "valid": true
+    },
+    "pci_tree": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/pci_tree.txt",
+      "valid": true
+    },
+    "pci_verbose": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/pci_verbose.txt",
+      "valid": true
+    },
+    "pci_config": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/pci_config.txt",
+      "valid": true
+    },
+    "disks": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/disks.txt",
+      "valid": true
+    },
+    "nvme": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/nvme.txt",
+      "valid": true
+    },
+    "usb": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/usb.txt",
+      "valid": true
+    },
+    "memory": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/memory.txt",
+      "valid": true
+    },
+    "network": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/network.txt",
+      "valid": true
+    },
+    "dmesg": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/dmesg.txt",
+      "valid": true
+    },
+    "dmesg_clear": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/dmesg_clear.txt",
+      "valid": true
+    },
+    "firmware": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/firmware.txt",
+      "valid": true
+    },
+    "system": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/system.txt",
+      "valid": true
+    },
+    "hardware": {
+      "code": 1,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/hardware.txt",
+      "valid": false
+    },
+    "sensor": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/sensor.txt",
+      "valid": true
+    },
+    "sel": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/sel.txt",
+      "valid": true
+    },
+    "bmc_firmware": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/bmc_firmware.txt",
+      "valid": true
+    },
+    "power": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/power.txt",
+      "valid": true
+    },
+    "host_power": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n1/loop0063/host_power.txt",
+      "valid": true
+    }
+  },
+  "identities": {
+    "bmc": {
+      "hostname": "vc-256-bmc-n1",
+      "boot_id": "a8b876ce-6c45-427a-a480-e8cba5dc5163"
+    },
+    "os": {
+      "hostname": "neutrino-n1",
+      "boot_id": "d807ff3b-3e5d-4f6e-a0e4-72d7f59017fd"
+    }
+  },
+  "pci": {
+    "0001:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "0001:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    },
+    "0002:00:00.0": {
+      "id": "10de:2f98",
+      "raw": "0002:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]"
+    },
+    "0002:01:00.0": {
+      "id": "1a03:1150",
+      "raw": "0002:01:00.0 PCI bridge [0604]: ASPEED Technology, Inc. AST1150 PCI-to-PCI Bridge [1a03:1150] (rev 06)"
+    },
+    "0002:02:00.0": {
+      "id": "1a03:2000",
+      "raw": "0002:02:00.0 VGA compatible controller [0300]: ASPEED Technology, Inc. ASPEED Graphics Family [1a03:2000] (rev 52)"
+    },
+    "0002:20:00.0": {
+      "id": "10de:2f98",
+      "raw": "0002:20:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]"
+    },
+    "0002:21:00.0": {
+      "id": "1912:0014",
+      "raw": "0002:21:00.0 USB controller [0c03]: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller [1912:0014] (rev 03)"
+    },
+    "0003:00:00.0": {
+      "id": "10de:2f96",
+      "raw": "0003:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]"
+    },
+    "0003:80:00.0": {
+      "id": "10de:2f96",
+      "raw": "0003:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]"
+    },
+    "0004:00:00.0": {
+      "id": "10de:2f97",
+      "raw": "0004:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "0004:01:00.0": {
+      "id": "1e0f:002e",
+      "raw": "0004:01:00.0 Non-Volatile memory controller [0108]: KIOXIA Corporation NVMe SSD Controller XD8 [1e0f:002e] (rev 01)"
+    },
+    "0004:40:00.0": {
+      "id": "10de:2f97",
+      "raw": "0004:40:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "0004:80:00.0": {
+      "id": "10de:2f97",
+      "raw": "0004:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "0004:c0:00.0": {
+      "id": "10de:2f97",
+      "raw": "0004:c0:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "0005:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "0005:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    },
+    "0006:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "0006:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    },
+    "0009:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "0009:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    },
+    "000a:00:00.0": {
+      "id": "10de:2f98",
+      "raw": "000a:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]"
+    },
+    "000a:20:00.0": {
+      "id": "10de:2f98",
+      "raw": "000a:20:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]"
+    },
+    "000b:00:00.0": {
+      "id": "10de:2f96",
+      "raw": "000b:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]"
+    },
+    "000b:80:00.0": {
+      "id": "10de:2f96",
+      "raw": "000b:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]"
+    },
+    "000c:00:00.0": {
+      "id": "10de:2f97",
+      "raw": "000c:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "000c:01:00.0": {
+      "id": "1e0f:001c",
+      "raw": "000c:01:00.0 Non-Volatile memory controller [0108]: KIOXIA Corporation Device [1e0f:001c] (rev 01)"
+    },
+    "000c:40:00.0": {
+      "id": "10de:2f97",
+      "raw": "000c:40:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "000c:80:00.0": {
+      "id": "10de:2f97",
+      "raw": "000c:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "000c:c0:00.0": {
+      "id": "10de:2f97",
+      "raw": "000c:c0:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]"
+    },
+    "000d:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "000d:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    },
+    "000e:00:00.0": {
+      "id": "10de:2f95",
+      "raw": "000e:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]"
+    }
+  },
+  "sensors": [
+    {
+      "name": "Chass0HSCCurren0",
+      "reading": "3.978",
+      "unit": "Amps",
+      "status": "ok",
+      "line": 1,
+      "raw": "Chass0HSCCurren0 | 3.978      | Amps       | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "NVMeE1SSSD0STS0",
+      "reading": "0x1",
+      "unit": "discrete",
+      "status": "0x0100",
+      "line": 2,
+      "raw": "NVMeE1SSSD0STS0  | 0x1        | discrete   | 0x0100| na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "NVMeE1SSSD1STS0",
+      "reading": "0x1",
+      "unit": "discrete",
+      "status": "0x0100",
+      "line": 3,
+      "raw": "NVMeE1SSSD1STS0  | 0x1        | discrete   | 0x0100| na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CpuFre0",
+      "reading": "3386000000.000",
+      "unit": "Hz",
+      "status": "ok",
+      "line": 4,
+      "raw": "PrMo0CPU0CpuFre0 | 3386000000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CpuFre0",
+      "reading": "3386000000.000",
+      "unit": "Hz",
+      "status": "ok",
+      "line": 5,
+      "raw": "PrMo0CPU1CpuFre0 | 3386000000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MemCnt0Fre0",
+      "reading": "4299500000.000",
+      "unit": "Hz",
+      "status": "ok",
+      "line": 6,
+      "raw": "PrMo0MemCnt0Fre0 | 4299500000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MemCnt1Fre0",
+      "reading": "4299500000.000",
+      "unit": "Hz",
+      "status": "ok",
+      "line": 7,
+      "raw": "PrMo0MemCnt1Fre0 | 4299500000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "Chassi0HSCPower0",
+      "reading": "200.600",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 8,
+      "raw": "Chassi0HSCPower0 | 200.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0EnfEDP0",
+      "reading": "588.000",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 9,
+      "raw": "PrMo0CPU0EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0EnfEDP0",
+      "reading": "901.600",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 10,
+      "raw": "PrMo0CPU0EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "ProMod0CPU0Powe0",
+      "reading": "117.600",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 11,
+      "raw": "ProMod0CPU0Powe0 | 117.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1EnfEDP0",
+      "reading": "588.000",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 12,
+      "raw": "PrMo0CPU1EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1EnfEDP0",
+      "reading": "901.600",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 13,
+      "raw": "PrMo0CPU1EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "ProMod0CPU1Powe0",
+      "reading": "117.600",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 14,
+      "raw": "ProMod0CPU1Powe0 | 117.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre0CpuPow0",
+      "reading": "39.200",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 15,
+      "raw": "PrMo0Vre0CpuPow0 | 39.200     | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre0SocPow0",
+      "reading": "0.000",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 16,
+      "raw": "PrMo0Vre0SocPow0 | 0.000      | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre1CpuPow0",
+      "reading": "78.400",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 17,
+      "raw": "PrMo0Vre1CpuPow0 | 78.400     | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre1SocPow0",
+      "reading": "0.000",
+      "unit": "Watts",
+      "status": "ok",
+      "line": 18,
+      "raw": "PrMo0Vre1SocPow0 | 0.000      | Watts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "BMC0_Temp_0",
+      "reading": "37.000",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 19,
+      "raw": "BMC0_Temp_0      | 37.000     | degrees C  | ok    | na        | na        | 5.000     | 90.000    | 93.000    | na        "
+    },
+    {
+      "name": "Chassis0HSCTemp0",
+      "reading": "18.000",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 20,
+      "raw": "Chassis0HSCTemp0 | 18.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "NVMeE1SSSD0Temp0",
+      "reading": "39.840",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 21,
+      "raw": "NVMeE1SSSD0Temp0 | 39.840     | degrees C  | ok    | na        | na        | 4.980     | 75.198    | 78.186    | na        "
+    },
+    {
+      "name": "NVMeE1SSSD1Temp0",
+      "reading": "43.824",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 22,
+      "raw": "NVMeE1SSSD1Temp0 | 43.824     | degrees C  | ok    | na        | na        | 4.980     | 75.198    | 78.186    | na        "
+    },
+    {
+      "name": "PrMo0CP0CoOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 23,
+      "raw": "PrMo0CP0CoOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0SyOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 24,
+      "raw": "PrMo0CP0SyOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0TemAvg0",
+      "reading": "25.500",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 25,
+      "raw": "PrMo0CPU0TemAvg0 | 25.500     | degrees C  | ok    | na        | na        | na        | 90.180    | 93.120    | na        "
+    },
+    {
+      "name": "PrMo0CPU0TemLim0",
+      "reading": "66.660",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 26,
+      "raw": "PrMo0CPU0TemLim0 | 66.660     | degrees C  | ok    | na        | -3.900    | -1.940    | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CoOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 27,
+      "raw": "PrMo0CP1CoOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1SyOvTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 28,
+      "raw": "PrMo0CP1SyOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1TemAvg0",
+      "reading": "24.520",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 29,
+      "raw": "PrMo0CPU1TemAvg0 | 24.520     | degrees C  | ok    | na        | na        | na        | 90.180    | 93.120    | na        "
+    },
+    {
+      "name": "PrMo0CPU1TemLim0",
+      "reading": "67.640",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 30,
+      "raw": "PrMo0CPU1TemLim0 | 67.640     | degrees C  | ok    | na        | -3.900    | -1.940    | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem0",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 31,
+      "raw": "PrMo0MeCn0DrTem0 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem1",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 32,
+      "raw": "PrMo0MeCn0DrTem1 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem2",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 33,
+      "raw": "PrMo0MeCn0DrTem2 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem3",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 34,
+      "raw": "PrMo0MeCn0DrTem3 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem4",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 35,
+      "raw": "PrMo0MeCn0DrTem4 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem5",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 36,
+      "raw": "PrMo0MeCn0DrTem5 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem6",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 37,
+      "raw": "PrMo0MeCn0DrTem6 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0DrTem7",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 38,
+      "raw": "PrMo0MeCn0DrTem7 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 39,
+      "raw": "PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 40,
+      "raw": "PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 41,
+      "raw": "PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn0MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 42,
+      "raw": "PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem0",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 43,
+      "raw": "PrMo0MeCn1DrTem0 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem1",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 44,
+      "raw": "PrMo0MeCn1DrTem1 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem2",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 45,
+      "raw": "PrMo0MeCn1DrTem2 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem3",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 46,
+      "raw": "PrMo0MeCn1DrTem3 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem4",
+      "reading": "29.420",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 47,
+      "raw": "PrMo0MeCn1DrTem4 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem5",
+      "reading": "29.420",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 48,
+      "raw": "PrMo0MeCn1DrTem5 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem6",
+      "reading": "29.420",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 49,
+      "raw": "PrMo0MeCn1DrTem6 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1DrTem7",
+      "reading": "28.440",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 50,
+      "raw": "PrMo0MeCn1DrTem7 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        "
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 51,
+      "raw": "PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 52,
+      "raw": "PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 53,
+      "raw": "PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0MeCn1MeTem0",
+      "reading": "104.880",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 54,
+      "raw": "PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "SMM_0_Temp_0",
+      "reading": "29.000",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 55,
+      "raw": "SMM_0_Temp_0     | 29.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "E1S_SMA0_Temp",
+      "reading": "46.000",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 56,
+      "raw": "E1S_SMA0_Temp    | 46.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "StoraBackplTemp0",
+      "reading": "36.000",
+      "unit": "degrees C",
+      "status": "ok",
+      "line": 57,
+      "raw": "StoraBackplTemp0 | 36.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti0",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 58,
+      "raw": "PrMo0CPU0CorUti0 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti1",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 59,
+      "raw": "PrMo0CPU0CorUti1 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti2",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 60,
+      "raw": "PrMo0CPU0CorUti2 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti3",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 61,
+      "raw": "PrMo0CPU0CorUti3 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti4",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 62,
+      "raw": "PrMo0CPU0CorUti4 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti5",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 63,
+      "raw": "PrMo0CPU0CorUti5 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti6",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 64,
+      "raw": "PrMo0CPU0CorUti6 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti7",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 65,
+      "raw": "PrMo0CPU0CorUti7 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti8",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 66,
+      "raw": "PrMo0CPU0CorUti8 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU0CorUti9",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 67,
+      "raw": "PrMo0CPU0CorUti9 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti10",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 68,
+      "raw": "PrMo0CP0CorUti10 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti11",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 69,
+      "raw": "PrMo0CP0CorUti11 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti12",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 70,
+      "raw": "PrMo0CP0CorUti12 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti13",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 71,
+      "raw": "PrMo0CP0CorUti13 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti14",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 72,
+      "raw": "PrMo0CP0CorUti14 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti15",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 73,
+      "raw": "PrMo0CP0CorUti15 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti16",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 74,
+      "raw": "PrMo0CP0CorUti16 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti17",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 75,
+      "raw": "PrMo0CP0CorUti17 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti18",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 76,
+      "raw": "PrMo0CP0CorUti18 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti19",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 77,
+      "raw": "PrMo0CP0CorUti19 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti20",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 78,
+      "raw": "PrMo0CP0CorUti20 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti21",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 79,
+      "raw": "PrMo0CP0CorUti21 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti22",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 80,
+      "raw": "PrMo0CP0CorUti22 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti23",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 81,
+      "raw": "PrMo0CP0CorUti23 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti24",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 82,
+      "raw": "PrMo0CP0CorUti24 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti25",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 83,
+      "raw": "PrMo0CP0CorUti25 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti26",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 84,
+      "raw": "PrMo0CP0CorUti26 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti27",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 85,
+      "raw": "PrMo0CP0CorUti27 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti28",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 86,
+      "raw": "PrMo0CP0CorUti28 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti29",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 87,
+      "raw": "PrMo0CP0CorUti29 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti30",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 88,
+      "raw": "PrMo0CP0CorUti30 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti31",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 89,
+      "raw": "PrMo0CP0CorUti31 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti32",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 90,
+      "raw": "PrMo0CP0CorUti32 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti33",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 91,
+      "raw": "PrMo0CP0CorUti33 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti34",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 92,
+      "raw": "PrMo0CP0CorUti34 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti35",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 93,
+      "raw": "PrMo0CP0CorUti35 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti36",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 94,
+      "raw": "PrMo0CP0CorUti36 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti37",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 95,
+      "raw": "PrMo0CP0CorUti37 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti38",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 96,
+      "raw": "PrMo0CP0CorUti38 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti39",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 97,
+      "raw": "PrMo0CP0CorUti39 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti40",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 98,
+      "raw": "PrMo0CP0CorUti40 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti41",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 99,
+      "raw": "PrMo0CP0CorUti41 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti42",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 100,
+      "raw": "PrMo0CP0CorUti42 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti43",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 101,
+      "raw": "PrMo0CP0CorUti43 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti44",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 102,
+      "raw": "PrMo0CP0CorUti44 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti45",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 103,
+      "raw": "PrMo0CP0CorUti45 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti46",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 104,
+      "raw": "PrMo0CP0CorUti46 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti47",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 105,
+      "raw": "PrMo0CP0CorUti47 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti48",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 106,
+      "raw": "PrMo0CP0CorUti48 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti49",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 107,
+      "raw": "PrMo0CP0CorUti49 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti50",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 108,
+      "raw": "PrMo0CP0CorUti50 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti51",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 109,
+      "raw": "PrMo0CP0CorUti51 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti52",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 110,
+      "raw": "PrMo0CP0CorUti52 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti53",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 111,
+      "raw": "PrMo0CP0CorUti53 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti54",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 112,
+      "raw": "PrMo0CP0CorUti54 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti55",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 113,
+      "raw": "PrMo0CP0CorUti55 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti56",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 114,
+      "raw": "PrMo0CP0CorUti56 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti57",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 115,
+      "raw": "PrMo0CP0CorUti57 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti58",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 116,
+      "raw": "PrMo0CP0CorUti58 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti59",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 117,
+      "raw": "PrMo0CP0CorUti59 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti60",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 118,
+      "raw": "PrMo0CP0CorUti60 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti61",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 119,
+      "raw": "PrMo0CP0CorUti61 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti62",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 120,
+      "raw": "PrMo0CP0CorUti62 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti63",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 121,
+      "raw": "PrMo0CP0CorUti63 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti64",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 122,
+      "raw": "PrMo0CP0CorUti64 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti65",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 123,
+      "raw": "PrMo0CP0CorUti65 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti66",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 124,
+      "raw": "PrMo0CP0CorUti66 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti67",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 125,
+      "raw": "PrMo0CP0CorUti67 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti68",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 126,
+      "raw": "PrMo0CP0CorUti68 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti69",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 127,
+      "raw": "PrMo0CP0CorUti69 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti70",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 128,
+      "raw": "PrMo0CP0CorUti70 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti71",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 129,
+      "raw": "PrMo0CP0CorUti71 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti72",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 130,
+      "raw": "PrMo0CP0CorUti72 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti73",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 131,
+      "raw": "PrMo0CP0CorUti73 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti74",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 132,
+      "raw": "PrMo0CP0CorUti74 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti75",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 133,
+      "raw": "PrMo0CP0CorUti75 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti76",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 134,
+      "raw": "PrMo0CP0CorUti76 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti77",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 135,
+      "raw": "PrMo0CP0CorUti77 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti78",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 136,
+      "raw": "PrMo0CP0CorUti78 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti79",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 137,
+      "raw": "PrMo0CP0CorUti79 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti80",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 138,
+      "raw": "PrMo0CP0CorUti80 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti81",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 139,
+      "raw": "PrMo0CP0CorUti81 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti82",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 140,
+      "raw": "PrMo0CP0CorUti82 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti83",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 141,
+      "raw": "PrMo0CP0CorUti83 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti84",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 142,
+      "raw": "PrMo0CP0CorUti84 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti85",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 143,
+      "raw": "PrMo0CP0CorUti85 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti86",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 144,
+      "raw": "PrMo0CP0CorUti86 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP0CorUti87",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 145,
+      "raw": "PrMo0CP0CorUti87 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti0",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 146,
+      "raw": "PrMo0CPU1CorUti0 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti1",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 147,
+      "raw": "PrMo0CPU1CorUti1 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti2",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 148,
+      "raw": "PrMo0CPU1CorUti2 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti3",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 149,
+      "raw": "PrMo0CPU1CorUti3 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti4",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 150,
+      "raw": "PrMo0CPU1CorUti4 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti5",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 151,
+      "raw": "PrMo0CPU1CorUti5 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti6",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 152,
+      "raw": "PrMo0CPU1CorUti6 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti7",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 153,
+      "raw": "PrMo0CPU1CorUti7 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti8",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 154,
+      "raw": "PrMo0CPU1CorUti8 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CPU1CorUti9",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 155,
+      "raw": "PrMo0CPU1CorUti9 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti10",
+      "reading": "7.472",
+      "unit": "percent",
+      "status": "ok",
+      "line": 156,
+      "raw": "PrMo0CP1CorUti10 | 7.472      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti11",
+      "reading": "7.080",
+      "unit": "percent",
+      "status": "ok",
+      "line": 157,
+      "raw": "PrMo0CP1CorUti11 | 7.080      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti12",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 158,
+      "raw": "PrMo0CP1CorUti12 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti13",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 159,
+      "raw": "PrMo0CP1CorUti13 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti14",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 160,
+      "raw": "PrMo0CP1CorUti14 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti15",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 161,
+      "raw": "PrMo0CP1CorUti15 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti16",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 162,
+      "raw": "PrMo0CP1CorUti16 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti17",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 163,
+      "raw": "PrMo0CP1CorUti17 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti18",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 164,
+      "raw": "PrMo0CP1CorUti18 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti19",
+      "reading": "3.552",
+      "unit": "percent",
+      "status": "ok",
+      "line": 165,
+      "raw": "PrMo0CP1CorUti19 | 3.552      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti20",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 166,
+      "raw": "PrMo0CP1CorUti20 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti21",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 167,
+      "raw": "PrMo0CP1CorUti21 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti22",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 168,
+      "raw": "PrMo0CP1CorUti22 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti23",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 169,
+      "raw": "PrMo0CP1CorUti23 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti24",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 170,
+      "raw": "PrMo0CP1CorUti24 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti25",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 171,
+      "raw": "PrMo0CP1CorUti25 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti26",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 172,
+      "raw": "PrMo0CP1CorUti26 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti27",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 173,
+      "raw": "PrMo0CP1CorUti27 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti28",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 174,
+      "raw": "PrMo0CP1CorUti28 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti29",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 175,
+      "raw": "PrMo0CP1CorUti29 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti30",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 176,
+      "raw": "PrMo0CP1CorUti30 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti31",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 177,
+      "raw": "PrMo0CP1CorUti31 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti32",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 178,
+      "raw": "PrMo0CP1CorUti32 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti33",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 179,
+      "raw": "PrMo0CP1CorUti33 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti34",
+      "reading": "3.552",
+      "unit": "percent",
+      "status": "ok",
+      "line": 180,
+      "raw": "PrMo0CP1CorUti34 | 3.552      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti35",
+      "reading": "3.552",
+      "unit": "percent",
+      "status": "ok",
+      "line": 181,
+      "raw": "PrMo0CP1CorUti35 | 3.552      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti36",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 182,
+      "raw": "PrMo0CP1CorUti36 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti37",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 183,
+      "raw": "PrMo0CP1CorUti37 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti38",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 184,
+      "raw": "PrMo0CP1CorUti38 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti39",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 185,
+      "raw": "PrMo0CP1CorUti39 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti40",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 186,
+      "raw": "PrMo0CP1CorUti40 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti41",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 187,
+      "raw": "PrMo0CP1CorUti41 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti42",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 188,
+      "raw": "PrMo0CP1CorUti42 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti43",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 189,
+      "raw": "PrMo0CP1CorUti43 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti44",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 190,
+      "raw": "PrMo0CP1CorUti44 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti45",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 191,
+      "raw": "PrMo0CP1CorUti45 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti46",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 192,
+      "raw": "PrMo0CP1CorUti46 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti47",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 193,
+      "raw": "PrMo0CP1CorUti47 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti48",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 194,
+      "raw": "PrMo0CP1CorUti48 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti49",
+      "reading": "1.984",
+      "unit": "percent",
+      "status": "ok",
+      "line": 195,
+      "raw": "PrMo0CP1CorUti49 | 1.984      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti50",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 196,
+      "raw": "PrMo0CP1CorUti50 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti51",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 197,
+      "raw": "PrMo0CP1CorUti51 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti52",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 198,
+      "raw": "PrMo0CP1CorUti52 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti53",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 199,
+      "raw": "PrMo0CP1CorUti53 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti54",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 200,
+      "raw": "PrMo0CP1CorUti54 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti55",
+      "reading": "2.768",
+      "unit": "percent",
+      "status": "ok",
+      "line": 201,
+      "raw": "PrMo0CP1CorUti55 | 2.768      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti56",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 202,
+      "raw": "PrMo0CP1CorUti56 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti57",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 203,
+      "raw": "PrMo0CP1CorUti57 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti58",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 204,
+      "raw": "PrMo0CP1CorUti58 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti59",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 205,
+      "raw": "PrMo0CP1CorUti59 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti60",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 206,
+      "raw": "PrMo0CP1CorUti60 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti61",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 207,
+      "raw": "PrMo0CP1CorUti61 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti62",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 208,
+      "raw": "PrMo0CP1CorUti62 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti63",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 209,
+      "raw": "PrMo0CP1CorUti63 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti64",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 210,
+      "raw": "PrMo0CP1CorUti64 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti65",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 211,
+      "raw": "PrMo0CP1CorUti65 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti66",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 212,
+      "raw": "PrMo0CP1CorUti66 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti67",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 213,
+      "raw": "PrMo0CP1CorUti67 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti68",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 214,
+      "raw": "PrMo0CP1CorUti68 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti69",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 215,
+      "raw": "PrMo0CP1CorUti69 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti70",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 216,
+      "raw": "PrMo0CP1CorUti70 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti71",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 217,
+      "raw": "PrMo0CP1CorUti71 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti72",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 218,
+      "raw": "PrMo0CP1CorUti72 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti73",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 219,
+      "raw": "PrMo0CP1CorUti73 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti74",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 220,
+      "raw": "PrMo0CP1CorUti74 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti75",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 221,
+      "raw": "PrMo0CP1CorUti75 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti76",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 222,
+      "raw": "PrMo0CP1CorUti76 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti77",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 223,
+      "raw": "PrMo0CP1CorUti77 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti78",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 224,
+      "raw": "PrMo0CP1CorUti78 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti79",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 225,
+      "raw": "PrMo0CP1CorUti79 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti80",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 226,
+      "raw": "PrMo0CP1CorUti80 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti81",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 227,
+      "raw": "PrMo0CP1CorUti81 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti82",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 228,
+      "raw": "PrMo0CP1CorUti82 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti83",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 229,
+      "raw": "PrMo0CP1CorUti83 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti84",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 230,
+      "raw": "PrMo0CP1CorUti84 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti85",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 231,
+      "raw": "PrMo0CP1CorUti85 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti86",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 232,
+      "raw": "PrMo0CP1CorUti86 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0CP1CorUti87",
+      "reading": "0.024",
+      "unit": "percent",
+      "status": "ok",
+      "line": 233,
+      "raw": "PrMo0CP1CorUti87 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "Chass0HSCVoltag0",
+      "reading": "50.740",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 234,
+      "raw": "Chass0HSCVoltag0 | 50.740     | Volts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "Chass0LeakDetec0",
+      "reading": "1.729",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 235,
+      "raw": "Chass0LeakDetec0 | 1.729      | Volts      | ok    | na        | 1.600     | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre0CpuVol0",
+      "reading": "1.032",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 236,
+      "raw": "PrMo0Vre0CpuVol0 | 1.032      | Volts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre0SocVol0",
+      "reading": "0.831",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 237,
+      "raw": "PrMo0Vre0SocVol0 | 0.831      | Volts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre1CpuVol0",
+      "reading": "0.919",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 238,
+      "raw": "PrMo0Vre1CpuVol0 | 0.919      | Volts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "PrMo0Vre1SocVol0",
+      "reading": "0.838",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 239,
+      "raw": "PrMo0Vre1SocVol0 | 0.838      | Volts      | ok    | na        | na        | na        | na        | na        | na        "
+    },
+    {
+      "name": "RTCBatterVoltag0",
+      "reading": "2.904",
+      "unit": "Volts",
+      "status": "ok",
+      "line": 240,
+      "raw": "RTCBatterVoltag0 | 2.904      | Volts      | ok    | na        | 2.000     | na        | na        | na        | na        "
+    }
+  ],
+  "action": [
+    {
+      "command": "/usr/bin/stbypowerctrl.sh aux_cycle",
+      "role": "bmc",
+      "state": "SENT",
+      "code": 0
+    }
+  ],
+  "recovery": {
+    "old_boot_id": "4feaf6e8-6ca8-49bf-a532-79e675c4722c",
+    "boot_changed": true,
+    "new_boot_id": "d807ff3b-3e5d-4f6e-a0e4-72d7f59017fd",
+    "attempts": 22
+  },
+  "loop": 63,
+  "sel_review": "REVIEW REQUIRED: cumulative SEL and delta are evidence; event correctness is not automatically judged.",
+  "power_on": true,
+  "post_complete": true
+}

@@ -1,0 +1,247 @@
+UTC+8: 2026-09-30T02:47:24+08:00
+Role: oob
+Command: sensor list
+Exit: 0
+State: RETURNED
+Duration: 15.09s
+
+Chass0HSCCurren0 | 3.900      | Amps       | ok    | na        | na        | na        | na        | na        | na        
+NVMeE1SSSD0STS0  | 0x1        | discrete   | 0x0100| na        | na        | na        | na        | na        | na        
+NVMeE1SSSD1STS0  | 0x1        | discrete   | 0x0100| na        | na        | na        | na        | na        | na        
+PrMo0CPU0CpuFre0 | 3386000000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CpuFre0 | 3386000000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MemCnt0Fre0 | 4299500000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MemCnt1Fre0 | 4299500000.000 | Hz         | ok    | na        | na        | na        | na        | na        | na        
+Chassi0HSCPower0 | 188.800    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+ProMod0CPU0Powe0 | 117.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1EnfEDP0 | 588.000    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1EnfEDP0 | 901.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+ProMod0CPU1Powe0 | 117.600    | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre0CpuPow0 | 39.200     | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre0SocPow0 | 0.000      | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre1CpuPow0 | 39.200     | Watts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre1SocPow0 | 0.000      | Watts      | ok    | na        | na        | na        | na        | na        | na        
+BMC0_Temp_0      | 38.000     | degrees C  | ok    | na        | na        | 5.000     | 90.000    | 93.000    | na        
+Chassis0HSCTemp0 | 19.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+NVMeE1SSSD0Temp0 | 45.816     | degrees C  | ok    | na        | na        | 4.980     | 75.198    | 78.186    | na        
+NVMeE1SSSD1Temp0 | 39.840     | degrees C  | ok    | na        | na        | 4.980     | 75.198    | 78.186    | na        
+PrMo0CP0CoOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0SyOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0TemAvg0 | 26.480     | degrees C  | ok    | na        | na        | na        | 90.180    | 93.120    | na        
+PrMo0CPU0TemLim0 | 65.680     | degrees C  | ok    | na        | -3.900    | -1.940    | na        | na        | na        
+PrMo0CP1CoOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1SyOvTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1TemAvg0 | 24.520     | degrees C  | ok    | na        | na        | na        | 90.180    | 93.120    | na        
+PrMo0CPU1TemLim0 | 67.640     | degrees C  | ok    | na        | -3.900    | -1.940    | na        | na        | na        
+PrMo0MeCn0DrTem0 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem1 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem2 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem3 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem4 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem5 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem6 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0DrTem7 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn0MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn1DrTem0 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem1 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem2 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem3 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem4 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem5 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem6 | 28.440     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1DrTem7 | 29.420     | degrees C  | ok    | na        | na        | na        | 85.280    | 88.220    | na        
+PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0MeCn1MeTem0 | 104.880    | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+SMM_0_Temp_0     | 29.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+E1S_SMA0_Temp    | 51.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+StoraBackplTemp0 | 38.000     | degrees C  | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti0 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti1 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti2 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti3 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti4 | 14.528     | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti5 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti6 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti7 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti8 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU0CorUti9 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti10 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti11 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti12 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti13 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti14 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti15 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti16 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti17 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti18 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti19 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti20 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti21 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti22 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti23 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti24 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti25 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti26 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti27 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti28 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti29 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti30 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti31 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti32 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti33 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti34 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti35 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti36 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti37 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti38 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti39 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti40 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti41 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti42 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti43 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti44 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti45 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti46 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti47 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti48 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti49 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti50 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti51 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti52 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti53 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti54 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti55 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti56 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti57 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti58 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti59 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti60 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti61 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti62 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti63 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti64 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti65 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti66 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti67 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti68 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti69 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti70 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti71 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti72 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti73 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti74 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti75 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti76 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti77 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti78 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti79 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti80 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti81 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti82 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti83 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti84 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti85 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti86 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP0CorUti87 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti0 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti1 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti2 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti3 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti4 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti5 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti6 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti7 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti8 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CPU1CorUti9 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti10 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti11 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti12 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti13 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti14 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti15 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti16 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti17 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti18 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti19 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti20 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti21 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti22 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti23 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti24 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti25 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti26 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti27 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti28 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti29 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti30 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti31 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti32 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti33 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti34 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti35 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti36 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti37 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti38 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti39 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti40 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti41 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti42 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti43 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti44 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti45 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti46 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti47 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti48 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti49 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti50 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti51 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti52 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti53 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti54 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti55 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti56 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti57 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti58 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti59 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti60 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti61 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti62 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti63 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti64 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti65 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti66 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti67 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti68 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti69 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti70 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti71 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti72 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti73 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti74 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti75 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti76 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti77 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti78 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti79 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti80 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti81 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti82 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti83 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti84 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti85 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti86 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+PrMo0CP1CorUti87 | 0.024      | percent    | ok    | na        | na        | na        | na        | na        | na        
+Chass0HSCVoltag0 | 50.740     | Volts      | ok    | na        | na        | na        | na        | na        | na        
+Chass0LeakDetec0 | 1.742      | Volts      | ok    | na        | 1.600     | na        | na        | na        | na        
+PrMo0Vre0CpuVol0 | 1.000      | Volts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre0SocVol0 | 0.824      | Volts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre1CpuVol0 | 0.937      | Volts      | ok    | na        | na        | na        | na        | na        | na        
+PrMo0Vre1SocVol0 | 0.838      | Volts      | ok    | na        | na        | na        | na        | na        | na        
+RTCBatterVoltag0 | 2.904      | Volts      | ok    | na        | 2.000     | na        | na        | na        | na        

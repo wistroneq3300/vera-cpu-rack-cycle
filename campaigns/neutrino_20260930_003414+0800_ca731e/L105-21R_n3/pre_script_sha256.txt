@@ -1,0 +1,8 @@
+UTC+8: 2026-09-30T00:34:16+08:00
+Role: os
+Command: sha256sum /tmp/vera-neutrino_20260930_003414+0800_ca731e-L105-21R_n3-d9932094638f.sh
+Exit: 0
+State: RETURNED
+Duration: 0.19s
+
+d9932094638f106ddd2f473962346ad600629bc600fae0ea5282438c27c22e96  /tmp/vera-neutrino_20260930_003414+0800_ca731e-L105-21R_n3-d9932094638f.sh

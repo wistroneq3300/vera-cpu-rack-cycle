@@ -1,0 +1,39 @@
+UTC+8: 2026-09-30T03:48:00+08:00
+Role: os
+Command: dmidecode -t bios
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+
+# dmidecode 3.6
+Getting SMBIOS data from sysfs.
+SMBIOS 3.8.0 present.
+# SMBIOS implementations newer than version 3.7.0 are not
+# fully supported by this version of dmidecode.
+
+Handle 0x0001, DMI type 0, 26 bytes
+BIOS Information
+	Vendor: NVIDIA
+	Version: NV_SBIOS: 06.07.01.A2, OEM_SBIOS: 06.07.01.A2
+	Release Date: Wed Sep 23 09:53:31 PM UTC 2026
+	ROM Size: 128 MB
+	Characteristics:
+		PCI is supported
+		PNP is supported
+		BIOS is upgradeable
+		BIOS shadowing is allowed
+		Boot from CD is supported
+		Selectable boot is supported
+		Serial services are supported (int 14h)
+		ACPI is supported
+		Targeted content distribution is supported
+		UEFI is supported
+	Firmware Revision: 26.9
+
+Handle 0x0015, DMI type 13, 22 bytes
+BIOS Language Information
+	Language Description Format: Abbreviated
+	Installable Languages: 1
+		enUS
+	Currently Installed Language: enUS
+

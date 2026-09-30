@@ -1,0 +1,15 @@
+UTC+8: 2026-09-30T00:34:18+08:00
+Role: os
+Command: dmesg
+Exit: 0
+State: RETURNED
+Duration: 0.19s
+
+[   41.438629] ipmi_ssif i2c-IPI0001:00: ipmi_ssif: Error fetching SSIF: -121 0 00, your system probably doesn't support this command so using defaults
+[   41.501337] ipmi_ssif i2c-IPI0001:00: ipmi_ssif: Unable to clear message flags: 0 3 c1
+[   42.006627] ipmi_ssif i2c-IPI0001:00: IPMI message handler: Found new BMC (man_id: 0x001647, prod_id: 0x0003, dev_id: 0x02)
+[   46.774649] hrtimer: interrupt took 138195 ns
+[   48.143376] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Trying ACPI-specified SSIF interface at i2c address 0x10, adapter NVDA2017:03, slave address 0x0
+[   63.519642] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Error fetching SSIF: -121 0 00, your system probably doesn't support this command so using defaults
+[   63.641960] ipmi_ssif i2c-IPI0001:01: ipmi_ssif: Unable to clear message flags: 0 3 c1
+[   64.145395] ipmi_ssif i2c-IPI0001:01: IPMI message handler: interfacing existing BMC (man_id: 0x001647, prod_id: 0x0003, dev_id: 0x02)
