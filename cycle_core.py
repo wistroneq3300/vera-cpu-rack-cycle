@@ -173,14 +173,17 @@ def parse_sensors(text):
     return rows
 
 def _known_no_reading(row, unreadable):
-    """Recognize only documented Vera no-value rows, not generic ``na``."""
+    """Recognize only documented Vera no-value rows, not generic ``na``.
+
+    Garbled names (U+FFFD replacement characters) are deliberately NOT
+    whitelisted: a corrupted sensor name means the row cannot be trusted, so
+    it must surface as SENSOR_UNREADABLE rather than pass as known-good.
+    """
     reading = row["reading"].strip().lower()
     status = row["status"].strip().lower()
     if reading not in unreadable or status not in unreadable:
         return False
-    name = row["name"].casefold()
-    unit = row["unit"].strip()
-    return "coruti" in name or ("\ufffd" in name and not unit)
+    return "coruti" in row["name"].casefold()
 
 def _snippet(row):
     """One-line, greppable pointer back to the exact evidence row."""
@@ -342,13 +345,55 @@ def config_issues(text, code):
                 items.append(issue(link_code, bdf, line.strip(), snippet=line.strip()))
     return items
 
+_DMESG_DIRECT = re.compile(
+    r"AER:.*(?:Uncorrected|Fatal)"
+    r"|Machine check events logged"
+    r"|nvme.*(?:I/O.*(?:error|timeout)|controller is down)"
+    r"|Memory failure:"
+    r"|Kernel panic|BUG:|Call Trace:",
+    re.I,
+)
+_HWERR_HEADER = re.compile(r"\[Hardware Error\]:\s*Hardware error from APEI.*Source:\s*(\S+)", re.I)
+_HWERR_SEVERE = re.compile(r"severity:\s*(fatal|corrected|uncorrected)|type:\s*(fatal|corrected|uncorrected)", re.I)
+_HWERR_ANY = re.compile(r"\[Hardware Error\]:", re.I)
+
 def dmesg_issues(text):
-    pattern = re.compile(r"AER:.*(?:Uncorrected|Fatal)|Machine check events logged|Hardware Error|nvme.*(?:I/O.*(?:error|timeout)|controller is down)|Memory failure:|Kernel panic|BUG:|Call Trace:", re.I)
+    """Extract genuine hardware failures from dmesg.
+
+    Two shapes are recognised:
+    * single-line faults (AER/MCE/nvme/panic...) matched on the line itself;
+    * APEI GHES blocks, whose many lines (severity, per-error type, section,
+      hex dump) describe ONE event. A block is only reported when it carries a
+      non-``info`` severity/type; an all-``info`` block is benign and dropped.
+      The block collapses to a single issue so one event cannot inflate into
+      dozens of findings.
+    """
     found = []
-    for lineno, line in enumerate(text.splitlines(), 1):
-        if pattern.search(line):
+    lines = text.splitlines()
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        if _DMESG_DIRECT.search(line):
             found.append(issue("DMESG_HARDWARE", "dmesg", line.strip(),
-                               snippet=f"dmesg line {lineno}: {line.strip()}"))
+                               snippet=f"dmesg line {idx + 1}: {line.strip()}"))
+            idx += 1
+            continue
+        header = _HWERR_HEADER.search(line)
+        if not header:
+            idx += 1
+            continue
+        # Consume the whole APEI block: contiguous [Hardware Error] lines.
+        start = idx
+        block = []
+        while idx < len(lines) and _HWERR_ANY.search(lines[idx]):
+            block.append(lines[idx])
+            idx += 1
+        joined = "\n".join(block)
+        severe = _HWERR_SEVERE.search(joined)
+        if severe:
+            detail = f"APEI {header.group(1)}: {severe.group(1) or severe.group(2)}"
+            found.append(issue("DMESG_HARDWARE", "dmesg", detail,
+                               snippet=f"dmesg line {start + 1}: {block[0].strip()}"))
     return found
 
 def sel_delta(previous, current):

@@ -173,15 +173,19 @@ class PureTests(unittest.TestCase):
         rows = parse_sensors(
             'PrMo0CP1CorUti11 | na | discrete | na | na\n'
             'PrMo0CP1CorUti24 | na | percent | na | na\n'
-            '\ufffd\ufffd\ufffd\ufffd | na |  | na | na\n'
         )
         self.assertEqual(sensor_issues(rows), [])
         self.assertEqual(
             health(sensor_issues(parse_sensors('Fan | na | percent | na'))),
             'FAIL',
         )
+        # Garbled names must never be whitelisted, with or without a unit.
         self.assertEqual(
             health(sensor_issues(parse_sensors('\ufffd\ufffd\ufffd\ufffd | na | percent | na'))),
+            'FAIL',
+        )
+        self.assertEqual(
+            health(sensor_issues(parse_sensors('\ufffd\ufffd\ufffd\ufffd | na |  | na'))),
             'FAIL',
         )
 
@@ -213,6 +217,34 @@ class PureTests(unittest.TestCase):
         self.assertEqual(item['code'], 'DMESG_HARDWARE')
         self.assertIn('dmesg line 2:', item['snippet'])
         self.assertIn('Uncorrected', item['snippet'])
+
+    def test_apei_info_block_is_benign_and_collapses(self):
+        # Real L105-21R_n1 loop0054 shape: one GHES event, severity info,
+        # spread across many lines (severity/type/section/hex dump).
+        text = (
+            '[ 10.289492] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8194\n'
+            '[ 10.295257] {1}[Hardware Error]: event severity: info\n'
+            '[ 10.300241] {1}[Hardware Error]:  Error 0, type: info\n'
+            '[ 10.305226] {1}[Hardware Error]:   section type: unknown, 9068e568-...\n'
+            '[ 10.313731] {1}[Hardware Error]:   section length: 0xe0\n'
+            '[ 10.318888] {1}[Hardware Error]:   00000000: 00000101 00000000 00000000 00000000\n'
+            '[ 10.327737] {1}[Hardware Error]:   00000010: 4c504343 43555845 00000046 00000000\n'
+            'plain unrelated line\n'
+        )
+        self.assertEqual(dmesg_issues(text), [])
+
+    def test_apei_severe_block_reports_once(self):
+        text = (
+            '[ 10.289492] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8194\n'
+            '[ 10.295257] {1}[Hardware Error]: event severity: corrected\n'
+            '[ 10.300241] {1}[Hardware Error]:  Error 0, type: corrected\n'
+            '[ 10.318888] {1}[Hardware Error]:   00000000: 00000101 00000000 00000000 00000000\n'
+            '[ 10.327737] {1}[Hardware Error]:   00000010: 4c504343 43555845 00000046 00000000\n'
+        )
+        items = dmesg_issues(text)
+        self.assertEqual(len(items), 1)
+        self.assertIn('corrected', items[0]['detail'])
+        self.assertIn('8194', items[0]['detail'])
 
     def test_missing_sensor_quotes_baseline_row(self):
         baseline = parse_sensors(SENSORS)
