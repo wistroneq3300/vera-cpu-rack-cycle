@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from cycle_core import aggregate_issues, atomic_write, health, now, write_json
+from cycle_storage import report_writer_lock, reject_live_rebuild
 
 ASSETS = Path(__file__).parent
 
@@ -65,6 +66,8 @@ def record_html(record, node_index):
             content = ''.join(f'<li><code>{esc(e)}</code></li>' for e in events)
             sel = f'<details class="sel-events"><summary>New BMC SEL events: {len(events)}</summary><div class="detail-body"><p>Review event correctness manually. Compared with the snapshot immediately before this loop.</p><ul>{content}</ul></div></details>'
     check_summary = facts(list(record.get('check_summary', {}).items()))
+    if any(record.get('dmesg_native_error_counts', {}).values()):
+        check_summary += facts([('Native errors reported in captured messages (not lifetime counters)', ', '.join(f'{k}={v}' for k, v in record['dmesg_native_error_counts'].items()))])
     return f'''<details id="{phase_id}"><summary><strong>{esc(record['phase'])}</strong> {badge(record['status'])}<span class="phase-count">{len(record['issues'])} findings · {esc(duration(record.get('duration_seconds')))} · {esc(record.get('finished') or 'Not finished')}</span></summary><div class="detail-body">
       {check_summary}<ul class="record-issues">{issues}</ul>{'<p>No issues recorded.</p>' if not issues else ''}{collection}{sel}<details><summary>Cycle action and verified identities</summary>{action}{identity}</details>
       <p class="muted">{esc(record.get('sel_review', ''))}</p><details><summary>Original evidence files</summary><ul class="evidence-list">{evidence}</ul></details></div></details>'''
@@ -103,10 +106,12 @@ def issue_cards(items, indices):
             i = indices[item['node']]
             loop = re.search(r'(\d+)\s*$', event['phase'])
             phase_id = f"node-{i}-" + (f"loop-{loop.group(1)}" if event['phase'] != 'PRE' and loop else 'start' if event['phase'] == 'START' else 'pre')
+            if event['phase'] == 'RECOVERY':
+                phase_id = f'node-{i}-recovery'
             source = f'<pre class="snippet">{esc(event["snippet"])}</pre>' if event.get('snippet') else ''
             occurrences.append(f'<tr><td><a href="#{phase_id}" data-panel="node-{i}">{esc(event["phase"])}</a></td><td>{esc(event["detail"])}{source}</td><td>{evidence_link(event["evidence"])}</td></tr>')
         loops = [int(m.group(1)) for p in phases if (m := re.search(r'LOOP (\d+)', p))]
-        scope = (('PRE; ' if 'PRE' in phases else '') + (f"Loops {min(loops)}–{max(loops)}" if loops else '')) or 'PRE'
+        scope = (('PRE; ' if 'PRE' in phases else '') + (f"Loops {min(loops)}–{max(loops)}" if loops else '')) or ', '.join(phases)
         open_attr = ' open' if not opened and item['severity'] == 'FAIL' else ''
         opened = opened or bool(open_attr)
         rows.append(f'''<details class="issue-row" data-severity="{esc(item['severity'])}" data-classification="{esc(item['classification'])}"{open_attr}><summary>{badge(item['severity'])}<span class="issue-title">{esc(item['node'])} / {esc(item['component'])}</span> {badge(item['classification'])}<span class="issue-meta">{esc(item['code'])} · {len(item['occurrences'])} occurrence(s) · {scope}</span></summary><div class="detail-body"><p>{esc(item['detail'])}</p><details><summary>All occurrences ({len(item['occurrences'])})</summary><div class="tablewrap"><table><thead><tr><th>Phase</th><th>Finding and source</th><th>Evidence</th></tr></thead><tbody>{''.join(occurrences)}</tbody></table></div></details></div></details>''')
@@ -129,6 +134,8 @@ def render_html(campaign, console_log=''):
         rows.append(f'<tr><td class="target"><a href="#node-{i}" data-panel="node-{i}">{esc(node["key"])}</a><small>{esc(node["target"]["os_ip"])}</small></td><td>{badge(health_value)}</td><td>{badge(state)}</td><td>{node["completed"]}</td><td>{esc(note)}</td></tr>')
         choices.append(f'<a class="node-choice" href="#node-{i}" data-panel="node-{i}" data-health="{health_value}">{esc(node["key"])} {badge(health_value)}<small>{node["completed"]} loops</small></a>')
         records = record_html(node['pre'], i) + (record_html(node['start'], i) if node.get('start') else '') + ''.join(record_html(r, i) for r in node['loops'])
+        if node.get('recovery_issues'):
+            records += f'<details id="node-{i}-recovery"><summary>Recovery integrity {badge("FAIL")}</summary><ul>' + ''.join(f'<li>{esc(item["detail"])}</li>' for item in node['recovery_issues']) + '</ul></details>'
         last = node['loops'][-1] if node['loops'] else node['pre']
         times = [r['duration_seconds'] for r in node['loops'] if r.get('post_complete') and r.get('duration_seconds') is not None]
         notice = f'<p class="notice">{esc("; ".join(node["blocked"]) or node["stop_reason"])}</p>' if node['blocked'] or node['stop_reason'] else ''
@@ -147,6 +154,11 @@ def render_html(campaign, console_log=''):
     <main id="main">{overview}{node_panel}{issues_panel}</main><footer><p>Generated {esc(now())}. Offline report. Keep this HTML with its evidence folders to use log links.</p><p>Hardware script SHA-256: <code>{esc(campaign['script_sha256'])}</code></p></footer><script>{js}</script></body></html>'''
 
 def write_reports(root, campaign):
+    with report_writer_lock(root, wait=True):
+        _write_reports(root, campaign)
+
+
+def _write_reports(root, campaign):
     root = Path(root)
     # Missing-file annotations belong to the rendered snapshot, not reviewed PRE.
     campaign = copy.deepcopy(campaign)
@@ -167,6 +179,7 @@ def write_reports(root, campaign):
                       f"Blocked: {'; '.join(node['blocked']) or 'No'}", f"Stop reason: {node['stop_reason']}"]
         for record in [node['pre'], *([node['start']] if node.get('start') else []), *node['loops']]:
             node_lines.append(f"{record['phase']}: {record['status']} ({len(record['issues'])} findings)")
+        node_lines.extend('Recovery: ' + note for note in node.get('recovery_notes', []))
         atomic_write(root / node['key'] / "node_summary.txt", '\n'.join(node_lines) + '\n')
         lines += node_lines
     atomic_write(root / "cycle_summary.txt", '\n'.join(lines) + '\n')
@@ -189,22 +202,13 @@ def write_reports(root, campaign):
         console_log = ''
     atomic_write(root / "CYCLE_REVIEW_REPORT.html", render_html(campaign, console_log))
 
-def rebuild(root):
-    root = Path(root)
-    campaign = json.loads((root / 'campaign.json').read_text(encoding='utf-8'))
-    for node in campaign['nodes']:
-        start_path = root / node['key'] / 'start' / 'report.json'
-        if start_path.exists():
-            node['start'] = json.loads(start_path.read_text(encoding='utf-8'))
-        pre_path = root / node['key'] / 'pre_report.json'
-        if pre_path.exists():
-            node['pre'] = json.loads(pre_path.read_text(encoding='utf-8'))
-        node['loops'] = [json.loads(p.read_text(encoding='utf-8')) for p in sorted((root / node['key']).glob('loop*/report.json'))]
-        node['completed'] = sum(r.get('post_complete', False) for r in node['loops'])
-        node['attempts'] = sum(bool(r.get('action')) for r in node['loops'])
-        node['boot_confirmed'] = sum(r.get('boot_confirmed', False) for r in node['loops'])
-        node['valid_cycles'] = sum(r.get('valid_cycle', False) for r in node['loops'])
-    if campaign['state'] == 'RUNNING':
-        campaign.update(state='INCOMPLETE', finished=now(), stop_reason='Recovered journal; original process did not finalize this campaign')
-    write_reports(root, campaign)
-    return campaign
+def rebuild(root, runtime_root=None):
+    # Read, ownership check, merge and publication share one writer lock.
+    with report_writer_lock(root):
+        root = Path(root)
+        campaign = json.loads((root / 'campaign.json').read_text(encoding='utf-8'))
+        reject_live_rebuild(root, campaign, runtime_root)
+        from cycle_recovery import recover_records
+        campaign = recover_records(root, campaign)
+        _write_reports(root, campaign)
+        return campaign

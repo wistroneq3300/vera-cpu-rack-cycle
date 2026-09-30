@@ -700,6 +700,8 @@ class EngineTests(unittest.TestCase):
         path=output/'campaign.json'
         data=json.loads(path.read_text())
         data['state']='RUNNING'
+        # Simulate a crashed former process, not this still-live test owner.
+        data['writer_owner']['process_token'] = 'terminated-test-owner'
         write_json(path,data)
         partial=new_record('LOOP 3');partial['loop']=3
         write_json(output/'tray1_n1'/'loop0003'/'report.json',partial)

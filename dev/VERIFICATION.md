@@ -1,5 +1,9 @@
 # Refactor verification
 
+## Release 2026.10.01.2 — Run 2
+
+**143 offline tests: 142 PASS, 1 explicit Linux-root cross-UID environment SKIP, 0 failures/errors.** Includes 28 new Run 2 tests and all 115 original tests. Bash syntax (three scripts), Python AST (nine production modules), version output, diff checks and Chrome desktop/128-node report checks passed. Nine selected new tests against untouched `b148a73` produced 17 expected assertion failures and zero errors as a negative control. No reviewer ZIP or live rack was used. See [finding-by-finding evidence and limits](../docs/RUN2_IMPLEMENTATION.md). All older release results below are historical.
+
 ## Release 2026.10.01
 
 Current results: **115 offline tests run, 114 PASS, 1 SKIP** (Linux-root cross-UID unavailable on Windows). Both project shell scripts and the stop script passed individual syntax checks; production Python compiled; diff whitespace checks passed. Chrome/Playwright desktop and 128-node synthetic report checks passed with no JavaScript errors or overflow. See [the current implementation and acceptance record](../docs/IMPLEMENTATION_2026-10-01.md) for scope and limits. Earlier results below are historical.

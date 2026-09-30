@@ -102,8 +102,9 @@ class RunRegistry:
         self.run_id = run_id
 
     def register(self, output, **metadata):
-        write_json(self.path / "owner.json", dict(**metadata, run_id=self.run_id, pid=os.getpid(),
-                   output=str(output), state="RUNNING", utc=now(), process_token=process_token(os.getpid())))
+        from cycle_storage import writer_identity
+        write_json(self.path / "owner.json", dict(**metadata, run_id=self.run_id, **writer_identity(),
+                   output=str(output), state="RUNNING", utc=now()))
 
     def requested(self):
         return (self.path / "stop.request").exists()

@@ -33,6 +33,7 @@ from cycle_engine import NodeSession
 from cycle_report import duration, elapsed, rebuild, status, write_reports
 from cycle_runtime import EndpointLocks, RunRegistry, list_running, request_stop
 from cycle_transport import Transport
+from cycle_storage import writer_identity
 
 BASE = Path(__file__).resolve().parent
 
@@ -114,6 +115,8 @@ def show_result(console, node, record):
         console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in {'hardware', 'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'sensor', 'pci', 'dmesg', 'sel', 'power'}))
     if record.get('dmesg_delta'):
         console('  New dmesg observations: ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_delta'].items()))
+    if any(record.get('dmesg_native_error_counts', {}).values()):
+        console('  Native errors reported in captured messages (not lifetime counters): ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_native_error_counts'].items()))
     groups = {}
     for item in record['issues']:
         key = (item['severity'], item['code'], item['component'], item['detail'])
@@ -253,6 +256,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             atomic_write(output / f'{options.project}_config.snapshot.sh', script.decode('utf-8'))
             atomic_write(output / 'issue_policy.snapshot.md', policy_text)
             data = dict(run_id=run_id, project=options.project, started=now(), finished=None,
+                        writer_owner=writer_identity(),
                         tool_version=(BASE / 'VERSION').read_text().strip(),
                         state='RUNNING', stop_reason='', cycle_mode=options.cycle_mode, channel=options.channel,
                         limits=dict(loops=options.loops, hours=options.hours), script_sha256=digest(script),

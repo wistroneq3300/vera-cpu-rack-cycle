@@ -1,5 +1,7 @@
 # Release 2026.10.01 — review implementation
 
+Historical release record. Run 2 found additional conditional defects; see [2026.10.01.2 corrections and regression evidence](RUN2_IMPLEMENTATION.md). The results below describe the original release, not exhaustive acceptance of every branch.
+
 Implemented against `259a80fa7579ef459ab0922ae4b877f56391870b`, following the FINAL USER DECISIONS in [the supplied review](vera_cycle_codex_requirements.md). The final decisions override earlier proposals in that review and historical development documents.
 
 ## Delivered behavior

@@ -37,17 +37,22 @@ cpu_check() {
     collect data CPU dmidecode -t processor || return
     qty=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Status:.*Populated/ && !/Unpopulated/ {n++} END {print n+0}')
     minimum CPU "$qty" "$CPU_MIN"
-    local enabled topology sockets total online threads
+    local enabled topology sockets total online threads row_errors missing_socket
     enabled=$(printf '%s\n' "$data" | awk '/Status:.*Populated/ && /Enabled/ && !/Unpopulated/ {n++} END {print n+0}')
     if ((enabled != qty)); then fail CPU_DISABLED CPU "Only $enabled of $qty populated CPUs are enabled"; fi
     threads=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Thread Count:/ {n+=$3} END {print n+0}')
     collect topology CPU-online lscpu --all -p=CPU,SOCKET,ONLINE || return
-    read -r sockets total online <<< "$(printf '%s\n' "$topology" | awk -F, '
-      !/^#/ && $1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/ {s[$2]=1; n++; if ($3=="Y") on++}
-      END {for (v in s) ns++; print ns+0, n+0, on+0}')"
-    printf 'CHECK|CPU_ONLINE|sockets=%s|logical=%s|online=%s|smbios_threads=%s\n' "$sockets" "$total" "$online" "$threads"
-    if ((sockets != enabled || total == 0 || online != total || (threads > 0 && threads != total))); then
-        fail CPU_TOPOLOGY CPU "SMBIOS enabled=$enabled threads=$threads; lscpu sockets=$sockets logical=$total online=$online"
+    read -r sockets total online row_errors missing_socket <<< "$(printf '%s\n' "$topology" | awk -F, '
+      /^[[:space:]]*#/ || /^[[:space:]]*$/ {next}
+      {for (i=1;i<=NF;i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
+       if (NF!=3 || $1 !~ /^[0-9]+$/) {bad++; next}
+       if (seen[$1]++) {bad++; next}
+       n++; if ($3=="Y") on++; else if ($3!="N") bad++
+       if ($2 ~ /^[0-9]+$/) s[$2]=1; else missing++}
+      END {for (v in s) ns++; print ns+0, n+0, on+0, bad+0, missing+0}')"
+    printf 'CHECK|CPU_ONLINE|sockets=%s|logical=%s|online=%s|smbios_threads=%s|row_errors=%s|missing_socket=%s\n' "$sockets" "$total" "$online" "$threads" "$row_errors" "$missing_socket"
+    if ((row_errors > 0 || missing_socket > 0 || sockets != enabled || total == 0 || online != total || (threads > 0 && threads != total))); then
+        fail CPU_TOPOLOGY CPU "SMBIOS enabled=$enabled threads=$threads; lscpu sockets=$sockets logical=$total online=$online row_errors=$row_errors missing_socket=$missing_socket"
     fi
 }
 dimm_check() {
@@ -136,7 +141,7 @@ pci_count() {
     minimum "$component" "$qty" "$expected"
 }
 link_check() {
-    local data line bdf="" name="" endpoint=false seen=false denied=false pcie=false
+    local data line bdf="" name="" endpoint=false integrated=false seen=false denied=false pcie=false
     collect data PCIe-links lspci -Dvv || return
     # Flush at every function boundary, including the last function.
     while IFS= read -r line; do
@@ -145,21 +150,25 @@ link_check() {
                 if [[ "$denied" == true || ( "$endpoint" == true && "$seen" != true ) || ( "$pcie" == true && "$seen" != true ) ]]; then
                     printf 'CHECK|PCIE_LINK|bdf=%s|state=unreadable\n' "$bdf"
                     fail PCIE_LINK_UNAVAILABLE "$bdf" "$name: required link status was not readable"
-                elif [[ "$endpoint" != true ]]; then
+                elif [[ "$endpoint" != true && "$seen" != true ]]; then
                     printf 'CHECK|PCIE_LINK|bdf=%s|state=unsupported\n' "$bdf"
                 fi
             fi
             [[ "$line" == __END__ ]] && break
-            bdf=${line%% *}; name=${line#* }; endpoint=false; seen=false; denied=false; pcie=false
+            bdf=${line%% *}; name=${line#* }; endpoint=false; integrated=false; seen=false; denied=false; pcie=false
             continue
         fi
         [[ "$line" == *'<access denied>'* ]] && denied=true
-        [[ "$line" =~ Express.*(Legacy[[:space:]]+)?Endpoint ]] && endpoint=true
+        if [[ "$line" =~ Express[[:space:]]+(\(v[0-9]+\)[[:space:]]+)?Root[[:space:]]+Complex[[:space:]]+(Integrated[[:space:]]+Endpoint|Event[[:space:]]+Collector)(,|$) ]]; then
+            integrated=true
+        elif [[ "$line" =~ Express[[:space:]]+(\(v[0-9]+\)[[:space:]]+)?(Legacy[[:space:]]+)?Endpoint(,|$) ]]; then
+            endpoint=true
+        fi
         # LnkCap with no Express capability header is still an unreadable PCIe link.
         [[ "$line" == *LnkCap:* ]] && pcie=true
         [[ "$line" == *LnkSta:* ]] || continue
         seen=true
-        [[ "$endpoint" == true ]] || continue
+        [[ "$endpoint" == true || "$integrated" == true ]] || continue
         printf 'CHECK|PCIE_LINK|bdf=%s|state=evaluated|lnksta=%s\n' "$bdf" "$line"
         if printf '%s\n' "$line" | grep -qiE 'down[[:space:]-]*grad|degrad'; then
             printf 'CHECK|PCIE_DOWNGRADE|bdf=%s|lnksta=%s\n' "$bdf" "$line"

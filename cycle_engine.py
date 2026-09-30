@@ -59,6 +59,7 @@ class NodeSession:
         self.pre_issue_keys = {}
         self.upload_attempted = False
         self.script_verified = False
+        self.hardware_execution_complete = False
         self.dmesg_seen = {}
         self.expected_boot = None
         self.cleanup_safe = True
@@ -92,6 +93,7 @@ class NodeSession:
             pass
 
     def persist(self, record):
+        record['revision'] = record.get('revision', 0) + 1
         if record["phase"] == "PRE":
             classify_against_pre(record["issues"], set())
         else:
@@ -116,6 +118,9 @@ class NodeSession:
             if record['check_summary'].get(stem) != 'FAIL':
                 record['check_summary'][stem] = item['severity']
         record['dmesg_delta'] = {severity: sum(i.get('occurrence_count', 1) for i in record['issues']
+                                            if i['code'].startswith('DMESG_') and i['severity'] == severity)
+                                  for severity in ('WARN', 'FAIL')}
+        record['dmesg_native_error_counts'] = {severity: sum(i.get('native_error_count', 0) for i in record['issues']
                                             if i['code'].startswith('DMESG_') and i['severity'] == severity)
                                   for severity in ('WARN', 'FAIL')}
         if record['commands'].get('hardware', {}).get('state') == 'BLOCKED':
@@ -234,6 +239,8 @@ class NodeSession:
             self.dmesg_seen = counts
 
     def capture(self, record, post=False):
+        self.hardware_execution_complete = False
+        record['hardware_execution_complete'] = False
         self.collect_dmesg(record, 'dmesg')
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
@@ -260,6 +267,21 @@ class NodeSession:
             config = self.command(record, "hardware", "os", f"MEMORY_MIN_RATIO={ratio} bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
             findings = config_issues(config.output, config.code)
             record["issues"] += findings
+            lines = [line.strip() for line in config.output.splitlines() if line.strip()]
+            results = [line for line in lines if line.startswith('RESULT|')]
+            expected_result = {0: 'RESULT|PASS', 1: 'RESULT|FAIL'}.get(config.code)
+            self.hardware_execution_complete = bool(
+                config.state == 'RETURNED' and expected_result and results == [expected_result]
+                and lines[-1] == expected_result
+                and not (config.code == 0 and findings))
+            record['hardware_execution_complete'] = self.hardware_execution_complete
+            if not self.hardware_execution_complete:
+                self.add(record, 'HARDWARE_EXECUTION_INCOMPLETE', 'hardware',
+                         f'Execution not confirmed: state={config.state}, exit={config.code}, final result={results}',
+                         evidence=record['commands']['hardware']['evidence'])
+                self.node.update(active=False, stop_reason='Hardware script execution incomplete')
+                if not post:
+                    self.node['blocked'].append('Hardware script execution incomplete')
             record['hardware_checks'] = {}
             for line in config.output.splitlines():
                 if line.startswith('CHECK|'):
@@ -273,6 +295,7 @@ class NodeSession:
                         state = 'FAIL'
                     key = f'{name}/{component}' if 'bdf' in values else name
                     record['hardware_checks'][key] = state
+        record['script_verified'] = self.script_verified
         sensor = self.command(record, "sensor", "oob", "sensor list")
         record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
         if post:
@@ -438,6 +461,8 @@ class NodeSession:
         return state
 
     def one_loop(self, number):
+        if not self.node['active'] or self.node['blocked']:
+            raise RuntimeError('Node is stopped or blocked; no additional cycle action allowed')
         record = new_record(f"LOOP {number}")
         record["loop"] = number
         self.node["loops"].append(record)
@@ -492,7 +517,11 @@ class NodeSession:
                 if role != "os":
                     self.identity(record, role, role + "_after_cycle",
                                   save_evidence=False, record_command=False)
-            if recovered and record['identities']['os']['boot_id'] != record['recovery']['new_boot_id']:
+            expected_post_boot = record['recovery']['new_boot_id'] if recovered else old_boot
+            record['recovery']['post_entry_boot_id'] = record['identities']['os']['boot_id']
+            if record['identities']['os']['boot_id'] != expected_post_boot:
+                self.add(record, 'UNEXPECTED_BOOT_TRANSITION', 'recovery',
+                         f"Expected POST boot {expected_post_boot}; observed {record['identities']['os']['boot_id']}")
                 raise IdentityUnsafe('Additional OS boot transition before POST')
             post_boot = record['identities']['os']['boot_id']
             record['boot_confirmed'] = bool(recovered)
@@ -511,10 +540,11 @@ class NodeSession:
                         self.add(record, "COMMAND_RECONCILED", "cycle", "Reply lost; changed OS boot ID and power-on state confirmed recovery", "WARN")
             elif any(a["state"] == "RESPONSE_LOST" for a in record["action"]):
                 self.add(record, "COMMAND_UNCONFIRMED", "cycle", "Lost response could not be reconciled with boot and power evidence")
-            record["post_complete"] = True
-            self.node["completed"] += 1
+            record['independent_checks_complete'] = True
+            record["post_complete"] = self.hardware_execution_complete
+            self.node["completed"] += int(record['post_complete'])
             record['boot_confirmed'] = bool(recovered)
-            record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified)
+            record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified and self.hardware_execution_complete)
             self.node['valid_cycles'] += int(record['valid_cycle'])
         except Exception as exc:
             code = "IDENTITY_UNSAFE" if isinstance(exc, IdentityUnsafe) else "NODE_UNAVAILABLE"

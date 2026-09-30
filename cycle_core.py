@@ -6,6 +6,9 @@ import hashlib
 import ipaddress
 import json
 import re
+import os
+import tempfile
+import unicodedata
 from collections import Counter
 
 from dataclasses import dataclass
@@ -25,9 +28,14 @@ def now():
 def atomic_write(path, text):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(path.name + ".tmp")
-    temp.write_text(text, encoding="utf-8")
-    temp.replace(path)
+    fd, name = tempfile.mkstemp(prefix=path.name + '.', suffix='.tmp', dir=path.parent)
+    temp = Path(name)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8', newline='\n') as stream:
+            stream.write(text)
+        temp.replace(path)
+    finally:
+        temp.unlink(missing_ok=True)
 
 def write_json(path, value):
     atomic_write(path, json.dumps(value, indent=2, ensure_ascii=True) + "\n")
@@ -149,8 +157,9 @@ def issue_key(item):
 def issue_baseline(items):
     result = {}
     for item in items:
-        value = result.setdefault(issue_key(item), dict(count=0, severity='WARN', native_rank=0))
+        value = result.setdefault(issue_key(item), dict(count=0, severity='WARN', native_rank=0, native_error_count=0))
         value['count'] += item.get('occurrence_count', 1)
+        value['native_error_count'] += item.get('native_error_count', 0)
         rank = {'info': 0, 'corrected': 1, 'recoverable': 2, 'unknown': 3,
                 'uncorrected': 4, 'uncorrectable': 4, 'fatal': 5}
         value['native_rank'] = max(value['native_rank'], rank.get(item.get('native_severity'), 0))
@@ -169,6 +178,7 @@ def classify_against_pre(items, pre_keys):
         if isinstance(pre_keys, dict) and key in pre_keys:
             old, current = pre_keys[key], counts[key]
             if (current['count'] > old['count'] or current['native_rank'] > old.get('native_rank', 0)
+                    or current['native_error_count'] > old.get('native_error_count', 0)
                     or (current['severity'] == 'FAIL' and old['severity'] != 'FAIL')):
                 item.update(classification='WORSENED', known_reason='Count or severity increased relative to PRE')
     return items
@@ -232,7 +242,7 @@ def sensor_issues(rows):
                            f"{count} rows share this sensor name; review each row", "WARN",
                            snippet="\n".join(_snippet(r) for r in dup_rows)))
     for r in rows:
-        if '\ufffd' in r['name'] or any(ord(c) < 32 for c in r['name']):
+        if '\ufffd' in r['name'] or any(unicodedata.category(c) == 'Cc' for c in r['name']):
             found.append(issue('SENSOR_NAME_MALFORMED', r['name'], 'Sensor identity contains invalid characters', snippet=_snippet(r)))
             continue
         if r.get("format_error"):
@@ -390,7 +400,8 @@ def aggregate_issues(campaign):
     for node in campaign["nodes"]:
         # Keep the PRE comparison separate from severity and causation.
         pre_keys = issue_baseline(node['pre']['issues'])
-        for record in [node["pre"], *([node['start']] if node.get('start') else []), *node["loops"]]:
+        for record in [node["pre"], *([node['start']] if node.get('start') else []), *node["loops"],
+                       dict(phase='RECOVERY', issues=node.get('recovery_issues', []))]:
             classified = classify_against_pre([i.copy() for i in record['issues']], pre_keys)
             for item in classified:
                 key = (node["key"], *issue_key(item))
