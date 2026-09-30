@@ -54,6 +54,8 @@ def record_html(record, node_index):
         events = record.get('sel_events')
         if events is None:
             sel = '<p>BMC SEL delta: ' + badge(record.get('sel_status', 'MISSING')) + '</p>'
+        elif not events:
+            sel = '<details class="sel-events empty-sel"><summary>BMC SEL: EMPTY — 0 events</summary><div class="detail-body"><p>The before-cycle and POST snapshots were read successfully. The BMC returned no SEL records.</p></div></details>'
         else:
             content = ''.join(f'<li><code>{esc(e)}</code></li>' for e in events)
             sel = f'<details class="sel-events"><summary>New BMC SEL events: {len(events)}</summary><div class="detail-body"><p>Review event correctness manually. Compared with the snapshot immediately before this loop.</p><ul>{content}</ul></div></details>'
@@ -105,7 +107,7 @@ def issue_cards(items, indices):
     return ''.join(rows) or '<p>No issues recorded.</p>'
 
 
-def render_html(campaign):
+def render_html(campaign, console_log=''):
     result = status(campaign)
     nodes, items = campaign['nodes'], result['issues']
     indices = {n['key']: i for i, n in enumerate(nodes)}
@@ -128,7 +130,9 @@ def render_html(campaign):
     outcome = f'''<div class="sheet"><div class="outcome"><div><h2>Campaign outcome</h2><p>{esc(campaign.get('stop_reason') or 'Campaign is in progress.')}</p></div><div class="outcome-badges"><div><span class="label">Execution</span>{badge(result['completion'])}</div><div><span class="label">Health</span>{badge(result['health'])}</div></div></div>{facts([('Cycle / channel', f"{campaign['cycle_mode']} / {campaign['channel']}"), ('Requested limits', f"{campaign['limits']['loops'] or 'No'} loop limit / {campaign['limits']['hours'] or 'No'} hour limit"), ('Campaign elapsed', duration(elapsed(campaign['started'], campaign.get('finished') or now()))), ('Completed node-loops', result['completed_node_loops']), ('Selected / approved nodes', f"{len(nodes)} / {sum(not n['blocked'] for n in nodes)}"), ('PRE-existing issue groups', result['known']), ('New issue groups during cycling', result['new'])])}</div>'''
     overview = f'''<section role="tabpanel" id="overview" aria-labelledby="tab-overview">{outcome}<div class="sheet"><h2>Target results</h2><p class="muted">All selected nodes. Filters in other views do not change this overview.</p><div class="tablewrap"><table id="target-results"><thead><tr><th>Target / OS address</th><th>Health</th><th>Execution</th><th>Completed loops</th><th>Findings</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div></div><div class="sheet"><h2>Problems to review</h2><p>FAIL first, then WARN. Repeated findings are grouped within each node; KNOWN still affects health.</p>{issue_cards(items, indices)}</div></section>'''
     node_panel = f'''<section role="tabpanel" id="nodes" aria-labelledby="tab-nodes"><div class="sheet node-browser"><aside><h2>Find a node</h2><label for="node-search">Node name</label><input id="node-search" type="search" placeholder="Search nodes"><label for="node-health">Health</label><select id="node-health"><option value="">All nodes</option><option>FAIL</option><option>WARN</option><option>PASS</option></select><p id="node-count" aria-live="polite">{len(nodes)} nodes</p><nav class="node-list" aria-label="Select a node">{''.join(choices)}</nav></aside><div class="node-content">{''.join(panels)}</div></div></section>'''
-    issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option></select></label></div><p id="issue-count" aria-live="polite">{len(items)} matching issues</p>{issue_cards(items, indices)}<p id="no-matches" hidden>No matching issues. Clear filters to show all findings.</p></div></section>'''
+    issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option></select></label></div><p id="issue-count" aria-live="polite">{len(items)} matching issues</p>{issue_cards(items, indices)}<p id="no-matches" hidden>No matching issues. Clear the filters to show all findings.</p></div></section>'''
+    console_panel = f'''<details class="console-panel"><summary>Console log <span class="muted">{len(console_log.splitlines()) if console_log else 0} lines</span></summary><div class="console-tools"><label for="console-search">Search console log<input id="console-search" type="search" placeholder="Search console output"></label><button id="download-console" type="button">Download console.log</button></div><pre id="console-log">{esc(console_log) if console_log else 'Console log is not available for this report.'}</pre></details>'''
+    overview = overview.replace('</section>', console_panel + '</section>', 1)
     css = (ASSETS / 'report.css').read_text(encoding='utf-8')
     js = (ASSETS / 'report.js').read_text(encoding='utf-8')
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>{esc(campaign['run_id'])} | Cycle review</title><style>{css}</style></head><body>
@@ -168,7 +172,12 @@ def write_reports(root, campaign):
                 markdown.append(f"- {event['phase']}: {event['detail']} ({event['evidence'] or 'No evidence file'})")
             markdown.append('')
         atomic_write(root / (classification.lower() + '_issues.md'), '\n'.join(markdown) + '\n')
-    atomic_write(root / "CYCLE_REVIEW_REPORT.html", render_html(campaign))
+    console_path = root / "console.log"
+    try:
+        console_log = console_path.read_text(encoding='utf-8') if console_path.is_file() else ''
+    except OSError:
+        console_log = ''
+    atomic_write(root / "CYCLE_REVIEW_REPORT.html", render_html(campaign, console_log))
 
 def rebuild(root):
     root = Path(root)

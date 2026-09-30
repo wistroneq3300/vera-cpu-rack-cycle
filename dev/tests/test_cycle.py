@@ -374,6 +374,12 @@ class EngineTests(unittest.TestCase):
                 clear_calls = [cmd for _, role, cmd in self.fake.calls if role == 'oob' and cmd == 'sel clear']
                 self.assertEqual(len(clear_calls), 1)
 
+    def test_pre_duration_does_not_include_campaign_log_clearing(self):
+        self.session.precheck()
+        before = self.session.node['pre']['duration_seconds']
+        self.session.start()
+        self.assertEqual(self.session.node['pre']['duration_seconds'], before)
+
     def test_unrecognized_sel_never_looks_like_zero_events(self):
         self.ready()
         original = self.fake.oob

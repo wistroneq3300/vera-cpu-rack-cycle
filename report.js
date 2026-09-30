@@ -10,6 +10,11 @@ function filter(){let shown=0;for(const item of document.querySelectorAll('#issu
 for(const control of [search,severity,classification])control.addEventListener('input',filter);
 function filterNodes(){const query=document.getElementById('node-search').value.toLowerCase(),health=document.getElementById('node-health').value;let shown=0;for(const a of document.querySelectorAll('.node-choice')){a.hidden=!a.textContent.toLowerCase().includes(query)||(health&&a.dataset.health!==health);if(!a.hidden)shown++;}document.getElementById('node-count').textContent=shown+' matching nodes';}
 for(const id of ['node-search','node-health'])document.getElementById(id).addEventListener('input',filterNodes);
+const consoleSearch=document.getElementById('console-search'),consoleLog=document.getElementById('console-log');
+if(consoleSearch)consoleSearch.addEventListener('input',()=>{const query=consoleSearch.value.toLowerCase();consoleLog.textContent=consoleLog.dataset.raw.split('\n').filter(line=>!query||line.toLowerCase().includes(query)).join('\n');});
+if(consoleLog)consoleLog.dataset.raw=consoleLog.textContent;
+const downloadConsole=document.getElementById('download-console');
+if(downloadConsole)downloadConsole.addEventListener('click',()=>{const blob=new Blob([consoleLog.dataset.raw||consoleLog.textContent],{type:'text/plain'}),link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='console.log';link.click();URL.revokeObjectURL(link.href);});
 let printState;
 window.addEventListener('beforeprint',()=>{printState=[...document.querySelectorAll('details')].map(r=>[r,r.open]);printState.forEach(([r])=>r.open=true);});
 window.addEventListener('afterprint',()=>{if(printState)printState.forEach(([r,open])=>r.open=open);});

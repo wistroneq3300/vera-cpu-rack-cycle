@@ -40,6 +40,7 @@ def build(output, count=3):
     campaign=dict(run_id='neutrino_DEMO_20260929_160000',project='neutrino',started='2026-09-29T16:00:00+08:00',finished='2026-09-29T16:38:00+08:00',
                   state='COMPLETE',stop_reason=f'All 3 requested loops completed on {count} approved nodes.',cycle_mode='power_cycle',channel='inband',limits=dict(loops=3,hours=0),
                   script_sha256=digest((Path(__file__).resolve().parents[2]/'neutrino_config.sh').read_bytes()),nodes=nodes,synthetic=True)
+    atomic_write(output/'console.log', '2026-09-29T16:00:00+08:00 Run ID: neutrino_DEMO_20260929_160000\n2026-09-29T16:01:00+08:00 L105-21R_n1 | LOOP 1 | FAIL\n')
     write_reports(output,campaign)
 
 if __name__=='__main__':

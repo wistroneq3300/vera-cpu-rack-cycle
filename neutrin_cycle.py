@@ -114,7 +114,14 @@ def show_result(console, node, record):
     for item in record['issues']:
         key = (item['severity'], item['code'], item['component'], item['detail'])
         groups[key] = groups.get(key, 0) + 1
+    if record['phase'] != 'PRE':
+        known_count = sum(1 for item in record['issues'] if item.get('classification') == 'KNOWN')
+        if known_count:
+            console(f"  Known issues unchanged: {known_count} finding(s); see PRE and HTML for details")
     for (severity, _code, component, detail), count in groups.items():
+        if record['phase'] != 'PRE' and all(item.get('classification') == 'KNOWN' for item in record['issues']
+                                            if (item['severity'], item['code'], item['component'], item['detail']) == (severity, _code, component, detail)):
+            continue
         text = ' '.join(detail.split())[:300]
         console(f"  {severity} {component}: {text}" + (f" (repeated {count} times)" if count > 1 else ''))
     for reason in node['blocked']:
@@ -179,7 +186,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         console("Selected targets: " + ', '.join(t.key for t in targets))
         console(f"Mode: {options.cycle_mode}; channel: {options.channel}; loops: {options.loops or 'unlimited'}; hours: {options.hours or 'unlimited'}")
         if options.cycle_mode == 'reboot' and options.channel == 'outband':
-            console("Outband reboot uses ACPI power soft, waits for confirmed Off, then sends power on once.")
+            console("Outband reboot uses BMC power reset.")
         if options.cycle_mode == 'aux_cycle':
             console("Auxiliary AC cycle uses the BMC standby controller for either selected channel.")
         blocked = inventory_blocks(targets)

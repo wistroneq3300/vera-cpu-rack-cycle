@@ -90,8 +90,9 @@ class NodeSession:
             classify_against_pre(record["issues"], self.pre_issue_keys)
         write_json(self.folder(record) / ("pre_report.json" if record["phase"] == "PRE" else "report.json"), record)
 
-    def finish(self, record):
-        record.update(status=health(record["issues"]), finished=now())
+    def finish(self, record, preserve_timing=False):
+        finished = record.get("finished") if preserve_timing else None
+        record.update(status=health(record["issues"]), finished=finished or now())
         began = record.get("cycle_started", record["started"])
         record["duration_seconds"] = max(0, (datetime.fromisoformat(record["finished"]) - datetime.fromisoformat(began)).total_seconds())
         self.persist(record)
@@ -262,7 +263,9 @@ class NodeSession:
         except Exception as exc:
             self.node["blocked"].append(str(exc))
             self.add(record, "PRE_BLOCKED", "identity", str(exc))
-        self.finish(record)
+        # PRE timing ends when the PRE capture finishes. Clearing dmesg/SEL is
+        # campaign preparation and must not inflate the displayed PRE duration.
+        self.finish(record, preserve_timing=True)
         return self.node
 
     def sel_command(self, record, stem, action, **kwargs):
@@ -296,7 +299,7 @@ class NodeSession:
                     existing = {(i['code'], i['detail']) for i in record['issues']}
                     record['issues'] += [i for i in dmesg_issues(result.output) if (i['code'], i['detail']) not in existing]
         self.pre_issue_keys = {(i['code'], i['component']) for i in record['issues']}
-        self.finish(record)
+        self.finish(record, preserve_timing=True)
 
     def wait_boot(self, record, old_boot, deadline):
         attempts = 0
