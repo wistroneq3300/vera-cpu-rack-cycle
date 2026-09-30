@@ -371,26 +371,7 @@ class NodeSession:
             if mode == "aux_cycle":
                 state = self.dispatch(record, "cycle_command", "bmc", "/usr/bin/stbypowerctrl.sh aux_cycle")
             elif mode == "reboot" and channel == "outband":
-                state = self.dispatch(record, "cycle_soft", "oob", "power soft")
-                if state in {"SENT", "RESPONSE_LOST"}:
-                    off = False
-                    attempt = 0
-                    while time.monotonic() < deadline:
-                        attempt += 1
-                        power = self.command(
-                            record, "power_off_poll", "oob", "power status",
-                            timeout=min(20, max(1, deadline-time.monotonic())), check=False,
-                            save_evidence=False, record_command=False,
-                        )
-                        if power.code == 0 and re.search(r"Chassis Power is off", power.output, re.I):
-                            off = True
-                            break
-                        time.sleep(min(self.options.poll_interval, max(0, deadline-time.monotonic())))
-                    if off:
-                        record["recovery"]["power_off_observed"] = True
-                        state = self.dispatch(record, "cycle_on", "oob", "power on")
-                    else:
-                        self.add(record, "POWER_OFF_TIMEOUT", "cycle", "ACPI shutdown did not reach confirmed off state; no power-on command sent")
+                state = self.dispatch(record, "cycle_command", "oob", "power reset")
             else:
                 inband = channel == "inband"
                 if mode == "reboot":

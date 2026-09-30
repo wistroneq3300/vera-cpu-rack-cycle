@@ -95,7 +95,7 @@ class FakeTransport:
         if cmd == 'power on':
             self.power_off = False
             return self.action(t)
-        if cmd == 'power cycle':
+        if cmd in {'power cycle', 'power reset'}:
             return self.action(t)
         if cmd == 'power status':
             return Command(0, 'Chassis Power is ' + ('off' if self.power_off else 'on'))
@@ -542,13 +542,12 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(result['post_complete'])
         self.assertEqual(result['action'][0]['state'],'COMMAND_FAILED')
 
-    def test_outband_reboot_off_then_on(self):
+    def test_outband_reboot_uses_power_reset(self):
         self.options.cycle_mode='reboot'
         self.options.channel='outband'
         self.ready()
         result=self.session.one_loop(1)
-        self.assertEqual([a['command'] for a in result['action']],['power soft','power on'])
-        self.assertTrue(result['recovery']['power_off_observed'])
+        self.assertEqual([a['command'] for a in result['action']],['power reset'])
 
     def test_dependencies_installed_before_full_pre(self):
         self.fake.package_missing = True
