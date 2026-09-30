@@ -1,0 +1,8 @@
+UTC+8: 2026-09-30T10:07:59+08:00
+Role: os
+Command: command -v mst
+Exit: 0
+State: RETURNED
+Duration: 0.21s
+
+/usr/bin/mst

@@ -1,0 +1,8 @@
+UTC+8: 2026-09-30T10:11:51+08:00
+Role: oob
+Command: power cycle
+Exit: 0
+State: RETURNED
+Duration: 0.39s
+
+Chassis Power Control: Cycle
