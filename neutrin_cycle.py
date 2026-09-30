@@ -92,9 +92,9 @@ class Console:
             line = re.sub(rf'(?<![\w;]){re.escape(name)}(?![\w])', lambda m: BLUE + m[0] + RESET, line)
         # The run ID identifies the whole run, so it gets its own colour to be
         # scannable in a long transcript. Matched on the generated shape
-        # (<project>_<YYYYmmdd>_<HHMMSS+0800>_<hex>) rather than on the label, so
+        # (<project>_<cycle>_<channel>_<YYYYmmdd>_<HHMMSS>_<hex>) rather than on the label, so
         # ids quoted in other messages colourise too.
-        line = re.sub(r'\b[A-Za-z0-9-]+_\d{8}_\d{6}(?:Z|[+-]\d{4})_[0-9a-f]{6}\b',
+        line = re.sub(r'\b[A-Za-z0-9-]+_(?:reboot|power_cycle|aux_cycle)_(?:inband|outband)_\d{8}_\d{6}_[0-9a-f]{6}\b',
                       lambda m: f'{BLUE}{m.group(0)}{RESET}', line)
         for word, colour in COLOURS.items():
             line = re.sub(rf'\b{word}\b', f'{colour}{word}{RESET}', line)
@@ -162,7 +162,7 @@ def parallel(function, sessions, console, label, display_result=True):
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
     console.node_names = [t.key for t in targets]
-    run_id = f"{options.project}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S%z')}_{uuid.uuid4().hex[:6]}"
+    run_id = f"{options.project}_{options.cycle_mode}_{options.channel}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
     output = options.output.resolve() / run_id
     locks = EndpointLocks(runtime_root)
     stop = threading.Event()
@@ -180,7 +180,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         policy_text = options.issue_policy.read_text(encoding='utf-8')
         rules = parse_policy(policy_text)
         console(f"Run ID: {run_id}")
-        console("Time zone: UTC+8 (+0800 in Run ID, +08:00 in console/evidence timestamps)")
+        console("Time zone: UTC+8 (local time in Run ID and +08:00 in console/evidence timestamps)")
         console(f"Planned output: {output}")
         console(f"Project config: {options.config_script.resolve()}")
         console("Selected targets: " + ', '.join(t.key for t in targets))

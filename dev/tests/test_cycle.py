@@ -615,8 +615,8 @@ class EngineTests(unittest.TestCase):
             mocked_clock.now.side_effect=clock
             self.run_campaign()
         output=next(self.options.output.iterdir())
-        self.assertTrue(output.name.startswith('neutrino_20260929_160000+0800_'),output.name)
-        self.assertIn('Time zone: UTC+8 (+0800 in Run ID',(output/'console.log').read_text())
+        self.assertTrue(output.name.startswith('neutrino_power_cycle_inband_20260929_160000_'),output.name)
+        self.assertIn('Time zone: UTC+8 (local time in Run ID',(output/'console.log').read_text())
 
     def test_graceful_stop_keeps_current_loop_post(self):
         def callback():
@@ -709,8 +709,8 @@ class ConsolePaintTests(unittest.TestCase):
     def test_loop_progress_and_run_id(self):
         out = self.paint('Loop 3: waiting for 1 target(s)')
         self.assertIn('\033[1;35mLoop 3\033[0m', out)
-        out = self.paint('Run ID: neutrino_20260929_231617+0800_690ec1')
-        self.assertIn('\033[1;34mneutrino_20260929_231617+0800_690ec1\033[0m', out)
+        out = self.paint('Run ID: neutrino_power_cycle_inband_20260929_231617_690ec1')
+        self.assertIn('\033[1;34mneutrino_power_cycle_inband_20260929_231617_690ec1\033[0m', out)
 
     def test_header_labels_are_coloured_but_timestamps_are_not(self):
         out = self.paint('2026-09-29T23:16:17+08:00 Mode: aux_cycle; channel: inband; loops: 5')

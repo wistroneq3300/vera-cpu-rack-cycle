@@ -37,7 +37,7 @@ L105-21R_n1 | PRE | FAIL
 L105-21R_n2 | PRE | FAIL
   Identity: BMC SSH OK | OS SSH OK
   FAIL [NEW] 000c:80:00.0: LnkSta: Speed 16GT/s (downgraded), Width x8
-Start neutrino_<timestamp>_<suffix> on 2 runnable target(s), accepting the listed findings and exclusions? [y/N]:
+Start neutrino_<cycle>_<channel>_<timestamp>_<suffix> on 2 runnable target(s), accepting the listed findings and exclusions? [y/N]:
 ```
 
 Missing/wrong hostnames, inaccessible identities, overlapping endpoints, locked endpoints, an unusable PCI baseline or inability to upload the verified hardware script block a target. Sensor read/format/health failures remain visible as PRE FAIL findings, including when the whole sensor table is malformed; the operator sees the summary and decides whether to continue. Other targets may proceed only after the operator sees the exclusions and confirms. All blocked means no campaign starts. Hardware FAIL, unreadable individual sensors and dependency-install failures remain FAIL; they do not by themselves forbid an otherwise usable PRE.
@@ -82,7 +82,7 @@ tray,node,bmc_ip,os_ip,bmc_hostname,os_hostname,lily_bmc_ip,lily_os_ip,lily_bmc_
 
 Lily endpoints are optional; when supplied their expected hostnames are required. Same node labels on different trays are allowed. Duplicate tray/node or ambiguous selections are rejected. Duplicate IP endpoints in selected rows are listed and blocked. Names used in paths accept letters, digits, dots and hyphens.
 
-Run IDs include project, a rack-lab UTC+8 timestamp using `+0800` without a colon so it is safe in paths and stop commands (for example `neutrino_20260929_160000+0800_a1b2c3`). Console and evidence timestamps use the same timezone (`+08:00`); the console states the time zone. Every target folder includes tray and node. Loop evidence uses concise names without a redundant `post_` prefix, while transient boot/identity polls are kept in the JSON recovery summary instead of producing one file per attempt. On Linux, endpoint locks are advisory file locks in `/tmp/vera-cycle-runtime` (mode `1777`); lock files are shared across users and are **not deleted on release**, avoiding inode races. A crashed process releases its OS-held locks. Failure to open or acquire a lock blocks that target; there is no fallback lock directory.
+Run IDs include project, cycle type, channel, and the rack-lab UTC+8 local timestamp without a timezone suffix (for example `neutrino_power_cycle_inband_20260929_160000_a1b2c3`). Console and evidence timestamps use the same timezone (`+08:00`); the console states the time zone. Every target folder includes tray and node. Loop evidence uses concise names without a redundant `post_` prefix, while transient boot/identity polls are kept in the JSON recovery summary instead of producing one file per attempt. On Linux, endpoint locks are advisory file locks in `/tmp/vera-cycle-runtime` (mode `1777`); lock files are shared across users and are **not deleted on release**, avoiding inode races. A crashed process releases its OS-held locks. Failure to open or acquire a lock blocks that target; there is no fallback lock directory.
 
 All operators on the **same orchestrator** must use the same runtime path. If `/tmp` is isolated per user/service, provision a shared local directory and set `VERA_RUNTIME_DIR` consistently. Locks do not coordinate separate orchestrator machines. Registry directories are owner-only. Never remove live endpoint lock files or use independent runtime paths to bypass an active run.
 
@@ -97,9 +97,9 @@ Select `1`, `2`, etc. to choose one of the current OS user's running campaigns. 
 The explicit Run ID interface remains available:
 
 ```bash
-./stop_cycle.sh neutrino_<timestamp>_<suffix>
+./stop_cycle.sh neutrino_<cycle>_<channel>_<timestamp>_<suffix>
 # equivalent:
-python3 neutrin_cycle.py --stop neutrino_<timestamp>_<suffix>
+python3 neutrin_cycle.py --stop neutrino_<cycle>_<channel>_<timestamp>_<suffix>
 ```
 
 Only the campaign owner can request the stop. It completes current POST and starts no next loop. Ctrl+C/SIGTERM behave the same way. It never uses broad `pkill`, never kills other campaigns, and does not stop `dryrun_sim.py`. A hard kill/power loss cannot generate a final report at the moment it occurs; once the process is stopped, rebuild from the retained journal:
