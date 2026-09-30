@@ -1,5 +1,9 @@
 # Refactor verification
 
+## Release 2026.10.01
+
+Current results: **115 offline tests run, 114 PASS, 1 SKIP** (Linux-root cross-UID unavailable on Windows). Both project shell scripts and the stop script passed individual syntax checks; production Python compiled; diff whitespace checks passed. Chrome/Playwright desktop and 128-node synthetic report checks passed with no JavaScript errors or overflow. See [the current implementation and acceptance record](../docs/IMPLEMENTATION_2026-10-01.md) for scope and limits. Earlier results below are historical.
+
 Verified on 2026-09-29 in the local Windows workspace. No rack SSH, power actions, IPMI or apt installation was performed against real equipment.
 
 ## Results

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Dry-run simulation with BASELINE DIFF (read-only, no power action):
+"""DISABLED historical live utility (not an offline simulator):
 Per node, take a baseline snapshot, then for each loop compare current vs
 baseline and report the delta (dropped/added MST endpoints, lspci/NVMe cards,
 BF4 change, new dmesg errors, new SEL entries minus Watchdog noise, power
-change). Read-only: NO reboot, NO power off, NO config change.
+change). Historical behavior includes mutation; execution is disabled before credentials or network access.
 
 Outputs per run dir /root/dryrun_<stamp>/:
   <node>_baseline.log        full baseline evidence
@@ -12,6 +12,7 @@ Outputs per run dir /root/dryrun_<stamp>/:
   summary.txt                unified 3-node diff table + verdict
 """
 from __future__ import annotations
+raise SystemExit("Disabled legacy live utility: this file used SSH, mst start and SEL clearing. Use dev/tests for offline simulation or the guarded campaign runner for approved live work.")
 import csv, datetime, os, re, subprocess, sys, time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor

@@ -110,6 +110,10 @@ def show_result(console, node, record):
         console('  Duration: ' + duration(record['duration_seconds']))
     if record['phase'] == 'PRE':
         console('  Identity: ' + ' | '.join(f"{role.upper()} SSH {'OK' if role in record['identities'] else 'NOT VERIFIED'}" for role in ('bmc', 'os')))
+    if record.get('check_summary'):
+        console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in {'hardware', 'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'sensor', 'pci', 'dmesg', 'sel', 'power'}))
+    if record.get('dmesg_delta'):
+        console('  New dmesg observations: ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_delta'].items()))
     groups = {}
     for item in record['issues']:
         key = (item['severity'], item['code'], item['component'], item['detail'])
@@ -117,7 +121,7 @@ def show_result(console, node, record):
     if record['phase'] != 'PRE':
         known_count = sum(1 for item in record['issues'] if item.get('classification') == 'KNOWN')
         if known_count:
-            console(f"  Known issues unchanged: {known_count} finding(s); see PRE and HTML for details")
+            console(f"  Previously observed in PRE: {known_count} finding(s); see PRE and HTML for details")
     for (severity, _code, component, detail), count in groups.items():
         if record['phase'] != 'PRE' and all(item.get('classification') == 'KNOWN' for item in record['issues']
                                             if (item['severity'], item['code'], item['component'], item['detail']) == (severity, _code, component, detail)):
@@ -148,16 +152,16 @@ def parallel(function, sessions, console, label, display_result=True):
                     future.result()
                 except Exception as exc:
                     session.node.update(active=False, stop_reason=f"{label}: {type(exc).__name__}: {exc}")
-                    record = session.node['loops'][-1] if session.node['loops'] else session.node['pre']
+                    record = session.node['loops'][-1] if session.node['loops'] else session.node.get('start', session.node['pre'])
                     session.add(record, 'EXECUTION_ERROR', label, str(exc))
                     if label == 'PRE':
                         session.node['blocked'].append(str(exc))
                     session.finish(record)
-                record = session.node['loops'][-1] if session.node['loops'] else session.node['pre']
+                record = session.node['loops'][-1] if session.node['loops'] else session.node.get('start', session.node['pre'])
                 if display_result:
                     show_result(console, session.node, record)
                 elif label == 'Start log clearing':
-                    console(f"{session.node['key']} | log clearing | complete")
+                    console(f"{session.node['key']} | log clearing | {record['status']}")
 
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
@@ -249,15 +253,16 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             atomic_write(output / f'{options.project}_config.snapshot.sh', script.decode('utf-8'))
             atomic_write(output / 'issue_policy.snapshot.md', policy_text)
             data = dict(run_id=run_id, project=options.project, started=now(), finished=None,
+                        tool_version=(BASE / 'VERSION').read_text().strip(),
                         state='RUNNING', stop_reason='', cycle_mode=options.cycle_mode, channel=options.channel,
                         limits=dict(loops=options.loops, hours=options.hours), script_sha256=digest(script),
                         nodes=[s.node for s in sessions])
             write_reports(output, data)
             console(f"Campaign started. Output: {output}")
             console(f"Stop after the current POST: ./stop_cycle.sh {run_id}")
-            start = time.monotonic()
             parallel(lambda s: s.start(), runnable, console, 'Start log clearing', display_result=False)
             write_reports(output, data)
+            start = time.monotonic()
             number = 0
             while True:
                 active = [s for s in runnable if s.node['active']]
@@ -265,7 +270,9 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
                     data.update(state='INCOMPLETE', stop_reason='Operator requested stop after the current POST')
                     break
                 if (options.loops and number >= options.loops) or (options.hours and time.monotonic()-start >= options.hours*3600):
-                    if any(not s.node['active'] for s in runnable):
+                    if number == 0:
+                        data.update(state='INCOMPLETE', stop_reason='No cycles exercised')
+                    elif any(not s.node['active'] for s in runnable):
                         data.update(state='INCOMPLETE', stop_reason='Run limit reached; one or more targets became unavailable')
                     else:
                         data.update(state='COMPLETE', stop_reason='Requested run limit reached')
@@ -438,6 +445,7 @@ def wizard(options):
 
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--version', action='version', version=(BASE / 'VERSION').read_text().strip())
     p.add_argument('--project', choices=('1', '2', 'neutrino', 'naboo'))
     p.add_argument('--node', action='append', help='all, unique node name, or tray/node; may repeat')
     p.add_argument('--inventory', type=Path)
@@ -447,6 +455,7 @@ def parser():
     p.add_argument('--channel', choices=('inband', 'outband'), default='inband')
     p.add_argument('--boot-timeout', type=float, default=900)
     p.add_argument('--poll-interval', type=float, default=10)
+    p.add_argument('--memory-min-ratio', type=float, default=0.90, help='Minimum OS MemTotal / installed SMBIOS capacity (0 < ratio <= 1)')
     p.add_argument('--config-script', type=Path,
                    help='Override the selected project config script')
     p.add_argument('--issue-policy', type=Path, default=BASE / 'issue_policy.md')
@@ -492,6 +501,8 @@ def main(argv=None):
             raise ValueError('Provide a positive --loops or --hours limit; negative/non-finite limits are invalid')
         if not math.isfinite(options.boot_timeout) or options.boot_timeout < 1 or not math.isfinite(options.poll_interval) or options.poll_interval <= 0:
             raise ValueError('Boot timeout must be >= 1 second and polling interval must be positive')
+        if not math.isfinite(options.memory_min_ratio) or not 0 < options.memory_min_ratio <= 1:
+            raise ValueError('Memory minimum ratio must be finite and in (0, 1]')
         if options.keep_going:
             print('Note: --keep-going is now always enabled for hardware/firmware findings.')
         blocks = inventory_blocks(targets)

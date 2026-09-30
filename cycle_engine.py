@@ -15,6 +15,7 @@ from cycle_core import (
     dmesg_issues,
     health,
     issue,
+    issue_baseline,
     missing_sensors,
     now,
     parse_pci,
@@ -24,7 +25,7 @@ from cycle_core import (
     sensor_issues,
     write_json,
 )
-from cycle_transport import IdentityUnsafe
+from cycle_transport import Command, IdentityUnsafe
 
 PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
             "ipmitool": "ipmitool", "lsusb": "usbutils", "ip": "iproute2"}
@@ -48,14 +49,19 @@ class NodeSession:
         self.target, self.transport, self.root = target, transport, Path(root)
         self.run_id, self.script, self.script_hash = run_id, script, script_hash
         self.options, self.rules = options, rules
-        self.remote = f"/tmp/vera-{run_id}-{target.key}-{script_hash[:12]}.sh"
+        self.remote = f"/var/tmp/vera-{run_id}-{target.key}-{script_hash[:12]}.sh"
         # Optional stage reporter set by the campaign; keeps one_loop silent when
         # a NodeSession is driven directly (tests, dry-run).
         self.progress = None
         self.node = dict(key=target.key, target=target.__dict__, blocked=[], active=True,
-                         pre=new_record("PRE"), loops=[], completed=0, stop_reason="", stage="")
+                         pre=new_record("PRE"), loops=[], completed=0, attempts=0, boot_confirmed=0, valid_cycles=0, stop_reason="", stage="")
         self.baseline = None
-        self.pre_issue_keys = set()
+        self.pre_issue_keys = {}
+        self.upload_attempted = False
+        self.script_verified = False
+        self.dmesg_seen = {}
+        self.expected_boot = None
+        self.cleanup_safe = True
 
     def stage(self, text):
         """Report the current phase for this node so the operator can see where
@@ -68,6 +74,8 @@ class NodeSession:
                 pass
 
     def folder(self, record):
+        if record["phase"] == "START":
+            return self.root / self.target.key / "start"
         return self.root / self.target.key / ("" if record["phase"] == "PRE" else f"loop{record['loop']:04d}")
 
     def cleanup_remote(self):
@@ -75,7 +83,7 @@ class NodeSession:
         Best effort: a node that is offline or reprovisioned must not turn
         teardown into an error. Only this run's own file is touched, and a
         node that was never used (blocked at PRE) is not contacted at all."""
-        if self.node["blocked"]:
+        if self.node["blocked"] or not self.cleanup_safe:
             return
         script = shlex.quote(self.remote)
         try:
@@ -95,6 +103,23 @@ class NodeSession:
         record.update(status=health(record["issues"]), finished=finished or now())
         began = record.get("cycle_started", record["started"])
         record["duration_seconds"] = max(0, (datetime.fromisoformat(record["finished"]) - datetime.fromisoformat(began)).total_seconds())
+        record['check_summary'] = {name: ('PASS' if command.get('valid') else 'FAIL')
+                                   for name, command in record['commands'].items()}
+        record['check_summary'].update(record.get('hardware_checks', {}))
+        for item in record['issues']:
+            code, component = item['code'], item['component']
+            stem = ('dmesg' if code.startswith('DMESG_') or 'dmesg' in component else
+                    'sensor' if code.startswith('SENSOR_') else
+                    'pci' if code in {'PCI_DRIFT', 'PCI_EMPTY'} else
+                    component if component in record['commands'] else
+                    'recovery' if component == 'recovery' else 'hardware')
+            if record['check_summary'].get(stem) != 'FAIL':
+                record['check_summary'][stem] = item['severity']
+        record['dmesg_delta'] = {severity: sum(i.get('occurrence_count', 1) for i in record['issues']
+                                            if i['code'].startswith('DMESG_') and i['severity'] == severity)
+                                  for severity in ('WARN', 'FAIL')}
+        if record['commands'].get('hardware', {}).get('state') == 'BLOCKED':
+            record['check_summary']['hardware'] = 'BLOCKED'
         self.persist(record)
         return record
 
@@ -103,8 +128,15 @@ class NodeSession:
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
                 save_evidence=True, record_command=True, include_output=True):
-        result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
-                  self.transport.ssh(self.target, role, cmd, timeout, sudo))
+        try:
+            result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
+                      self.transport.ssh(self.target, role, cmd, timeout, sudo))
+        except IdentityUnsafe:
+            raise
+        except (ConnectionError, TimeoutError, OSError) as exc:
+            if not check:
+                raise
+            result = Command(255, f'{type(exc).__name__}: {exc}', 'NOT_ISSUED')
         evidence = ""
         if save_evidence:
             filename = f"pre_{stem}.txt" if record["phase"] == "PRE" else f"{stem}.txt"
@@ -162,8 +194,50 @@ class NodeSession:
         if mst.code:
             self.add(record, "MST_MISSING", "MST", "mst is expected in the OS image; automatic MFT installation is disabled")
 
+    def ensure_verified_script(self, record):
+        """Upload once; all later executions require the same safe file and SHA."""
+        self.script_verified = False
+        if not self.upload_attempted:
+            self.upload_attempted = True
+            self.transport.upload(self.target, self.script, self.remote)
+        remote = shlex.quote(self.remote)
+        safety = self.command(record, 'script_safety', 'os',
+                              f'test -f {remote} && test ! -L {remote} && '
+                              f'test "$(stat -c %u:%a {remote})" = "$(id -u):700"')
+        if safety.code:
+            raise RuntimeError('Hardware script type, owner or permissions are unsafe')
+        verify = self.command(record, 'script_sha256', 'os', 'sha256sum ' + remote)
+        words = verify.output.split()
+        if verify.code or not words or words[0] != self.script_hash:
+            raise RuntimeError('Remote hardware script hash verification failed; no execution')
+        self.script_verified = True
+
+    def collect_dmesg(self, record, stem, clear=False):
+        result = self.command(record, stem, 'os', 'dmesg -c' if clear else 'dmesg', sudo=True)
+        if result.code:
+            return
+        boot = record['identities'].get('os', {}).get('boot_id', '')
+        events = dmesg_issues(result.output)
+        counts = {}
+        for event in events:
+            # printk timestamp + exact raw content distinguishes repetitions;
+            # a multiset also preserves identical repeated lines in one read.
+            key = (boot, event['raw'])
+            counts[key] = counts.get(key, 0) + 1
+            if counts[key] <= self.dmesg_seen.get(key, 0):
+                continue
+            event.update(boot_id=boot, phase=stem, evidence=record['commands'][stem]['evidence'])
+            record['issues'].append(event)
+        if clear:
+            self.dmesg_seen = {}
+        else:
+            self.dmesg_seen = counts
+
     def capture(self, record, post=False):
+        self.collect_dmesg(record, 'dmesg')
         for stem, (cmd, sudo) in CAPTURES.items():
+            if stem == 'dmesg':
+                continue
             result = self.command(record, stem, "os", cmd, sudo=sudo)
             if stem == "pci":
                 record["pci"] = parse_pci(result.output) if result.code == 0 else {}
@@ -171,22 +245,34 @@ class NodeSession:
                     self.add(record, "PCI_EMPTY", "PCIe", "No valid full-BDF PCI inventory")
                 elif post:
                     record["issues"] += pci_issues(self.baseline["pci"], record["pci"])
-            elif stem == "dmesg":
-                if result.code == 0:
-                    record["issues"] += dmesg_issues(result.output)
-                    if post:
-                        cleared = self.command(record, "dmesg_clear", "os", "dmesg -c", sudo=True,
-                                               include_output=False, save_evidence=False)
-                        # Read-and-clear also saves messages arriving between the
-                        # first read and clearing; -C alone would discard them.
-                        if cleared.code == 0:
-                            existing = {(i['code'], i['detail']) for i in record['issues']}
-                            record['issues'] += [i for i in dmesg_issues(cleared.output) if (i['code'], i['detail']) not in existing]
-        if post:
-            # AC cycle clears /tmp (tmpfs); re-push the verified script before post-check.
-            self.transport.upload(self.target, self.script, self.remote)
-        config = self.command(record, "hardware", "os", "bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
-        record["issues"] += config_issues(config.output, config.code)
+        try:
+            self.ensure_verified_script(record)
+        except IdentityUnsafe:
+            raise
+        except Exception as exc:
+            self.add(record, 'SCRIPT_VALIDATION_FAILED', 'hardware', str(exc))
+            record['commands']['hardware'] = dict(valid=False, state='BLOCKED', evidence='')
+            self.node.update(active=False, stop_reason='Hardware script validation failed')
+            if not post:
+                self.node['blocked'].append('Cannot run the verified hardware script')
+        if self.script_verified:
+            ratio = getattr(self.options, 'memory_min_ratio', 0.9)
+            config = self.command(record, "hardware", "os", f"MEMORY_MIN_RATIO={ratio} bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
+            findings = config_issues(config.output, config.code)
+            record["issues"] += findings
+            record['hardware_checks'] = {}
+            for line in config.output.splitlines():
+                if line.startswith('CHECK|'):
+                    cells = line.split('|')
+                    name = cells[1]
+                    values = dict(c.split('=', 1) for c in cells[2:] if '=' in c)
+                    component = values.get('bdf', name)
+                    state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
+                    related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
+                    if any(i['component'] in {component, related} for i in findings):
+                        state = 'FAIL'
+                    key = f'{name}/{component}' if 'bdf' in values else name
+                    record['hardware_checks'][key] = state
         sensor = self.command(record, "sensor", "oob", "sensor list")
         record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
         if post:
@@ -228,6 +314,8 @@ class NodeSession:
         bmc = self.command(record, "host_power", "bmc", "/usr/bin/powerctrl.sh power_status")
         if bmc.code == 0 and not ("Host: Running" in bmc.output and "Chassis Power: On" in bmc.output):
             self.add(record, "HOST_NOT_RUNNING", "power", "BMC power_status did not confirm Host: Running and Chassis Power: On")
+        if post:
+            self.collect_dmesg(record, 'dmesg_clear', clear=True)
         for item in record["issues"]:
             if not item.get("evidence"):
                 component = item["component"]
@@ -244,14 +332,6 @@ class NodeSession:
             if uid.code or uid.output.strip() != "0":
                 self.add(record, "ROOT_UNAVAILABLE", "privileges", "Root execution is unavailable; privileged checks may fail")
             self.dependencies(record)
-            try:
-                self.transport.upload(self.target, self.script, self.remote)
-                verify = self.command(record, "script_sha256", "os", "sha256sum " + shlex.quote(self.remote))
-                if verify.code or verify.output.split()[0] != self.script_hash:
-                    raise RuntimeError("Remote hardware script hash verification failed")
-            except Exception as exc:
-                self.add(record, "SCRIPT_UPLOAD_FAILED", "hardware", str(exc))
-                self.node["blocked"].append("Cannot run the verified hardware script")
             self.capture(record)
             # Sensor parse/health failures remain visible PRE FAIL findings. The
             # operator must be able to review them and decide whether to run;
@@ -259,8 +339,11 @@ class NodeSession:
             if not record["pci"]:
                 self.node["blocked"].append("PRE PCI baseline is unavailable")
             self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
-            self.pre_issue_keys = {(i["code"], i["component"]) for i in record["issues"]}
+            self.pre_issue_keys = issue_baseline(record["issues"])
+            self.expected_boot = record['identities']['os']['boot_id']
         except Exception as exc:
+            if isinstance(exc, IdentityUnsafe):
+                self.cleanup_safe = False
             self.node["blocked"].append(str(exc))
             self.add(record, "PRE_BLOCKED", "identity", str(exc))
         # PRE timing ends when the PRE capture finishes. Clearing dmesg/SEL is
@@ -285,21 +368,25 @@ class NodeSession:
         return result
 
     def start(self):
-        record = self.node["pre"]
+        record = new_record('START')
+        self.node['start'] = record
+        try:
+            for role, _, _ in self.target.endpoints():
+                self.identity(record, role)
+            if self.expected_boot and record['identities']['os']['boot_id'] != self.expected_boot:
+                raise IdentityUnsafe('OS rebooted while awaiting PRE approval; reviewed baseline is no longer current')
+        except IdentityUnsafe:
+            self.cleanup_safe = False
+            raise
         for stem in ('dmesg', 'sel'):
-            if not record['commands'].get(stem, {}).get('valid'):
+            if not self.node['pre']['commands'].get(stem, {}).get('valid'):
                 self.add(record, 'CLEAR_SKIPPED', stem, 'PRE capture failed; original evidence was not cleared')
                 continue
             if stem == 'sel':
                 self.sel_command(record, 'start_sel_clear', 'clear', save_evidence=False)
             else:
-                result = self.command(record, 'start_dmesg_clear', 'os', 'dmesg -c',
-                                      sudo=True, save_evidence=False)
-                if result.code == 0:
-                    existing = {(i['code'], i['detail']) for i in record['issues']}
-                    record['issues'] += [i for i in dmesg_issues(result.output) if (i['code'], i['detail']) not in existing]
-        self.pre_issue_keys = {(i['code'], i['component']) for i in record['issues']}
-        self.finish(record, preserve_timing=True)
+                self.collect_dmesg(record, 'start_dmesg_clear', clear=True)
+        self.finish(record)
 
     def wait_boot(self, record, old_boot, deadline):
         attempts = 0
@@ -360,6 +447,9 @@ class NodeSession:
             for role, _, _ in self.target.endpoints():
                 self.identity(record, role, role + "_before_cycle",
                               save_evidence=False, record_command=False)
+            if self.expected_boot and record['identities']['os']['boot_id'] != self.expected_boot:
+                raise IdentityUnsafe('Unexpected OS boot transition between captures')
+            self.collect_dmesg(record, 'before_action_dmesg')
             before = self.sel_command(record, 'sel_before', 'list', save_evidence=False)
             record['sel_before_valid'] = record['commands']['sel_before']['valid']
             record['sel_before'] = before.output if record['sel_before_valid'] else ''
@@ -371,6 +461,7 @@ class NodeSession:
             # never read it as a problem report.
             cycle_label = {"aux_cycle": "aux cycle", "reboot": "reboot",
                            "power_cycle": "power cycle"}.get(mode, mode)
+            self.node["attempts"] += 1
             if mode == "aux_cycle":
                 state = self.dispatch(record, "cycle_command", "bmc", "/usr/bin/stbypowerctrl.sh aux_cycle")
             elif mode == "reboot" and channel == "outband":
@@ -388,6 +479,8 @@ class NodeSession:
                 self.stage(f"{cycle_label} sent")
                 self.stage("waiting OS boot")
                 recovered = self.wait_boot(record, old_boot, deadline)
+                if not recovered:
+                    raise ConnectionError('Boot recovery was not confirmed; POST hardware execution blocked')
             else:
                 self.stage(f"{cycle_label} not sent")
                 recovered = False
@@ -399,8 +492,17 @@ class NodeSession:
                 if role != "os":
                     self.identity(record, role, role + "_after_cycle",
                                   save_evidence=False, record_command=False)
+            if recovered and record['identities']['os']['boot_id'] != record['recovery']['new_boot_id']:
+                raise IdentityUnsafe('Additional OS boot transition before POST')
+            post_boot = record['identities']['os']['boot_id']
+            record['boot_confirmed'] = bool(recovered)
+            self.node['boot_confirmed'] += int(recovered)
             self.stage("OS up, system check running")
             self.capture(record, post=True)
+            self.identity(record, 'os', 'os_after_checks')
+            if record['identities']['os']['boot_id'] != post_boot:
+                raise IdentityUnsafe('Additional OS boot transition during POST')
+            self.expected_boot = post_boot
             self.stage("system check done")
             if recovered and record.get("power_on"):
                 for action in record["action"]:
@@ -411,8 +513,13 @@ class NodeSession:
                 self.add(record, "COMMAND_UNCONFIRMED", "cycle", "Lost response could not be reconciled with boot and power evidence")
             record["post_complete"] = True
             self.node["completed"] += 1
+            record['boot_confirmed'] = bool(recovered)
+            record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified)
+            self.node['valid_cycles'] += int(record['valid_cycle'])
         except Exception as exc:
             code = "IDENTITY_UNSAFE" if isinstance(exc, IdentityUnsafe) else "NODE_UNAVAILABLE"
+            if isinstance(exc, IdentityUnsafe):
+                self.cleanup_safe = False
             self.add(record, code, "recovery", str(exc))
             self.node.update(active=False, stop_reason=str(exc))
             record["post_complete"] = False

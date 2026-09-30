@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from cycle_core import *
-from cycle_engine import NodeSession, new_record
+from cycle_engine import CAPTURES, NodeSession, new_record
 from cycle_report import render_html, rebuild, status
 from cycle_runtime import EndpointLocks, request_stop
 from cycle_transport import Command, IdentityUnsafe
@@ -77,11 +77,15 @@ class FakeTransport:
             return self.action(t)
         if cmd == 'lspci -Dnn':
             return Command(0, '' if self.empty_baseline else PCI.splitlines()[0] if self.pci_drift and self.boots.get(t.key) == 1 else PCI)
-        if cmd.startswith('bash '):
+        if (cmd.startswith('bash ') or cmd.startswith('MEMORY_MIN_RATIO=')):
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')
         if cmd == '/usr/bin/powerctrl.sh power_status':
             return Command(0, 'Host: Running\nChassis Power: On')
-        return Command(0, 'available\n')
+        if cmd in {value[0] for value in CAPTURES.values()} | {'dmesg -c', 'command -v mst'}:
+            return Command(0, 'available\n')
+        if cmd.startswith('test -f ') or cmd.startswith('rm -f '):
+            return Command(0, '')
+        return Command(127, 'Unsupported fake SSH command: ' + cmd)
 
     def oob(self, t, cmd, timeout=30):
         self.calls.append((t.key, 'oob', cmd))
@@ -101,7 +105,9 @@ class FakeTransport:
             return Command(0, 'Chassis Power is ' + ('off' if self.power_off else 'on'))
         if cmd == 'sel list':
             return Command(0, '1 | 09/29/2026 | 10:00:00 | System boot | Asserted\n')
-        return Command(0, 'OK')
+        if cmd in {'mc info', 'sel clear'}:
+            return Command(0, 'OK')
+        return Command(127, 'Unsupported fake OOB command: ' + cmd)
 
 class PureTests(unittest.TestCase):
     def test_truncated_sensor_row_cannot_disappear_from_pre(self):
@@ -134,14 +140,14 @@ class PureTests(unittest.TestCase):
         pre['issues'] = [issue('BF4_MISSING', 'BF4', 'missing in pre', 'FAIL')]
         loop1['issues'] = [
             issue('BF4_MISSING', 'BF4', 'still missing', 'FAIL'),        # in PRE -> KNOWN
-            issue('DMESG_HARDWARE', '0001:02:00.0', 'AER surfaced', 'FAIL'),  # not in PRE -> NEW
+            issue('DMESG_PCIE', '0001:02:00.0', 'AER surfaced', 'FAIL'),  # not in PRE -> NEW
         ]
         data = {'nodes': [{'key': 'tray_n1', 'pre': pre, 'loops': [loop1]}]}
         merged = aggregate_issues(data)
         by_code = {m['code']: m for m in merged}
         self.assertEqual(by_code['BF4_MISSING']['classification'], 'KNOWN')
-        self.assertEqual(by_code['DMESG_HARDWARE']['classification'], 'NEW')
-        self.assertEqual(by_code['DMESG_HARDWARE']['known_reason'], '')
+        self.assertEqual(by_code['DMESG_PCIE']['classification'], 'NEW')
+        self.assertEqual(by_code['DMESG_PCIE']['known_reason'], '')
         self.assertEqual(by_code['BF4_MISSING']['known_reason'], 'Present in PRE baseline')
         self.assertEqual(len(by_code['BF4_MISSING']['occurrences']), 2)
 
@@ -214,7 +220,7 @@ class PureTests(unittest.TestCase):
     def test_dmesg_issue_points_at_line_number(self):
         text = 'first line\nAER: Uncorrected (Fatal) error\nanother\n'
         item = dmesg_issues(text)[0]
-        self.assertEqual(item['code'], 'DMESG_HARDWARE')
+        self.assertEqual(item['code'], 'DMESG_PCIE')
         self.assertIn('dmesg line 2:', item['snippet'])
         self.assertIn('Uncorrected', item['snippet'])
 
@@ -312,7 +318,7 @@ class PureTests(unittest.TestCase):
         pre_keys = {(i['code'], i['component']) for i in pre}
         items = classify_against_pre([
             issue('BF4_MISSING', 'BF4', 'still missing', 'FAIL'),
-            issue('DMESG_HARDWARE', '0001:02:00.0', 'uncorrected AER', 'FAIL'),
+            issue('DMESG_PCIE', '0001:02:00.0', 'uncorrected AER', 'FAIL'),
         ], pre_keys)
         self.assertEqual(items[0]['classification'], 'KNOWN')
         self.assertEqual(items[1]['classification'], 'NEW')
@@ -490,7 +496,7 @@ class EngineTests(unittest.TestCase):
         self.fake.oob=oob
         self.ready()
         self.assertFalse(any(cmd=='sel clear' for _,_,cmd in self.fake.calls))
-        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['pre']['issues']])
+        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['start']['issues']])
 
     def test_all_cycle_modes_and_channels(self):
         self.ready()
@@ -525,8 +531,8 @@ class EngineTests(unittest.TestCase):
             return Command(1,'permission denied') if cmd=='dmesg -c' else original(t,role,cmd,timeout,sudo)
         self.fake.ssh=ssh
         self.session.start()
-        self.assertFalse(self.session.node['pre']['commands']['start_dmesg_clear']['valid'])
-        self.assertTrue(self.session.node['pre']['commands']['start_sel_clear']['valid'])
+        self.assertFalse(self.session.node['start']['commands']['start_dmesg_clear']['valid'])
+        self.assertTrue(self.session.node['start']['commands']['start_sel_clear']['valid'])
         self.assertEqual(sum(cmd=='sel clear' for _,_,cmd in self.fake.calls),1)
 
     def test_dispatch_not_issued_and_exception_paths(self):
@@ -616,9 +622,9 @@ class EngineTests(unittest.TestCase):
             return original(t,role,cmd,timeout,sudo)
         self.fake.ssh=ssh
         result=self.session.one_loop(1)
-        self.assertIn('DMESG_HARDWARE',[i['code'] for i in result['issues']])
-        self.assertFalse((self.root/'tray1_n1'/'loop0001'/'dmesg_clear.txt').exists())
-        self.assertTrue(any(item['code'] == 'DMESG_HARDWARE' for item in result['issues']))
+        self.assertIn('DMESG_PCIE',[i['code'] for i in result['issues']])
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'dmesg_clear.txt').exists())
+        self.assertTrue(any(item['code'] == 'DMESG_PCIE' for item in result['issues']))
 
     def test_campaign_reports_are_consistent_and_escaped(self):
         self.assertEqual(self.run_campaign(),1)
@@ -636,7 +642,7 @@ class EngineTests(unittest.TestCase):
         self.assertTrue((output/'known_issues.md').exists())
         console_log = (output/'console.log').read_text()
         self.assertEqual(console_log.count('| PRE |'), 1)
-        self.assertIn('| log clearing | complete', console_log)
+        self.assertIn('| log clearing | PASS', console_log)
         self.assertEqual(rebuild(output)['state'],'COMPLETE')
 
     def test_run_id_uses_rack_timezone(self):

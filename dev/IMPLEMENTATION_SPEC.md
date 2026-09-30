@@ -1,3 +1,5 @@
+> Historical decisions below are superseded where they conflict with the final user policy and [2026-10-01 implementation](../docs/IMPLEMENTATION_2026-10-01.md). The original review is retained in docs/vera_cycle_codex_requirements.md.
+
 # Approved campaign behavior
 
 This is the implementation contract from the operator discussion, not a list of new proposals.

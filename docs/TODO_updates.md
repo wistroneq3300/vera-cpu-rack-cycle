@@ -1,3 +1,5 @@
+> Historical decisions below are superseded where they conflict with the final user policy and [2026-10-01 implementation](IMPLEMENTATION_2026-10-01.md). The original review is retained in docs/vera_cycle_codex_requirements.md.
+
 # Cycle 腳本 — 待更新清單 (2026-09-30)
 
 > 使用者口述想改的點,逐條記錄。**尚未動 code**,確認後才實作。

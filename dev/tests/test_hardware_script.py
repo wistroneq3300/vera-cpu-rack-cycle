@@ -11,36 +11,39 @@ SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
 
 @unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
 class HardwareTests(unittest.TestCase):
-    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino'):
+    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90'):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             serials = ['CARD-A'] * functions if serials is None else serials
             identities = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller: Mellanox {bf4}\n Capabilities: [54] Vital Product Data\n [SN] Serial number: {serial}" for i, serial in enumerate(serials))
             pci_functions = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]" for i in range(functions))
+            pci_inventory = '\n'.join(f'0000:{i:02x}:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]' for i in [1, *range(16, 35)]) + '\n' + pci_functions + '\n0000:02:00.0 USB controller [0c03]: controller [1234:5678]\n0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]'
+            link_inventory = pci_inventory.replace('0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]', f"0000:01:00.0 Controller\n Capabilities: [80] Express (v2) {'Endpoint' if endpoint else 'Root Port'}\n LnkSta: Speed {'unknown, Width x0' if unavailable else '16GT/s, Width x8'} {'(downgraded)' if downgrade else ''}")
             tools={
               'dmidecode':f'''case "$*" in
                 '-t processor') printf 'Status: Populated, Enabled\\nStatus: Populated, Enabled\\n';;
                 '-t memory') i=1; while [ "$i" -le {dimms} ]; do printf 'Memory Device\\n Size: 128 GB\\n'; i=$((i+1)); done; printf 'Memory Device\\n Size: No Module Installed\\n';;
                 *) echo 'Version: example';; esac''',
               'nvme':"printf '/dev/nvme0n1 disk0\\n/dev/nvme0n2 namespace2\\n/dev/nvme1n1 disk1\\n'",
-              'mst':f'''i=1; while [ "$i" -le 22 ]; do echo "Vera(rev:0) /dev/mst/mt12183_pciconf$i 0001:01:00.0"; i=$((i+1)); done
+              'lscpu':"printf '# CPU,Socket,Online\\n0,0,Y\\n1,1,Y\\n'",
+              'cat':"printf 'MemTotal: 2000000000 kB\\n'",
+              'mst':f'''i=1; while [ "$i" -le 22 ]; do printf 'Vera(rev:0) /dev/mst/device %04x:01:00.0\\n' "$i"; i=$((i+1)); done
                         echo '{bf4}(rev:0) /dev/mst/dpu 0000:02:00.0' ''',
               'lspci':f'''case "$1" in
                     -Dvvv) printf '%s\\n' '{identities}';;
-                    -Dvv) printf '0000:01:00.0 Controller\\n Capabilities: [80] Express (v2) {'Endpoint' if endpoint else 'Root Port'}\\n LnkSta: Speed {'unknown, Width x0' if unavailable else '16GT/s, Width x8'} {'(downgraded)' if downgrade else ''}\\n';;
-                    *) i=1; while [ "$i" -le 20 ]; do printf '0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]\\n'; i=$((i+1)); done
-                       printf '%s\\n' '{pci_functions}'
-                       echo '0000:02:00.0 USB controller [0c03]: controller [1234:5678]'
-                       echo '0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]';;
+                    -Dvv) printf '%s\\n' '{link_inventory}';;
+                    *) printf '%s\\n' '{pci_inventory}';;
                   esac''',
               'ipmitool':"echo 'Firmware Revision: example'"}
+            for name, transform in (overrides or {}).items():
+                tools[name] = transform(tools[name]) if callable(transform) else transform
             # POSIX sh stubs so the harness runs under both dash and Git Bash.
             for name,content in tools.items():
                 file=root/name
                 file.write_text('#!/usr/bin/env sh\n'+content+'\n',encoding='utf-8',newline='\n')
                 file.chmod(0o755)
-            env={**os.environ,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
-            result=subprocess.run([SHELL,str(BASE/f'{project}_config.sh')],env=env,capture_output=True,text=True,timeout=45,check=False)
+            env={**os.environ,'MEMORY_MIN_RATIO':ratio,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
+            result=subprocess.run([SHELL,str(BASE/f'{project}_config.sh')],env=env,capture_output=True,text=True,encoding='utf-8',timeout=45,check=False)
             return result
 
     def test_populated_16_pass_and_namespace_dedup(self):
@@ -99,6 +102,29 @@ class HardwareTests(unittest.TestCase):
     def test_naboo_configuration(self):
         result = self.run_fixture(project='naboo')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_review_hardware_failures_for_both_projects(self):
+        scenarios = [
+            ({'lscpu': "printf '0,0,Y\\n1,1,N\\n'"}, 'CPU_TOPOLOGY'),
+            ({'dmidecode': lambda s: s.replace('Populated, Enabled\\nStatus: Populated, Enabled', 'Populated, Enabled\\nStatus: Populated, Disabled By BIOS')}, 'CPU_DISABLED'),
+            ({'cat': "printf 'MemTotal: 1000000000 kB\\n'"}, 'MEMORY_VISIBLE'),
+            ({'mst': "i=0; while [ $i -lt 22 ]; do echo 'Vera(rev:0) /dev/mst/device 0001:01:00.0'; i=$((i+1)); done"}, 'DUPLICATE_BDF'),
+            ({'lspci': lambda s: s.replace(' LnkSta: Speed 16GT/s, Width x8 ', ' LnkCap: Speed 16GT/s, Width x8 ')}, 'PCIE_LINK_UNAVAILABLE'),
+            ({'lspci': lambda s: s.replace(' Capabilities: [80] Express (v2) Endpoint', ' Capabilities: <access denied>')}, 'PCIE_LINK_UNAVAILABLE'),
+            ({'lspci': lambda s: s.replace('0000:04:00.0 Ethernet controller: Mellanox', '0000:09:00.0 Ethernet controller: Mellanox')}, 'BF4_INVENTORY_UNSTABLE'),
+        ]
+        for project in ('neutrino', 'naboo'):
+            for overrides, code in scenarios:
+                with self.subTest(project=project, code=code):
+                    result = self.run_fixture(project=project, overrides=overrides)
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn('ISSUE|' + code, result.stdout)
+
+    def test_memory_ratio_boundary_and_invalid_config(self):
+        # Sixteen 128 GiB modules = 2147483648 KiB; 50% is exact.
+        for ratio, expected in [('0.5', 0), ('0.51', 1), ('nan', 1), ('0', 1)]:
+            result = self.run_fixture(ratio=ratio, overrides={'cat': "printf 'MemTotal: 1073741824 kB\\n'"})
+            self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
 
 if __name__=='__main__':
     unittest.main()

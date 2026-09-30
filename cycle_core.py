@@ -7,9 +7,12 @@ import ipaddress
 import json
 import re
 from collections import Counter
+
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from cycle_dmesg import dmesg_issues
 
 ROLES = ("bmc", "os", "lily_bmc", "lily_os")
 
@@ -139,15 +142,35 @@ def classify(items, project, rules):
                 break
     return items
 
-def classify_against_pre(items, pre_keys):
-    """Classify each issue by comparing against the PRE baseline issue set.
-    An issue whose (code, component) pair already appeared in PRE is KNOWN
-    (pre-existing, not caused by the cycle); otherwise NEW. PRE records pass
-    an empty set so every PRE issue is tagged NEW (the baseline itself)."""
+def issue_key(item):
+    return (item['code'], item['component'], item['fingerprint']) if item.get('fingerprint') else (item['code'], item['component'])
+
+
+def issue_baseline(items):
+    result = {}
     for item in items:
-        key = (item["code"], item["component"])
+        value = result.setdefault(issue_key(item), dict(count=0, severity='WARN', native_rank=0))
+        value['count'] += item.get('occurrence_count', 1)
+        rank = {'info': 0, 'corrected': 1, 'recoverable': 2, 'unknown': 3,
+                'uncorrected': 4, 'uncorrectable': 4, 'fatal': 5}
+        value['native_rank'] = max(value['native_rank'], rank.get(item.get('native_severity'), 0))
+        if item['severity'] == 'FAIL':
+            value['severity'] = 'FAIL'
+    return result
+
+
+def classify_against_pre(items, pre_keys):
+    """PRE comparison describes observations, never cycle causation."""
+    counts = issue_baseline(items)
+    for item in items:
+        key = issue_key(item)
         item["classification"] = "KNOWN" if key in pre_keys else "NEW"
         item["known_reason"] = "Present in PRE baseline" if key in pre_keys else ""
+        if isinstance(pre_keys, dict) and key in pre_keys:
+            old, current = pre_keys[key], counts[key]
+            if (current['count'] > old['count'] or current['native_rank'] > old.get('native_rank', 0)
+                    or (current['severity'] == 'FAIL' and old['severity'] != 'FAIL')):
+                item.update(classification='WORSENED', known_reason='Count or severity increased relative to PRE')
     return items
 
 def parse_sensors(text):
@@ -183,7 +206,7 @@ def _known_no_reading(row, unreadable):
     status = row["status"].strip().lower()
     if reading not in unreadable or status not in unreadable:
         return False
-    return "coruti" in row["name"].casefold()
+    return bool(re.fullmatch(r'PrMo\d+CP\d+CorUti\d*', row['name'], re.I))
 
 def _snippet(row):
     """One-line, greppable pointer back to the exact evidence row."""
@@ -209,6 +232,9 @@ def sensor_issues(rows):
                            f"{count} rows share this sensor name; review each row", "WARN",
                            snippet="\n".join(_snippet(r) for r in dup_rows)))
     for r in rows:
+        if '\ufffd' in r['name'] or any(ord(c) < 32 for c in r['name']):
+            found.append(issue('SENSOR_NAME_MALFORMED', r['name'], 'Sensor identity contains invalid characters', snippet=_snippet(r)))
+            continue
         if r.get("format_error"):
             found.append(issue("SENSOR_MALFORMED", r["name"], r["format_error"], snippet=_snippet(r)))
             continue
@@ -272,7 +298,7 @@ def pci_issues(baseline, current):
     found = []
     for bdf in sorted(baseline.keys() | current.keys()):
         old, new = baseline.get(bdf), current.get(bdf)
-        if old != new:
+        if (old or {}).get('id') != (new or {}).get('id'):
             old_id = old["id"] if old else "absent"
             new_id = new["id"] if new else "absent"
             lines = []
@@ -345,57 +371,6 @@ def config_issues(text, code):
                 items.append(issue(link_code, bdf, line.strip(), snippet=line.strip()))
     return items
 
-_DMESG_DIRECT = re.compile(
-    r"AER:.*(?:Uncorrected|Fatal)"
-    r"|Machine check events logged"
-    r"|nvme.*(?:I/O.*(?:error|timeout)|controller is down)"
-    r"|Memory failure:"
-    r"|Kernel panic|BUG:|Call Trace:",
-    re.I,
-)
-_HWERR_HEADER = re.compile(r"\[Hardware Error\]:\s*Hardware error from APEI.*Source:\s*(\S+)", re.I)
-_HWERR_SEVERE = re.compile(r"severity:\s*(fatal|corrected|uncorrected)|type:\s*(fatal|corrected|uncorrected)", re.I)
-_HWERR_ANY = re.compile(r"\[Hardware Error\]:", re.I)
-
-def dmesg_issues(text):
-    """Extract genuine hardware failures from dmesg.
-
-    Two shapes are recognised:
-    * single-line faults (AER/MCE/nvme/panic...) matched on the line itself;
-    * APEI GHES blocks, whose many lines (severity, per-error type, section,
-      hex dump) describe ONE event. A block is only reported when it carries a
-      non-``info`` severity/type; an all-``info`` block is benign and dropped.
-      The block collapses to a single issue so one event cannot inflate into
-      dozens of findings.
-    """
-    found = []
-    lines = text.splitlines()
-    idx = 0
-    while idx < len(lines):
-        line = lines[idx]
-        if _DMESG_DIRECT.search(line):
-            found.append(issue("DMESG_HARDWARE", "dmesg", line.strip(),
-                               snippet=f"dmesg line {idx + 1}: {line.strip()}"))
-            idx += 1
-            continue
-        header = _HWERR_HEADER.search(line)
-        if not header:
-            idx += 1
-            continue
-        # Consume the whole APEI block: contiguous [Hardware Error] lines.
-        start = idx
-        block = []
-        while idx < len(lines) and _HWERR_ANY.search(lines[idx]):
-            block.append(lines[idx])
-            idx += 1
-        joined = "\n".join(block)
-        severe = _HWERR_SEVERE.search(joined)
-        if severe:
-            detail = f"APEI {header.group(1)}: {severe.group(1) or severe.group(2)}"
-            found.append(issue("DMESG_HARDWARE", "dmesg", detail,
-                               snippet=f"dmesg line {start + 1}: {block[0].strip()}"))
-    return found
-
 def sel_delta(previous, current):
     # Complete record text includes record ID and timestamp; reused IDs remain visible.
     old = Counter(line.strip() for line in previous.splitlines() if "|" in line)
@@ -413,19 +388,21 @@ def sel_delta(previous, current):
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:
-        # Pre-existing findings: this node's (code, component) pairs in PRE. A
-        # finding that reappears in a loop is KNOWN (was there before cycling);
-        # one not present in PRE is NEW (surfaced by the cycle).
-        pre_keys = {(i["code"], i["component"]) for i in node["pre"]["issues"]}
-        for record in [node["pre"], *node["loops"]]:
-            for item in record["issues"]:
-                key = (node["key"], item["code"], item["component"])
+        # Keep the PRE comparison separate from severity and causation.
+        pre_keys = issue_baseline(node['pre']['issues'])
+        for record in [node["pre"], *([node['start']] if node.get('start') else []), *node["loops"]]:
+            classified = classify_against_pre([i.copy() for i in record['issues']], pre_keys)
+            for item in classified:
+                key = (node["key"], *issue_key(item))
                 entry = merged.setdefault(key, {**item, "node": node["key"], "occurrences": []})
                 if item["severity"] == "FAIL":
                     entry["severity"] = "FAIL"
-                pair = (item["code"], item["component"])
-                entry["classification"] = "KNOWN" if pair in pre_keys else "NEW"
-                entry["known_reason"] = "Present in PRE baseline" if pair in pre_keys else ""
+                if entry.get('classification') != 'WORSENED':
+                    entry['classification'] = item['classification']
+                    entry['known_reason'] = item['known_reason']
+                    if item['classification'] == 'WORSENED':
+                        entry['detail'] = item['detail']
+                        entry['native_severity'] = item.get('native_severity')
                 entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"],
                                                   evidence=item.get("evidence", ""),
                                                   snippet=item.get("snippet", "")))
