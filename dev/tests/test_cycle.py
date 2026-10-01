@@ -530,6 +530,24 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(session.node['pre']['status'],'FAIL')
             self.assertIn('SENSOR_MALFORMED',[i['code'] for i in session.node['pre']['issues']])
 
+    def test_pre_sensor_transport_failure_retries_once(self):
+        original = self.fake.oob
+        reads = {'count': 0}
+        def oob(t, cmd, timeout=30):
+            if cmd == 'sensor list':
+                reads['count'] += 1
+                if reads['count'] == 1:
+                    return Command(124, 'timeout', 'RESPONSE_LOST')
+            return original(t, cmd, timeout)
+        self.fake.oob = oob
+        self.session.precheck()
+        record = self.session.node['pre']
+        self.assertEqual(reads['count'], 2)
+        self.assertTrue(record['commands']['sensor_retry']['valid'])
+        self.assertTrue((self.root/'tray1_n1'/'pre_sensor_retry.txt').exists())
+        self.assertIn('COLLECTION_FAILED', [item['code'] for item in record['issues']])
+        self.assertEqual(len(record['sensors']), 2)
+
     def test_failed_dmesg_clear_still_attempts_sel_without_key_error(self):
         self.session.precheck()
         original=self.fake.ssh

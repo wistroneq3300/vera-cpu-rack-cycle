@@ -3,7 +3,8 @@ import unittest
 
 from cycle_core import merge_pci_devices, parse_pci, parse_pci_verbose, issue
 from cycle_engine import new_record
-from cycle_report import _pci_summary, _render_pci_group, _render_sel, _finding_summary, issue_cards, record_html, render_html
+from cycle_report import (_pci_summary, _render_pci_group, _render_sel, _render_summary_groups,
+                          _finding_summary, issue_cards, record_html, render_html)
 
 
 PCI = """0002:02:00.0 VGA compatible controller [0300]: ASPEED Technology, Inc. ASPEED Graphics Family [1a03:2000]
@@ -153,8 +154,14 @@ class ReportSemanticsTests(unittest.TestCase):
                     sel_before_meta={'phase': 'BEFORE_CYCLE', 'status': 'COLLECTED', 'valid': True, 'event_count': 2, 'evidence': 'loop0001/sel_before.txt'},
                     sel_post_meta={'phase': 'POST', 'status': 'COLLECTED', 'valid': True, 'event_count': 2, 'evidence': 'loop0001/sel.txt'},
                     sel_delta_meta={'phase': 'LOOP', 'status': 'COMPARED', 'valid': True, 'new_event_count': 0, 'evidence': 'loop0001/sel_delta.txt'},
-                    sel_events=[], action=[{'command': 'power cycle', 'role': 'os', 'state': 'SENT', 'code': 0}], recovery={})
+                    sel_events=[], action=[{'command': 'power cycle', 'role': 'os', 'state': 'SENT', 'code': 0}],
+                    recovery={'boot_changed': True, 'attempts': 3, 'old_boot_id': 'boot-a', 'new_boot_id': 'boot-b'})
         loop_html = record_html(loop, 0)
+        self.assertIn('Cycle action and recovery', loop_html)
+        self.assertIn('power cycle', loop_html)
+        self.assertIn('boot-a', loop_html)
+        self.assertIn('boot-b', loop_html)
+        self.assertIn('Recovery attempts', loop_html)
         self.assertIn('Delta: 0 new events', loop_html)
         self.assertIn('Before-cycle SEL collection', loop_html)
         self.assertIn('POST SEL collection', loop_html)
@@ -177,6 +184,7 @@ class ReportSemanticsTests(unittest.TestCase):
 
         legacy = new_record('LOOP 2')
         legacy['loop'] = 2
+        legacy.pop('sel_evidence_schema')
         legacy.update(sel_events=[], status='PASS', finished='2026-10-01T10:00:04+08:00')
         legacy_html = _render_sel(legacy)
         self.assertIn('NOT RETAINED — legacy run', legacy_html)
@@ -246,6 +254,52 @@ class ReportSemanticsTests(unittest.TestCase):
         html = _render_sel(record)
         self.assertIn('MISSING', html)
         self.assertNotIn('NOT RETAINED — legacy run', html)
+
+    def test_pcie_hardware_fail_overrides_parser_pass_and_is_grouped_once(self):
+        bdf = '0004:01:00.0'
+        record = new_record('LOOP 1')
+        record['loop'] = 1
+        record.update(status='FAIL', finished='2026-10-01T10:00:09+08:00',
+                      pci_devices={bdf: {'bdf': bdf, 'id': '1e0f:002e', 'class_id': '0108',
+                                         'class_name': 'Non-Volatile memory controller',
+                                         'device_name': 'KIOXIA NVMe', 'link_result': 'PASS',
+                                         'link_reason': 'lspci reports usable link'}},
+                      hardware_checks={f'PCIE_LINK/{bdf}': 'FAIL', f'PCIE_DOWNGRADE/{bdf}': 'FAIL'},
+                      hardware_check_details={f'PCIE_LINK/{bdf}': {'raw': f'CHECK|PCIE_LINK|bdf={bdf}|lnksta=Speed unknown'},
+                                              f'PCIE_DOWNGRADE/{bdf}': {'raw': f'CHECK|PCIE_DOWNGRADE|bdf={bdf}|lnksta=downgraded'}},
+                      check_summary={f'PCIE_LINK/{bdf}': 'FAIL', f'PCIE_DOWNGRADE/{bdf}': 'FAIL'},
+                      commands={'pci': {'valid': True, 'evidence': 'loop0001/pci.txt'},
+                                'pci_verbose': {'valid': True, 'evidence': 'loop0001/pci_verbose.txt'}},
+                      issues=[issue('PCIE_DOWNGRADE', bdf, 'LnkSta downgraded')])
+        devices, counts, evaluated, result = _pci_summary(record)
+        self.assertEqual(result, 'FAIL')
+        self.assertEqual(counts['FAIL'], 1)
+        self.assertEqual(evaluated, 1)
+        self.assertEqual(devices[0]['_effective_link_result'], 'FAIL')
+        group = _render_pci_group(record)
+        self.assertIn('captures differ', group)
+        self.assertIn('FAIL', group)
+        summary = _render_summary_groups(record)
+        self.assertNotIn(f'PCIE_LINK/{bdf}', summary)
+        self.assertNotIn(f'PCIE_DOWNGRADE/{bdf}', summary)
+        self.assertIn('PCIe End Devices', summary)
+        self.assertIn('FAIL', summary)
+
+    def test_new_loop_failure_before_post_is_not_called_legacy(self):
+        loop = new_record('LOOP 24')
+        loop['loop'] = 24
+        loop.update(status='FAIL', finished='2026-10-01T10:00:10+08:00',
+                    sel_before_meta={'phase': 'BEFORE_CYCLE', 'status': 'COLLECTED', 'valid': True,
+                                     'event_count': 3, 'evidence': 'loop0024/sel_before.txt'},
+                    commands={'sel_before': {'valid': True, 'state': 'RETURNED', 'evidence': 'loop0024/sel_before.txt'},
+                              'failure_sel': {'valid': False, 'state': 'RESPONSE_LOST', 'evidence': 'loop0024/failure_sel.txt'}},
+                    issues=[issue('BOOT_TIMEOUT', 'recovery', 'Boot recovery timed out')])
+        html = _render_sel(loop)
+        self.assertIn('Before-cycle SEL collection', html)
+        self.assertIn('Failure-path SEL collection', html)
+        self.assertIn('Delta: UNAVAILABLE', html)
+        self.assertNotIn('NOT RETAINED — legacy run', html)
+        self.assertIn('POST SEL collection', html)
 
 
 if __name__ == '__main__':

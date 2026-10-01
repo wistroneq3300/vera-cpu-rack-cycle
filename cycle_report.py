@@ -172,13 +172,108 @@ def _pci_devices(record):
     return rows
 
 
+def _phase_kind(record):
+    """Normalize phase names for rendering without changing their stored text."""
+    phase = str(record.get('phase', '')).strip()
+    upper = phase.upper()
+    if upper == 'PRE':
+        return 'PRE'
+    if upper == 'START':
+        return 'START'
+    if re.fullmatch(r'LOOP(?:\s+\d+)?', phase, re.I) or record.get('loop') is not None:
+        return 'LOOP'
+    return upper or 'UNKNOWN'
+
+
+def _loop_number(record):
+    value = record.get('loop')
+    if value is not None:
+        return str(value)
+    match = re.fullmatch(r'LOOP\s+(\d+)', str(record.get('phase', '')).strip(), re.I)
+    return match.group(1) if match else ''
+
+
+def _is_pci_device_check(key):
+    return bool(re.match(r'^(?:PCIE_LINK|PCIE_DOWNGRADE)/[^/]+$', str(key), re.I))
+
+
+def _pci_hardware_results(record):
+    """Return saved hardware-script PCIe results keyed by full BDF.
+
+    ``hardware_checks`` is authoritative for the script result, while
+    ``check_summary`` is accepted for recovered/legacy records that only kept
+    the flattened summary.  The original keys and raw details remain available
+    to the renderer so a capture disagreement is visible.
+    """
+    results = {}
+    hardware_checks = record.get('hardware_checks') or {}
+    details = record.get('hardware_check_details') or {}
+    for source_name, mapping in (('hardware_checks', hardware_checks),
+                                 ('check_summary', record.get('check_summary') or {})):
+        for key, state in mapping.items():
+            match = re.match(r'^(PCIE_LINK|PCIE_DOWNGRADE)/(.+)$', str(key), re.I)
+            if not match:
+                continue
+            if source_name == 'check_summary' and key in hardware_checks:
+                continue
+            bdf = match.group(2)
+            normalized = str(state or 'UNKNOWN').upper()
+            entry = results.setdefault(bdf, {'states': [], 'keys': [], 'details': []})
+            entry['states'].append(normalized)
+            entry['keys'].append(str(key))
+            detail = details.get(key) or {}
+            raw = detail.get('raw') if isinstance(detail, dict) else ''
+            if raw:
+                entry['details'].append(str(raw))
+    return results
+
+
+def _pci_effective_result(item, hardware):
+    parser_result = str(item.get('link_result') or 'UNKNOWN').upper()
+    entry = hardware.get(item.get('bdf'))
+    if not entry:
+        return parser_result, item.get('link_reason') or 'No link applicability reason was recorded', ''
+    states = entry['states']
+    # Keep a failure from either saved source visible.  Otherwise the formal
+    # hardware check wins over a parser-only unknown/N/A classification.
+    if 'FAIL' in states or parser_result == 'FAIL':
+        effective = 'FAIL'
+    elif 'WARN' in states or parser_result == 'WARN':
+        effective = 'WARN'
+    else:
+        effective = states[0] if states else parser_result
+    source_summary = '; '.join(f'{key}={state}' for key, state in zip(entry['keys'], states))
+    if parser_result != effective or len(set(states + [parser_result])) > 1:
+        note = f'Parsed lspci={parser_result}; hardware script={source_summary}; captures differ and are both retained.'
+    else:
+        note = f'Hardware script={source_summary}'
+    reason = item.get('link_reason') or 'No link applicability reason was recorded'
+    return effective, f'{reason}; {note}', note
+
+
 def _pci_summary(record):
     devices = _pci_devices(record)
-    counts = Counter(str(item.get('link_result', 'UNKNOWN')).upper() for item in devices)
-    evaluated = counts.get('PASS', 0) + counts.get('FAIL', 0)
+    hardware = _pci_hardware_results(record)
+    by_bdf = {item.get('bdf'): item for item in devices}
+    # A saved per-BDF hardware result without a retained lspci row is still a
+    # measured endpoint result, and must not disappear from the group summary.
+    for bdf in sorted(set(hardware) - set(by_bdf)):
+        item = dict(bdf=bdf, device_name=bdf, class_name='PCIe endpoint',
+                    link_result='UNKNOWN', link_reason='Hardware script result has no matching saved PCI inventory row')
+        devices.append(item)
+        by_bdf[bdf] = item
+    for item in devices:
+        effective, reason, source_note = _pci_effective_result(item, hardware)
+        item['_effective_link_result'] = effective
+        item['_effective_link_reason'] = reason
+        item['_source_note'] = source_note
+    counts = Counter(str(item.get('_effective_link_result', 'UNKNOWN')).upper() for item in devices)
+    evaluated = sum(counts.get(name, 0) for name in ('PASS', 'FAIL', 'WARN'))
     command = record.get('commands', {}).get('pci', {})
     if counts.get('FAIL') or (not devices and command and not command.get('valid', False)):
         status = 'FAIL'
+    elif counts.get('WARN'):
+        status = 'WARN'
     elif counts.get('UNKNOWN'):
         status = 'UNKNOWN'
     elif evaluated == 0 and (counts.get('N/A') or counts.get('UNSUPPORTED')):
@@ -234,8 +329,8 @@ def _render_pci_group(record, baseline=None):
         capability = item.get('link_capability') or 'Not reported'
         pre_link = pre.get('link_current') or ('Not recorded' if pre else 'No PRE row')
         expected = 'Not configured'
-        status_value = str(item.get('link_result') or 'UNKNOWN').upper()
-        reason = item.get('link_reason') or 'No link applicability reason was recorded'
+        status_value = str(item.get('_effective_link_result') or item.get('link_result') or 'UNKNOWN').upper()
+        reason = item.get('_effective_link_reason') or item.get('link_reason') or 'No link applicability reason was recorded'
         evidence = ' · '.join(_record_evidence(record, path) for path in _pci_link_evidence(record))
         raw_name = item.get('raw_name') or item.get('raw') or ''
         raw_name_html = f'<small class="raw-key">Raw name: {esc(raw_name)}</small>' if raw_name and raw_name != item.get('device_name') else ''
@@ -252,6 +347,11 @@ def _summary_groups(record):
     collection_keys = {'pci', 'pci_tree', 'pci_verbose', 'pci_config', 'disks', 'nvme', 'usb', 'memory', 'network', 'firmware', 'system', 'sel', 'sel_before', 'failure_sel'}
     execution_keys = {'root_uid', 'dependencies', 'package_install', 'dependencies_after_install', 'mst_available', 'script_safety', 'script_sha256', 'hardware', 'cycle_command', 'power', 'host_power', 'bmc_firmware'}
     for key, value in record.get('check_summary', {}).items():
+        if _is_pci_device_check(key):
+            # Per-BDF rows are rendered in the PCI / PCIe End Devices group.
+            # Keep the JSON key intact, but do not show the same finding twice
+            # in the general Hardware validation table.
+            continue
         if key in hardware_keys or key.split('/', 1)[0] in {'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'BF4_IDENTITIES', 'PCIe', 'PCIeFAB', 'PCIE_LINK', 'PCIE_DOWNGRADE', 'sensor', 'dmesg'}:
             group = 'hardware'
         elif key in collection_keys:
@@ -298,7 +398,7 @@ def _render_summary_groups(record):
 
 
 def _render_action(record):
-    phase = record.get('phase')
+    phase = _phase_kind(record)
     if phase == 'START':
         rows = []
         for name, command in record.get('commands', {}).items():
@@ -317,7 +417,7 @@ def _render_action(record):
 
 
 def _render_sel(record):
-    phase = record.get('phase')
+    phase = _phase_kind(record)
     if phase == 'PRE':
         meta = record.get('sel_collection')
         if meta:
@@ -325,6 +425,14 @@ def _render_sel(record):
             snapshot = _record_evidence(record, meta.get('evidence'))
             return f'<div class="sel-panel"><h3>PRE SEL collection</h3><p>Collection: {badge(meta.get("status", "UNKNOWN"))} · Snapshot events: {esc(count)} · Delta: N/A — PRE baseline phase</p><p>Evidence: {snapshot}</p><p class="muted">Collection success does not certify that every SEL event is healthy; event review remains separate.</p></div>'
         command = record.get('commands', {}).get('sel', {})
+        if record.get('sel_evidence_schema'):
+            if command:
+                collection = 'COLLECTED' if command.get('valid') else 'FAILED'
+                reason = 'Command was recorded but retention metadata is unavailable'
+            else:
+                collection, reason = 'NOT RUN', 'PRE SEL collection was not reached'
+            evidence = _record_evidence(record, command.get('evidence', ''))
+            return f'<div class="sel-panel"><h3>PRE SEL collection</h3><p>Collection: {badge(collection)} · Snapshot events: -- · Delta: N/A — PRE baseline phase</p><p>Reason: {esc(reason)} · Evidence: {evidence}</p><p class="muted">This new-format record does not claim a snapshot that was not retained.</p></div>'
         evidence = _record_evidence(record, command.get('evidence', ''))
         return f'<div class="sel-panel"><h3>PRE SEL collection</h3><p>Collection: {badge("PASS" if command.get("valid") else "UNKNOWN")} · Snapshot events: -- · Delta: N/A — NOT RETAINED — legacy run</p><p>Evidence: {evidence}</p><p class="muted">Event count and raw retention metadata were not recorded by this legacy run; no baseline claim is made.</p></div>'
     if phase == 'START':
@@ -344,6 +452,37 @@ def _render_sel(record):
     after = record.get('sel_post_meta')
     delta = record.get('sel_delta_meta')
     if not before or not after or not delta:
+        if record.get('sel_evidence_schema') or any(record.get(name) is not None for name in ('sel_before_meta', 'sel_post_meta', 'sel_delta_meta')):
+            commands = record.get('commands', {})
+            before_command = commands.get('sel_before', {})
+            failure_command = commands.get('failure_sel', {})
+            before_status = before.get('status', 'UNKNOWN') if before else ('COLLECTED' if before_command.get('valid') else 'NOT RUN')
+            before_count = before.get('event_count', '--') if before else '--'
+            before_evidence = _record_evidence(record, before.get('evidence', '') if before else before_command.get('evidence', ''))
+            failure_row = ''
+            if after:
+                after_status = after.get('status', 'UNKNOWN')
+                after_count = after.get('event_count', '--')
+                after_evidence = _record_evidence(record, after.get('evidence', ''))
+                after_reason = ''
+            elif failure_command:
+                after_status = 'NOT RUN'
+                after_count = '--'
+                after_evidence = '<span class="muted">POST was not completed</span>'
+                after_reason = 'POST SEL collection was not completed.'
+                failure_status = 'COLLECTED' if failure_command.get('valid') else 'FAILED'
+                failure_row = f'<tr><td>Failure-path SEL collection</td><td>{badge(failure_status)}</td><td>--</td><td>{_record_evidence(record, failure_command.get("evidence", ""))}</td></tr>'
+            else:
+                after_status = 'NOT RUN'
+                after_count = '--'
+                after_evidence = '<span class="muted">POST was not completed</span>'
+                after_reason = 'POST SEL collection was not reached.'
+            delta_reason = (delta or {}).get('reason') or 'Before-cycle and POST snapshots were not both available'
+            # Any missing stage makes the comparison incomplete, even if a
+            # malformed journal happens to carry a stale COMPARED label.
+            delta_status = 'UNAVAILABLE'
+            delta_evidence = _record_evidence(record, (delta or {}).get('evidence', ''))
+            return f'<div class="sel-panel"><h3>LOOP SEL comparison</h3><div class="tablewrap"><table><thead><tr><th>Stage</th><th>Status</th><th>Event count</th><th>Evidence</th></tr></thead><tbody><tr><td>Before-cycle SEL collection</td><td>{badge(before_status)}</td><td>{esc(before_count if before_count is not None else "--")}</td><td>{before_evidence}</td></tr><tr><td>POST SEL collection</td><td>{badge(after_status)}</td><td>{esc(after_count if after_count is not None else "--")}</td><td>{after_evidence}</td></tr>{failure_row}<tr><td>Delta comparison</td><td>{badge(delta_status)}</td><td>--</td><td>{delta_evidence}</td></tr></tbody></table></div><p><strong>Delta: UNAVAILABLE</strong> · Event review: {esc(delta_reason)}</p>{f'<p class="muted">{esc(after_reason)}</p>' if after_reason else ''}</div>'
         return '<div class="sel-panel"><h3>LOOP SEL comparison</h3><p>Delta: UNAVAILABLE · Event count: -- · Event review: NOT RETAINED — legacy run</p><p class="muted">The schema does not retain both the action-before and POST raw snapshots; this is not evidence that collection failed.</p></div>'
     before_status = before.get('status', 'UNKNOWN')
     after_status = after.get('status', 'UNKNOWN')
@@ -366,7 +505,9 @@ def _render_sel(record):
 
 
 def record_html(record, node_index, baseline=None):
-    phase_id = f"node-{node_index}-" + ("pre" if record["phase"] == "PRE" else "start" if record["phase"] == "START" else f"loop-{record['loop']}")
+    phase = _phase_kind(record)
+    loop_number = _loop_number(record)
+    phase_id = f"node-{node_index}-" + ("pre" if phase == "PRE" else "start" if phase == "START" else f"loop-{loop_number or 'unknown'}")
     evidence = ''.join('<li>' + _record_evidence(record, p) + '</li>' for p in dict.fromkeys(record.get("evidence", [])))
     identity_rows = ''.join(f'<tr><td>{esc(role.upper())}</td><td>{esc(values.get("hostname", "Not recorded"))}</td><td><code>{esc(values.get("boot_id", "Not recorded"))}</code></td></tr>' for role, values in record.get('identities', {}).items())
     identity = '<h3>Verified identities</h3><div class="tablewrap"><table><thead><tr><th>Endpoint</th><th>Hostname</th><th>Boot ID</th></tr></thead><tbody>' + (identity_rows or '<tr><td colspan="3">No identity record</td></tr>') + '</tbody></table></div>'
@@ -375,7 +516,7 @@ def record_html(record, node_index, baseline=None):
     action = _render_action(record)
     sel = _render_sel(record)
     return f'''<details id="{phase_id}"><summary><strong>{esc(record['phase'])}</strong> {badge(record['status'])}<span class="phase-count">{esc(_finding_summary(record))} · {esc(duration(record.get('duration_seconds')))} · {esc(record.get('finished') or 'Not finished')}</span></summary><div class="detail-body">
-      {_render_summary_groups(record)}{_render_pci_group(record, baseline) if record.get('phase') != 'START' or record.get('pci') or record.get('pci_devices') else ''}<h3>Findings</h3>{_finding_html(record)}{collection}{sel}<details><summary>{'START preparation and verified identities' if record.get('phase') == 'START' else 'Cycle action and verified identities' if record.get('phase') == 'LOOP' else 'Verified identities'}</summary>{action}{identity}</details>
+      {_render_summary_groups(record)}{_render_pci_group(record, baseline) if phase != 'START' or record.get('pci') or record.get('pci_devices') else ''}<h3>Findings</h3>{_finding_html(record)}{collection}{sel}<details><summary>{'START preparation and verified identities' if phase == 'START' else 'Cycle action and verified identities' if phase == 'LOOP' else 'Verified identities'}</summary>{action}{identity}</details>
       <p class="muted">{esc(record.get('sel_review', ''))}</p><details><summary>Original evidence files</summary><ul class="evidence-list">{evidence or '<li>Evidence paths were not recorded.</li>'}</ul></details></div></details>'''
 
 def duration(seconds):

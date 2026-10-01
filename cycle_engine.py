@@ -44,7 +44,11 @@ CAPTURES = {
 
 def new_record(phase):
     return dict(phase=phase, started=now(), finished=None, status="PENDING", issues=[],
-                evidence=[], commands={}, identities={}, pci={}, pci_devices={}, sensors=[], action=[], recovery={})
+                evidence=[], commands={}, identities={}, pci={}, pci_devices={}, sensors=[], action=[], recovery={},
+                # Marks records written by the SEL evidence-aware schema.  The
+                # renderer uses this to distinguish an unfinished new record
+                # from an old record that never retained SEL metadata.
+                sel_evidence_schema=1)
 
 class NodeSession:
     def __init__(self, target, transport, root, run_id, script, script_hash, options, rules):
@@ -307,7 +311,17 @@ class NodeSession:
                     record['hardware_check_details'][key] = dict(name=name, values=values, raw=line, status=state)
         record['script_verified'] = self.script_verified
         sensor = self.command(record, "sensor", "oob", "sensor list")
-        record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
+        sensor_valid = record['commands']['sensor']['valid']
+        record["sensors"] = parse_sensors(sensor.output) if sensor_valid else []
+        # PRE has no baseline to confirm against, but a transport/command
+        # failure is still safe to retry once just like the LOOP path.  Keep
+        # the first failure and both evidence files; a successful retry only
+        # supplies the rows used for the current phase's validation.
+        if not post and not sensor_valid:
+            retry = self.command(record, 'sensor_retry', 'oob', 'sensor list')
+            sensor_valid = record['commands']['sensor_retry']['valid']
+            if sensor_valid:
+                record['sensors'] = parse_sensors(retry.output)
         if post:
             valid = record['commands']['sensor']['valid']
             if not valid:
