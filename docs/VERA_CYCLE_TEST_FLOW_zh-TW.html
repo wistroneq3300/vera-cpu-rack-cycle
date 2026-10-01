@@ -167,10 +167,10 @@
         <div class="panel">
           <h3>互動式 wizard</h3>
           <p>不帶參數執行時，程式會依序詢問 project、node、cycle mode、channel，以及用 loops 或 hours 限制執行時間。適合第一次操作或需要人工確認設定的情境。</p>
-          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py">複製</button><code>python3 neutrin_cycle.py</code></div>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrino_cycle.py">複製</button><code>python3 neutrino_cycle.py</code></div>
           <h3>自動化／可重現命令</h3>
           <p>以下例子對 Neutrino 的 n1 執行 3 輪。<code>--cycle</code> 才會在 PRE 後進入 START 與 Cycle；沒有它只做 PRE，且暫存 PRE evidence 不會保留成 campaign。</p>
-          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle">複製</button><code>python3 neutrin_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle</code></div>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrino_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle">複製</button><code>python3 neutrino_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle</code></div>
           <h3>主要參數</h3>
           <div class="table-scroll"><table><thead><tr><th>參數</th><th>可用值／規則</th><th>影響</th></tr></thead><tbody>
             <tr><td><code>--project</code></td><td><code>neutrino</code> 或 <code>naboo</code></td><td>選擇對應硬體 config script。</td></tr>
@@ -290,7 +290,7 @@
             <tr><td><code>dmesg.txt</code>、<code>sel_delta.txt</code></td><td>原始 kernel／SEL 證據</td><td>看 raw lines、BDF、subtype、severity、delta；native count 不是 lifetime counter。</td></tr>
             <tr><td><code>CYCLE_REVIEW_REPORT.html</code></td><td>同一批 records 的可讀報告</td><td>Overview 看整場，Nodes 看時間序列，Issues 看 finding 的所有 occurrence。</td></tr>
           </tbody></table></div>
-          <div class="notice warn" style="margin-top:17px"><strong>報告重建：</strong>只對已停止 campaign 使用 <code>python3 neutrin_cycle.py --report campaigns/&lt;run_id&gt;</code>。live owner 仍在時 rebuild 會拒絕；缺少 loop report 不會把 journal 裡保存的歷史 FAIL 變成 PASS。</div>
+          <div class="notice warn" style="margin-top:17px"><strong>報告重建：</strong>只對已停止 campaign 使用 <code>python3 neutrino_cycle.py --report campaigns/&lt;run_id&gt;</code>。live owner 仍在時 rebuild 會拒絕；缺少 loop report 不會把 journal 裡保存的歷史 FAIL 變成 PASS。</div>
         </div>
       </section>
 
@@ -299,7 +299,7 @@
         <div class="panel">
           <h3>Graceful stop</h3>
           <p>停止請求只會由 campaign owner 發出，程式會完成目前 POST，不再開始下一輪，也不使用廣泛的 <code>pkill</code>。</p>
-          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py --stop RUN_ID">複製</button><code>python3 neutrin_cycle.py --stop RUN_ID</code></div>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrino_cycle.py --stop RUN_ID">複製</button><code>python3 neutrino_cycle.py --stop RUN_ID</code></div>
           <h3>操作後確認清單</h3>
           <ul class="checklist" id="operator-checklist">
             <li><input id="c1" type="checkbox"><label for="c1">我確認 campaign 的 project、node、mode、channel 與 loop／hour limit。</label></li>

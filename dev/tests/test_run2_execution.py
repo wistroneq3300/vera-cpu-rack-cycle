@@ -8,7 +8,7 @@ from unittest.mock import patch
 import test_cycle as fixtures
 from cycle_core import aggregate_issues, health
 from cycle_transport import Command
-from neutrin_cycle import campaign, show_result
+from neutrino_cycle import campaign, show_result
 
 
 INCOMPLETE = [

@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cycle_runtime import RunRegistry, list_running, process_running, request_stop
-from neutrin_cycle import main, stop_menu
+from neutrino_cycle import main, stop_menu
 
 
 class StopMenuTests(unittest.TestCase):
@@ -72,7 +72,7 @@ class StopMenuTests(unittest.TestCase):
         self.assertEqual(run['project'], 'naboo')
 
     def test_cli_stop_without_id_opens_menu(self):
-        with patch('neutrin_cycle.stop_menu', return_value=0) as menu:
+        with patch('neutrino_cycle.stop_menu', return_value=0) as menu:
             self.assertEqual(main(['--stop']), 0)
         menu.assert_called_once_with()
 

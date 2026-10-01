@@ -16,7 +16,7 @@ from unittest.mock import patch, Mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-import neutrin_cycle as nc
+import neutrino_cycle as nc
 
 with patch.dict(os.environ, {"BMC_PASSWORD": "offline-only", "OS_PASSWORD": "offline-only"}):
     import dryrun_sim as ds
@@ -200,7 +200,7 @@ echo "BF4_COUNT=$BF4_Qty"
     with patch.object(nc, "acquire_run_lock", return_value=None), \
          patch.object(nc, "load_inventory", return_value=[loop_target]), \
          patch.object(nc, "run_campaign") as campaign, \
-         patch.object(sys, "argv", ["neutrin_cycle.py", "--project", "1", "--loops", "1"]), \
+         patch.object(sys, "argv", ["neutrino_cycle.py", "--project", "1", "--loops", "1"]), \
          contextlib.redirect_stdout(io.StringIO()):
         return_code = nc.main()
     confirm("CLI preflight performs no connectivity checks", return_code == 0 and not campaign.called,
@@ -210,7 +210,7 @@ echo "BF4_COUNT=$BF4_Qty"
          patch.object(nc, "load_inventory", return_value=[loop_target]), \
          patch.object(nc, "get_password", return_value="offline"), \
          patch.object(nc, "run_campaign", return_value=0) as campaign, \
-         patch.object(sys, "argv", ["neutrin_cycle.py", "--project", "1", "--loops", "1", "--node", "n1", "--node", "n99", "--cycle"]), \
+         patch.object(sys, "argv", ["neutrino_cycle.py", "--project", "1", "--loops", "1", "--node", "n1", "--node", "n99", "--cycle"]), \
          contextlib.redirect_stdout(io.StringIO()):
         nc.main()
     confirm("auto rewritten to inband and nonexistent node silently dropped",

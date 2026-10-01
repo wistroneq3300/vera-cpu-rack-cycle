@@ -5,7 +5,7 @@ import test_cycle as fixtures
 import test_hardware_script as hardware
 from cycle_core import aggregate_issues, classify_against_pre, dmesg_issues, issue_baseline, parse_sensors, sensor_issues
 from cycle_transport import Command
-from neutrin_cycle import show_result
+from neutrino_cycle import show_result
 
 
 def aer(name='BadTLP', bit=6, bdf='0000:01:00.0'):

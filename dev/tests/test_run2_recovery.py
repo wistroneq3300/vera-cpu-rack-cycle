@@ -16,7 +16,7 @@ from cycle_core import issue, now, write_json
 from cycle_engine import new_record
 from cycle_report import rebuild, status, write_reports
 from cycle_runtime import RunRegistry
-from neutrin_cycle import main
+from neutrino_cycle import main
 from test_cycle import target
 
 

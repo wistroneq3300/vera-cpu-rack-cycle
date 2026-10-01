@@ -7,7 +7,7 @@ Run reboot, DC power-cycle and auxiliary AC-cycle campaigns from one **external 
 ```bash
 python3 -m pip install -r requirements.txt
 chmod +x neutrino_config.sh naboo_config.sh stop_cycle.sh
-python3 neutrin_cycle.py
+python3 neutrino_cycle.py
 ```
 
 The wizard selects project, targets, mode, channel and limits before PRE. Enter credentials at the prompts, or set `OS_PASSWORD` and `BMC_PASSWORD` in the environment. Optional Lily credentials are `LILY_OS_PASSWORD` and `LILY_BMC_PASSWORD`. Project-prefixed variables such as `NEUTRINO_OS_PASSWORD` take precedence. Users default to root for OS/BMC, ubuntu for Lily OS, service for Lily BMC; override with `OS_USER`, `BMC_USER`, `LILY_OS_USER`, `LILY_BMC_USER`. A non-root OS account needs working sudo.
@@ -17,7 +17,7 @@ First fill the real `bmc_hostname` and `os_hostname` in the inventory. The check
 Example using explicit options:
 
 ```bash
-python3 neutrin_cycle.py --project neutrino \
+python3 neutrino_cycle.py --project neutrino \
   --node L105-21R/n1 --node L105-21R/n2 \
   --loops 40 --hours 12 --cycle-mode power_cycle --channel inband --cycle
 ```
@@ -99,13 +99,13 @@ The explicit Run ID interface remains available:
 ```bash
 ./stop_cycle.sh neutrino_<cycle>_<channel>_<timestamp>_<suffix>
 # equivalent:
-python3 neutrin_cycle.py --stop neutrino_<cycle>_<channel>_<timestamp>_<suffix>
+python3 neutrino_cycle.py --stop neutrino_<cycle>_<channel>_<timestamp>_<suffix>
 ```
 
 Only the campaign owner can request the stop. It completes current POST and starts no next loop. Ctrl+C/SIGTERM behave the same way. It never uses broad `pkill`, never kills other campaigns, and does not stop `dryrun_sim.py`. A hard kill/power loss cannot generate a final report at the moment it occurs; once the process is stopped, rebuild from the retained journal:
 
 ```bash
-python3 neutrin_cycle.py --report campaigns/<run_id>
+python3 neutrino_cycle.py --report campaigns/<run_id>
 ```
 
 Do not rebuild a live campaign. Runner and rebuild share an output writer lock; rebuild checks the journal/registry owner PID and process-start token inside that lock and refuses an active owner. Use the same controller and `VERA_RUNTIME_DIR` for recovery. A RUNNING owner on another controller cannot be verified locally and is refused; recover on the source controller before sharing the stopped bundle. A recovered unfinished journal is INCOMPLETE. Restarting always creates a new campaign; no resume path reuses an old baseline.
@@ -142,7 +142,7 @@ Reports distinguish attempts, POST completions, confirmed boots and valid cycles
 
 CPU row accounting uses unique CPU IDs independently of socket topology. Offline CPUs with blank sockets remain counted; malformed/duplicate rows or missing topology are explicit failures. SMBIOS Thread Count remains optional; no fixed CPU SKU was added. RCiEP/RCEC without link capability are UNSUPPORTED (not applicable); an advertised/present optional link is checked. Ordinary/Legacy Endpoint missing link, denied capability access and downgraded links still fail.
 
-Current release: **2026.10.01.2** (`python3 neutrin_cycle.py --version`). See [Run 2 implementation and verification](docs/RUN2_IMPLEMENTATION.md) and the [previous release record](docs/IMPLEMENTATION_2026-10-01.md).
+Current release: **2026.10.01.2** (`python3 neutrino_cycle.py --version`). See [Run 2 implementation and verification](docs/RUN2_IMPLEMENTATION.md) and the [previous release record](docs/IMPLEMENTATION_2026-10-01.md).
 
 For a Chinese operator-facing walkthrough of inputs, PRE, OS checks, Cycle/POST, FAIL criteria and evidence, open the offline [VERA Cycle 測試流程與判定邏輯](docs/VERA_CYCLE_TEST_FLOW_zh-TW.html).
 

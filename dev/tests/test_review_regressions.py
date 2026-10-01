@@ -11,7 +11,7 @@ from cycle_core import (aggregate_issues, classify_against_pre, dmesg_issues, he
                         issue_baseline, parse_pci, parse_sensors, pci_issues, sensor_issues)
 from cycle_report import record_html
 from cycle_transport import Command, Transport
-from neutrin_cycle import show_result
+from neutrino_cycle import show_result
 import test_cycle
 
 
@@ -226,7 +226,7 @@ class EngineReviewTests(unittest.TestCase):
         def slow_start(session):
             start(session)
             clock[0] += 2
-        with patch('neutrin_cycle.time.monotonic', side_effect=lambda: clock[0]), patch.object(test_cycle.NodeSession, 'start', slow_start):
+        with patch('neutrino_cycle.time.monotonic', side_effect=lambda: clock[0]), patch.object(test_cycle.NodeSession, 'start', slow_start):
             self.run_campaign()
         path = next(self.options.output.glob('*/campaign.json'))
         data = json.loads(path.read_text())

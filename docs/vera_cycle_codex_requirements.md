@@ -101,7 +101,7 @@ F02-C — 常見其他格式。
 
 ### F01 / P1：PRE 有任何 dmesg finding，POST 新 panic 可被標 KNOWN
 
-位置：cycle_core.py 142–150、377–378、395–396、413–431；neutrin_cycle.py 117–124。
+位置：cycle_core.py 142–150、377–378、395–396、413–431；neutrino_cycle.py 117–124。
 
 正式 dmesg parser 把偵測到的事件全部建成 DMESG_HARDWARE/dmesg。classification 與 aggregation 只比較 code/component，所以 PRE AER 和 POST Kernel panic 是同一個 key。
 
@@ -157,7 +157,7 @@ PCIe wiring 的另一層政策：lspci 的 downgraded annotation 是由 sta/cap 
 
 | ID / 優先 | 證據與觸發 | 影響與修正 |
 | --- | --- | --- |
-| F08 / P2 零輪 COMPLETE/PASS | neutrin_cycle.py 258–271。合法正數 hours limit 在 start clearing 用盡；1秒limit/2秒虛擬準備時間，0 action、0 completed、exit0、COMPLETE/PASS。 | 計時在準備後開始，另明確表示 no cycles exercised；不能只靠 PRE health當cycle完成。不是把一般 COMPLETE/health分開的設計一概判錯。 |
+| F08 / P2 零輪 COMPLETE/PASS | neutrino_cycle.py 258–271。合法正數 hours limit 在 start clearing 用盡；1秒limit/2秒虛擬準備時間，0 action、0 completed、exit0、COMPLETE/PASS。 | 計時在準備後開始，另明確表示 no cycles exercised；不能只靠 PRE health當cycle完成。不是把一般 COMPLETE/health分開的設計一概判錯。 |
 | F09 / P2 SEL delta空不等於SEL空 | engine213–221取delta；report53–61把[]寫成 BMC SEL EMPTY / BMC returned no SEL records。前後都含同筆PSU事件即可重現。 | raw cumulative SEL仍保存，這是HTML誤導；改成0 new events，cumulative count另存。 |
 | F10 / P2 PRE內容被改寫 | engine287–302在確認後start()把新dmesg finding加進原PRE與pre_issue_keys，再覆寫pre_report.json。 | reviewed PRE保持不變；新增START/BEFORE_ACTION record。時間保留已修，別再次報timing bug。該新事件在第一次power前發生，不能判為cycle造成。 |
 | F11 / P2 額外二次boot未被識別 | wait_boot記boot1，下一次os_after_cycle回boot2；engine304–327、395–413未比一致性，乾淨fixture單一LOOP仍PASS。 | pin recovered boot ID至POST完成、尾端再核對，額外transition與資料不穩定需可見；不是本次真機或整場PASS證據。 |
@@ -281,7 +281,7 @@ Cross-UID未驗證說明：目前容器UID/GID map只映射0；test_runtime_proc
 
 原碼固定URL prefix：
 https://github.com/wistroneq3300/vera-cpu-rack-cycle/blob/259a80fa7579ef459ab0922ae4b877f56391870b/
-主要引用檔：cycle_core.py、cycle_engine.py、cycle_transport.py、cycle_runtime.py、cycle_report.py、neutrin_cycle.py、neutrino_config.sh、naboo_config.sh、dev/dryrun_sim.py、dev/tests/test_cycle.py、dev/tests/test_hardware_script.py、dev/tests/test_runtime_process.py、README.md、docs/TODO_updates.md。
+主要引用檔：cycle_core.py、cycle_engine.py、cycle_transport.py、cycle_runtime.py、cycle_report.py、neutrino_cycle.py、neutrino_config.sh、naboo_config.sh、dev/dryrun_sim.py、dev/tests/test_cycle.py、dev/tests/test_hardware_script.py、dev/tests/test_runtime_process.py、README.md、docs/TODO_updates.md。
 
 官方語意：
 [O1] Linux CPER：https://github.com/torvalds/linux/blob/master/drivers/firmware/efi/cper.c

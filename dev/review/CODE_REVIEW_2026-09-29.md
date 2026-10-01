@@ -62,7 +62,7 @@
 | M-1 | `vera_rack.sh:87` | `pci_count PCIeFAB 'NVIDIA.*bridge\|bridge.*NVIDIA'` 用 `grep -Eic`，「NVIDIA ... bridge」跨詞比對；真機實測 21（≥20 ✓），但若 lspci 描述順序改變（class 在前 vendor 在後）可能漏算 | 真機目前 OK |
 | M-2 | `vera_rack.sh:58` | BF4 偵測把 `$PCI`（全域）也算進去，但 `-F` 模式下 `$PCI` 為空；`all` 模式順序上 `collect PCI` 先於 `nic_bf4_check`，OK。但變數依賴隱晦 | 可維護性 |
 | M-3 | ~~`cycle_engine.py:237`~~ | ✅ **已修**：巢狀三元改為 if/elif，`inband` 抽變數 | 可讀性 |
-| M-4 | `neutrin_cycle.py` `campaign()` | 116 語句巨型函式 | 可維護性 |
+| M-4 | `neutrino_cycle.py` `campaign()` | 116 語句巨型函式 | 可維護性 |
 | M-5 | 全域 | 多處 `except Exception` 過寬（8 處，**防禦性設計**，不建議動） | 有意的取捨 |
 | M-6 | ~~`cycle_report.py:76`~~ | ✅ **已修**：改抓尾端數字，取不到就退回 PRE 錨點（原本空 phase 會 IndexError） | 脆 → 已強化 |
 | M-7 | `sensor_issues` | `unreadable` 含空字串 `""`，所以「status 空 + reading 空」的健康 sensor 會被判 `SENSOR_UNREADABLE`；`_known_no_reading` 只豁免 coruti/亂碼。真機 240 行無此情況，但邊界脆 | 真機 OK |

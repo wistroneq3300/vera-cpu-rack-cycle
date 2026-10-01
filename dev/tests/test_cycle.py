@@ -16,7 +16,7 @@ from cycle_engine import CAPTURES, NodeSession, new_record
 from cycle_report import render_html, rebuild, status
 from cycle_runtime import EndpointLocks, request_stop
 from cycle_transport import Command, IdentityUnsafe
-from neutrin_cycle import BASE, Console, campaign, main
+from neutrino_cycle import BASE, Console, campaign, main
 
 PCI = '0000:01:00.0 Ethernet controller [0200]: Example [1234:5678]\n0001:01:00.0 PCI bridge [0604]: Fabric [10de:2f95]\n'
 SENSORS = 'Temp | 30 | degrees C | ok | na\nFan | 12000 | RPM | ok | na\n'
@@ -649,7 +649,7 @@ class EngineTests(unittest.TestCase):
         fixed=datetime(2026,9,29,8,0,0,tzinfo=timezone.utc)
         def clock(tz=None):
             return fixed.astimezone(tz) if tz is not None else (fixed+timedelta(hours=8)).replace(tzinfo=None)
-        with patch('neutrin_cycle.datetime') as mocked_clock:
+        with patch('neutrino_cycle.datetime') as mocked_clock:
             mocked_clock.now.side_effect=clock
             self.run_campaign()
         output=next(self.options.output.iterdir())
@@ -732,7 +732,7 @@ class LockTests(unittest.TestCase):
 class ConsolePaintTests(unittest.TestCase):
     def paint(self, line):
         console = Console()
-        with patch('neutrin_cycle.COLOUR_ON', True):
+        with patch('neutrino_cycle.COLOUR_ON', True):
             return console.paint(line)
 
     def test_system_and_phase_slots_are_coloured(self):
@@ -770,7 +770,7 @@ class ConsolePaintTests(unittest.TestCase):
 
     def test_colour_off_returns_plain_text(self):
         console = Console()
-        with patch('neutrin_cycle.COLOUR_ON', False):
+        with patch('neutrino_cycle.COLOUR_ON', False):
             line = 'T L105-21R_n1 | PRE | FAIL'
             self.assertEqual(console.paint(line), line)
 

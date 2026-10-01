@@ -28,14 +28,14 @@
 
 ### R02. 正式循環也在備份與身份核對前清除證據【靜態確認】
 
-- 位置：neutrin_cycle.py:715–731。
+- 位置：neutrino_cycle.py:715–731。
 - 先執行 sel clear 與 dmesg -c 丟棄輸出，之後才 identity/check_mac 與 pre_dmesg_all。
 - 影響：pre_dmesg_all 並非清除前資料；既有 SEL 無備份。若 inventory 指錯可登入的設備，身份檢查發現前就已清除其 log。
 - 建議：身份及設備配對核對 → 原始證據存檔 → 確認收集成功 → 必要時清除；優先以時間戳/record ID 做差集，避免清除。
 
 ### R03. BF4 存在且其他盤點正常，config 仍然無法通過【重現】
 
-- 位置：vera_rack.sh:119–145、480–484；neutrin_cycle.py:474–484。
+- 位置：vera_rack.sh:119–145、480–484；neutrino_cycle.py:474–484。
 - BF4_fun 無條件設 BF4_ERROR_TAG=1；Sum_fun 必須等於 0 才輸出成功文字，而 config_ok 又要求此文字。
 - 影響：正常完整盤點也回傳 config=False；預設 keep_going=False 時第一輪結束便停止該節點。
 - 建議：依實際結果設定 flag，盤點輸出結構化結果與正確 exit code；是否需要 BF4 應由 inventory/profile 決定。
@@ -43,7 +43,7 @@
 
 ### R04. 健康報告會隱藏真正 config 失敗，甚至把開機逾時寫成 PASS【重現】
 
-- 位置：neutrin_cycle.py:1099–1109、1128–1144、1209–1212、1263、1425–1431。
+- 位置：neutrino_cycle.py:1099–1109、1128–1144、1209–1212、1263、1425–1431。
 - _row_real_issues 直接排除所有 step=config；detail 含 BF4 的 issue 也被廣泛排除，沒有驗證真的是「此節點不需 BF4」。
 - FAIL_KINDS 未包含 TIMEOUT/NO_VALUE，overall_fail 也不看 result.error 或必需步驟是否完成。
 - 已重現：NVMe config loss、boot TimeoutError、worker FileExistsError，都能產生健康報告 PASS。
@@ -52,7 +52,7 @@
 
 ### R05. WARN 在執行器被視為失敗，摘要卻可能顯示 OK【重現】
 
-- 位置：neutrin_cycle.py:879–885、1055–1073、1104–1133、1439–1445。
+- 位置：neutrino_cycle.py:879–885、1055–1073、1104–1133、1439–1445。
 - evaluate_result 把未豁免的所有 issue 都當 fatal，包含 sensor_diff WARN。
 - 單節點摘要又把 WARN 排除，沒有 real issue 就寫 OK。
 - 影響：一次已恢復的感測器瞬斷足以停止節點；runtime FAILED、node summary OK、health report PASS 可同時出現。
@@ -60,7 +60,7 @@
 
 ### R06. 感測器 critical/non-recoverable 判斷不相容於標準 ipmitool 輸出【重現＋上游核對】
 
-- 位置：neutrin_cycle.py:419–420、950–975。
+- 位置：neutrino_cycle.py:419–420、950–975。
 - 程式只接受 critical / non-recoverable 長字串；標準 sensor list 通常使用 cr / nr。
 - 已重現：ok → cr、ok → nr 都得到 sensor_diff=True。
 - ok → na/ns（讀值不可用）也會通過；原本就異常、或不是從 ok 開始的惡化也不在檢查範圍。
@@ -69,7 +69,7 @@
 
 ### R07. 同名感測器後一筆正常值會覆蓋前一筆異常【重現】
 
-- 位置：neutrin_cycle.py:372–390、398–416。
+- 位置：neutrino_cycle.py:372–390、398–416。
 - 使用 name set 及 name→status dict；重複名稱採 last occurrence wins。
 - 已重現：同名 Temp 第一筆 critical、第二筆 ok，最後只留下 ok。
 - 影響：多個不同实体或重複 SDR 記錄若共用顯示名稱，部分故障或部分消失可被隱藏。
@@ -77,7 +77,7 @@
 
 ### R08. sensor 命令失敗被 || true 改為成功，讀不到與掉 sensor 混在一起【重現＋靜態確認】
 
-- 位置：neutrin_cycle.py:423–444、797–802、832–888。
+- 位置：neutrino_cycle.py:423–444、797–802、832–888。
 - capture_sensor_list 的 shell 指令有 2>&1 || true，命令失敗常回 code=0；呼叫端依賴 code 判定是否讀取成功。
 - 只特別辨識 Get SDR ... command failed，其他裝置不存在/權限/通訊失敗可能被當空表。
 - 影響：既可能將採集故障誤報 SENSOR_LOST，也可能在 baseline 空/不足時跳過檢查；「ipmi0 不在就 skip」註解與實作不一致。
@@ -93,7 +93,7 @@
 
 ### R10. outband reboot 實際送軟關機，沒有重新開機步驟【靜態確認＋上游核對】
 
-- 位置：neutrin_cycle.py:606–609、779–780；README.md:62。
+- 位置：neutrino_cycle.py:606–609、779–780；README.md:62。
 - power soft 是 ACPI soft shutdown，並非一般 reboot；程式後面只等待 boot_id 改變，沒有等 off 再 power on。
 - 影響：支援 ACPI 的機器可能關機後一直等到 timeout。
 - 建議：先定義測試需要 graceful reboot、hard reset 或 power off/on；選定相符指令與完整狀態流程，文件清楚區分。
@@ -101,14 +101,14 @@
 
 ### R11. auto 沒有 fallback；outband 也要求 OS 在 PRE 已可登入【重現＋靜態確認】
 
-- 位置：neutrin_cycle.py:715–716、767–780、1703–1705；README.md:66–67。
+- 位置：neutrino_cycle.py:715–716、767–780、1703–1705；README.md:66–67。
 - auto 在 main 被改成 inband；issue_cycle/wait_for_os 無 outband fallback 路徑。
 - 預檢固定先 SSH OS，OS 原本不在線時 outband 操作也無法走到 issue_cycle。
 - 建議：明確規範 fallback 的條件與次數，先查證前一次動作是否已生效，避免重複下電。若測試設計要求 baseline，應將「恢復已關機 OS」與「循環測試」分開，而非宣稱 outband 任意可用。
 
 ### R12. 密碼會出現在 OOB 逾時例外與命令參數；dry-run 有 shell 注入問題【重現＋靜態確認】
 
-- 位置：neutrin_cycle.py:581–589、637–640、916–917；dryrun_sim.py:37–45。
+- 位置：neutrino_cycle.py:581–589、637–640、916–917；dryrun_sim.py:37–45。
 - OOB 使用 -P password；TimeoutExpired 的字串包含完整 argv，issue_cycle 將其寫入 note/issues，後續落盤。
 - 已用合成密碼重現例外文字洩漏；程式雖將正常顯示的 command 遮罩，例外路徑未遮罩。
 - dry-run 直接把密碼及 IP 插入 shell=True 字串，密碼未 quote；空格、$、分號等會被 shell 解讀，cmd!r 也不是 shell escaping。
@@ -116,7 +116,7 @@
 
 ### R13. PRE 已失敗仍執行電源循環，POST 還會覆蓋 PRE 結果【完整 mock cycle 重現】
 
-- 位置：neutrin_cycle.py:737–741、767–774、889–892、905–906。
+- 位置：neutrino_cycle.py:737–741、767–774、889–892、905–906。
 - pre root/config/power 為 False 不阻擋 issue_cycle；keep_going 僅在整輪結束才生效。
 - pre/post 共用 root/config/power key，post 正常就把 pre 失敗覆蓋。
 - 已重現：pre config=False → 照樣發送 cycle → post config=True → 最終 PASS。
@@ -124,7 +124,7 @@
 
 ### R14. 嚴重 dmesg 與部分 SEL 事件未進入判定【完整 mock cycle 重現】
 
-- 位置：neutrin_cycle.py:520–524、893–896、1163–1175、1204–1212、1322–1328。
+- 位置：neutrino_cycle.py:520–524、893–896、1163–1175、1204–1212、1322–1328。
 - dmesg 是 record-only，且先將 post_dmesg_ok 設 True；health report 雖掃出 fatal AER，overall_fail 不使用該結果。
 - 已重現：含 AER: Uncorrected (Fatal) 的完整 mock loop 回 PASS，健康報告列 1 matches 仍 PASS。
 - SEL 主要依一般 error/fail 字詞掃描與「是否空」，沒有事件型別/嚴重性判定；有事件不代表必須 FAIL，但不能等同完整健康檢查。
@@ -134,7 +134,7 @@
 
 ### R15. 電源指令是否成功與 RESPONSE_LOST 處理不一致【靜態確認】
 
-- 位置：neutrin_cycle.py:617–662、922–928。
+- 位置：neutrino_cycle.py:617–662、922–928。
 - inband exec_command 後不讀 stdout/stderr/exit status，直接等 2 秒後記 OK；command not found 也可能被記為已接受，直到等開機逾時。
 - aux_cycle 走 log_command，回應斷線例外直接跳出整輪，沒有 OOB/inband 的 RESPONSE_LOST 對帳流程。
 - 對帳一律要求 bmc_boot_changed，但一般 host reboot/power cycle 不需要 BMC 重啟；即使對帳成功，原 issue 仍在，evaluate_result 仍可能 FAILED。
@@ -142,7 +142,7 @@
 
 ### R16. inventory 節點身份、輸出路徑與選取規則不一致【重現＋靜態確認】
 
-- 位置：neutrin_cycle.py:119–120、228–260、695–696、1118–1120、1359–1366、1696–1701。
+- 位置：neutrino_cycle.py:119–120、228–260、695–696、1118–1120、1359–1366、1696–1701。
 - inventory 允許不同 tray 的同名 n1，但目錄与報告只用 node，兩者都寫 node1/loop1；已重現目錄名稱碰撞。
 - 未禁止多行指到同 BMC/OS，可能對同設備併發送電源命令。
 - CLI --node n1 --node n99 會默默丟掉 n99，只要 n1 有效就照跑；已重現。
@@ -151,7 +151,7 @@
 
 ### R17. 所謂 CLI preflight 幾乎沒有檢查【重現】
 
-- 位置：neutrin_cycle.py:1528、1707–1712。
+- 位置：neutrino_cycle.py:1528、1707–1712。
 - 沒有 --cycle 時只處理參數/載入 inventory，直接 return 0；不驗證 SSH、BMC 指令、必要套件、config 檔案、基準可取得。
 - wizard 有 ping，但 ping 也不能證明 SSH 權限或工具完整。
 - 建議：新增真正無寫入 preflight，產生每個節點的 ready/blocked 與原因，明列將執行的模式與目標。
@@ -166,7 +166,7 @@
 
 ### R19. baseline 完整性與整場 campaign 比較不足【靜態確認】
 
-- 位置：neutrin_cycle.py:743–765、431–444、814–828；dryrun_sim.py:64–77。
+- 位置：neutrino_cycle.py:743–765、431–444、814–828；dryrun_sim.py:64–77。
 - sensor 三次讀取只取最多 unique names，不要求達到已驗證的完整基準；240 rows 只是提前結束條件。
 - 每轮重抓基準；前一輪掉的硬體若一直沒回來，在 keep-going 後續輪可能成為新基準。前一輪故障仍留著，但後續 loop 的單獨 PASS 容易被誤解。
 - PCIe 使用整行文字作身份，名稱資料庫/輸出变化也会像掉卡；dry-run 要求 BDF 有 domain，標準 01:00.0 行直接忽略，已重現。
@@ -174,7 +174,7 @@
 
 ### R20. host key 信任策略不足、DPU 獨立憑證未接線【靜態確認】
 
-- 位置：neutrin_cycle.py:276–289、531–565、1388–1392、1693–1711；dryrun_sim.py:42。
+- 位置：neutrino_cycle.py:276–289、531–565、1388–1392、1693–1711；dryrun_sim.py:42。
 - 主程式強制 trust_first_use=True，新 host key 寫入每次 PID 專用暫存檔；既有 system known_hosts 仍会使用，但新設備無持久信任。
 - dry-run 完全關閉 host key 檢查。
 - 文件宣稱 NEUTRINO_* / LILY_* 密碼，但 main 僅讀 BMC_PASSWORD/OS_PASSWORD，Lily 強制共用兩組密碼。
@@ -182,16 +182,16 @@
 
 ### R21. stop/lock 不足以保證單一擁有者與安全收尾【靜態確認】
 
-- 位置：stop_cycle.sh:5–15；neutrin_cycle.py:1453–1483。
+- 位置：stop_cycle.sh:5–15；neutrino_cycle.py:1453–1483。
 - pkill -9 -f 以名稱廣泛殺程序，可能殺到其他 campaign 或相關程序；SIGKILL 不執行收尾，報告可能停在半寫入狀態。
-- stop 只檢查 neutrin_cycle，沒有驗證 dryrun 已停。
+- stop 只檢查 neutrino_cycle，沒有驗證 dryrun 已停。
 - /var/run lock 若無法開就改用 /tmp，不同權限使用者可能取得不同 lock；兩處都不可寫仍允許繼續。
 - dry-run 無 lock，另一台 orchestrator 也不受本機 flock 保護。
 - 建議：PID/target/run ID 精確停止，SIGTERM 優雅停止於安全邊界，超時才強殺；統一鎖定路徑，鎖失敗應中止；多控制端使用共享租約或操作規範。
 
 ### R22. timeout 不是整段流程的實際時間上限【靜態風險，未實機計時】
 
-- 位置：neutrin_cycle.py:292–305、315–324、561–575、665–689、1408–1418。
+- 位置：neutrino_cycle.py:292–305、315–324、561–575、665–689、1408–1418。
 - boot deadline 裡嵌套 SSH retry/sleep/identity retry，單次內層操作可能超過剩餘時間。
 - Lily 註解約 5 分鐘，但 40 輪內每次 connect 也多次重試，時間可能遠超註解。
 - hours 只在每輪開始檢查，最後一輪可以超出指定時數。
@@ -200,7 +200,7 @@
 
 ### R23. config 來源與執行版本不確定，clone 後不能直接依 README 跑【靜態確認】
 
-- 位置：neutrin_cycle.py:1040–1052、1494–1498；dryrun_sim.py:221–224；README.md:18–23。
+- 位置：neutrino_cycle.py:1040–1052、1494–1498；dryrun_sim.py:221–224；README.md:18–23。
 - 路徑寫死 /root/rackctl。未在該目錄安裝時 README 指令找不到 inventory。
 - local config 缺失仍執行遠端舊 ~/vera_rack.sh；存在時又直接覆寫遠端同名檔，未記錄 hash、版本或備份。
 - requirements 未完整列出 Linux/fcntl、orchestrator ipmitool、node nvme-cli/mft/dmidecode/net-tools/sudo 等環境要求；naboo inventory 只有表頭。
@@ -218,7 +218,7 @@
 
 ### R25. 報告完整性、耐久性及長跑成本仍需加強【靜態確認】
 
-- 位置：neutrin_cycle.py:127–129、709–711、1196–1205、1358–1383、1434–1448。
+- 位置：neutrino_cycle.py:127–129、709–711、1196–1205、1358–1383、1434–1448。
 - save 直接覆寫，程序中止/空間不足可能留下截斷 JSON；缺少原子替換與磁碟空間檢查。
 - 每輪從頭重寫/掃描所有歷史報告及 dmesg，總成本隨輪數接近平方增加。
 - health report 的 loops_total=max 已存在 loop，沒有區分 requested/completed/failed/aborted；工作失敗或節點停止後標題可讓人误认完整測試完成。

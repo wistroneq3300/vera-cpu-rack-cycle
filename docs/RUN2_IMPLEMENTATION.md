@@ -43,7 +43,7 @@ python3 -m unittest discover -s dev/tests -v
 # 143 tests: 142 PASS, 1 explicit environment SKIP, 0 failures/errors
 # Original 115: 114 PASS, 1 SKIP; new Run 2: 28 PASS
 for script in neutrino_config.sh naboo_config.sh stop_cycle.sh; do bash -n "$script" || exit; done
-python3 neutrin_cycle.py --version
+python3 neutrino_cycle.py --version
 # 2026.10.01.2
 python3 dev/tests/make_demo.py test-results/demo
 python3 dev/tests/make_demo.py test-results/demo128 128

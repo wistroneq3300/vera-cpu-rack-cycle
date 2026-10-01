@@ -42,8 +42,8 @@ Reproduce:
 ```bash
 python3 -m unittest discover -s dev/tests -v
 for script in neutrino_config.sh naboo_config.sh stop_cycle.sh; do bash -n "$script" || exit; done
-python3 -m compileall -q cycle_core.py cycle_dmesg.py cycle_engine.py cycle_report.py cycle_transport.py cycle_runtime.py neutrin_cycle.py
-python3 neutrin_cycle.py --version
+python3 -m compileall -q cycle_core.py cycle_dmesg.py cycle_engine.py cycle_report.py cycle_transport.py cycle_runtime.py neutrino_cycle.py
+python3 neutrino_cycle.py --version
 python3 dev/tests/make_demo.py
 python3 dev/tests/make_demo.py test-results/demo128 128
 node dev/tests/check_report.cjs test-results/demo/CYCLE_REVIEW_REPORT.html test-results/demo128/CYCLE_REVIEW_REPORT.html

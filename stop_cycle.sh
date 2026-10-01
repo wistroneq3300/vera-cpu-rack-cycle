@@ -6,4 +6,4 @@ if [[ $# -gt 1 ]]; then
     exit 2
 fi
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-exec python3 "$SCRIPT_DIR/neutrin_cycle.py" --stop "$@"
+exec python3 "$SCRIPT_DIR/neutrino_cycle.py" --stop "$@"
