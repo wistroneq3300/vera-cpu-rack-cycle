@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VERA Cycle 2026.10.01.2 中文測試流程與判定邏輯">
+  <title>VERA Cycle｜測試流程與判定邏輯</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #123b59;
+      --blue: #005f91;
+      --cyan: #00a0be;
+      --ink: #173247;
+      --muted: #5e7181;
+      --line: #d7e2e8;
+      --paper: #ffffff;
+      --canvas: #f3f7f9;
+      --soft-blue: #eaf4f8;
+      --soft-cyan: #e4f6f6;
+      --pass: #16633d;
+      --pass-bg: #e8f5ed;
+      --warn: #7a4d00;
+      --warn-bg: #fff5d7;
+      --fail: #9d2c2c;
+      --fail-bg: #fff0ee;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.65 "Segoe UI", "Noto Sans TC", Arial, sans-serif; }
+    ::selection { background: #bfeaf0; color: var(--navy); }
+    a { color: var(--blue); text-underline-offset: 3px; }
+    a:hover { color: var(--navy); }
+    :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+    code, pre, .mono { font-family: Consolas, "Liberation Mono", monospace; font-size: .9em; }
+    code { background: #eef3f6; padding: 2px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+    .skip { position: absolute; top: -80px; left: 14px; padding: 9px 13px; background: #fff; z-index: 5; }
+    .skip:focus { top: 14px; }
+    .topbar { background: var(--navy); color: #fff; border-bottom: 3px solid var(--cyan); }
+    .topbar-inner { max-width: 1440px; margin: auto; padding: 15px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .wordmark { font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
+    .wordmark span { display: block; color: #bfe3ed; font-size: 12px; font-weight: 400; letter-spacing: .04em; }
+    .top-meta { color: #d6e9ef; font-size: 13px; text-align: right; }
+    .shell { max-width: 1440px; margin: auto; padding: 32px 28px 64px; display: grid; grid-template-columns: 245px minmax(0, 1fr); gap: 32px; }
+    .toc { position: sticky; top: 18px; align-self: start; }
+    .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 9px; }
+    .toc a { display: block; padding: 7px 10px; border-radius: 7px; text-decoration: none; color: var(--ink); }
+    .toc a:hover, .toc a.active { background: var(--soft-blue); color: var(--blue); font-weight: 650; }
+    .toc .version { margin-top: 18px; padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; color: var(--muted); font-size: 12px; }
+    main { min-width: 0; }
+    .hero { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 34px 38px; box-shadow: 0 10px 26px rgba(0,0,0,.08); }
+    h1 { margin: 0; color: var(--navy); font-size: clamp(30px, 4vw, 48px); line-height: 1.14; letter-spacing: -.035em; text-wrap: balance; }
+    .hero p { max-width: 70ch; margin: 15px 0 0; font-size: 17px; color: var(--muted); }
+    .hero-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
+    .tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 5px; background: var(--soft-blue); color: var(--blue); font-size: 12px; font-weight: 700; }
+    .tag.green { background: var(--pass-bg); color: var(--pass); }
+    .tag.amber { background: var(--warn-bg); color: var(--warn); }
+    section { scroll-margin-top: 20px; margin-top: 30px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 13px; }
+    h2 { margin: 0; color: var(--navy); font-size: 25px; line-height: 1.25; letter-spacing: -.025em; }
+    h3 { margin: 23px 0 8px; color: var(--navy); font-size: 18px; }
+    p { max-width: 76ch; }
+    .panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 25px 28px; }
+    .notice { padding: 14px 16px; border-radius: 8px; background: var(--soft-cyan); border: 1px solid #b9e1e3; }
+    .notice.warn { background: var(--warn-bg); border-color: #ecd69b; }
+    .notice.fail { background: var(--fail-bg); border-color: #efc5c1; }
+    .notice strong { color: var(--navy); }
+    .command { position: relative; margin: 13px 0; background: #152b3b; color: #e7f5f8; border-radius: 8px; padding: 16px 48px 16px 17px; overflow-x: auto; }
+    .command code { background: transparent; padding: 0; font-size: 13px; white-space: pre; }
+    .copy { position: absolute; top: 10px; right: 10px; border: 1px solid #6a899a; border-radius: 5px; background: #203d50; color: #e8f6f8; padding: 5px 8px; cursor: pointer; }
+    .copy:hover { background: #2c556d; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 11px 12px; background: #f1f6f8; color: var(--muted); font-size: 12px; font-weight: 700; }
+    td { padding: 12px; border-top: 1px solid var(--line); vertical-align: top; }
+    tr:first-child td { border-top: 0; }
+    .flow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; margin: 18px 0 5px; }
+    .flow-step { min-height: 118px; padding: 14px 13px; background: var(--soft-blue); border: 1px solid #c6dfe9; border-radius: 9px; position: relative; }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -17px; top: 44px; color: var(--cyan); font-weight: 700; z-index: 1; }
+    .flow-step b { display: block; color: var(--blue); font-size: 13px; margin-bottom: 5px; }
+    .flow-step span { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .step-list { counter-reset: step; display: grid; gap: 10px; }
+    .step { counter-increment: step; display: grid; grid-template-columns: 42px minmax(0,1fr); gap: 16px; padding: 17px 0; border-top: 1px solid var(--line); }
+    .step::before { content: counter(step); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: white; font-weight: 700; }
+    .step h3 { margin: 0 0 4px; }
+    .step p { margin: 5px 0 8px; }
+    .step ul, .checklist { margin: 7px 0; padding-left: 21px; }
+    .step li { margin: 5px 0; }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { display: flex; gap: 9px; align-items: flex-start; margin: 8px 0; }
+    .checklist input { margin-top: 5px; accent-color: var(--blue); }
+    .checklist label { cursor: pointer; }
+    .checklist input:checked + label { color: var(--muted); text-decoration: line-through; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .mini { padding: 17px; border: 1px solid var(--line); border-radius: 9px; background: #fbfdfe; }
+    .mini h3 { margin-top: 0; }
+    .mini p { color: var(--muted); margin: 6px 0 0; }
+    details { border-top: 1px solid var(--line); }
+    details:first-of-type { border-top: 0; }
+    summary { cursor: pointer; padding: 15px 3px; font-weight: 700; color: var(--navy); }
+    summary:hover { color: var(--blue); }
+    .details-body { padding: 0 3px 15px; }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .status.pass { color: var(--pass); background: var(--pass-bg); }
+    .status.warn { color: var(--warn); background: var(--warn-bg); }
+    .status.fail { color: var(--fail); background: var(--fail-bg); }
+    .status.na { color: #365272; background: #e8eef8; }
+    .legend { display: flex; flex-wrap: wrap; gap: 9px; margin: 7px 0 13px; }
+    .search-row { display: flex; gap: 9px; align-items: center; margin-bottom: 13px; }
+    .search-row input { width: 100%; max-width: 360px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; }
+    .search-row small { color: var(--muted); }
+    footer { max-width: 1440px; margin: auto; padding: 24px 28px 50px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 1050px) { .shell { grid-template-columns: 205px minmax(0,1fr); gap: 22px; } .flow { grid-template-columns: repeat(3, minmax(0,1fr)); } .flow-step:nth-child(3)::after { display: none; } }
+    @media (max-width: 740px) { .topbar-inner { padding: 13px 17px; } .top-meta { display: none; } .shell { display: block; padding: 18px 15px 42px; } .toc { position: static; display: flex; gap: 5px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 4px; } .toc h2, .toc .version { display: none; } .toc a { white-space: nowrap; background: var(--paper); border: 1px solid var(--line); } .hero { padding: 25px 20px; } .panel { padding: 19px 17px; } .flow { grid-template-columns: 1fr 1fr; } .flow-step:not(:last-child)::after { display: none; } .grid-2 { grid-template-columns: 1fr; } table { min-width: 650px; } .table-scroll { overflow-x: auto; } h2 { font-size: 23px; } }
+    @media print { .topbar { color: #000; background: #fff; border-bottom: 1px solid #000; } .wordmark span, .top-meta { color: #173247; } .toc, .copy, .search-row { display: none; } .shell { display: block; padding: 0; } .panel, .hero { box-shadow: none; break-inside: avoid; } section { margin-top: 18px; } a { color: inherit; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要內容</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="wordmark">Wistron / VERA<span>Internal engineering test guide</span></div>
+      <div class="top-meta">VERA Cycle<br><span class="mono">2026.10.01.2</span></div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="toc" aria-label="頁面導覽">
+      <h2>Guide map</h2>
+      <a href="#start">開始前</a>
+      <a href="#input">輸入與啟動</a>
+      <a href="#flow">完整流程</a>
+      <a href="#pre">PRE Check</a>
+      <a href="#cycle">Cycle / POST</a>
+      <a href="#checks">檢查與 FAIL</a>
+      <a href="#evidence">證據與報告</a>
+      <a href="#stop">停止與復原</a>
+      <div class="version">適用版本<br><strong>2026.10.01.2</strong><br><span>以 branch codex/run2-review 的程式邏輯為準。</span></div>
+    </nav>
+
+    <main id="main">
+      <section class="hero" id="start">
+        <h1>VERA Cycle 測試流程與判定邏輯</h1>
+        <p>這份頁面把腳本從輸入參數、PRE baseline、進入 OS、每一輪 power action，到最後報告判讀的邏輯攤開來。使用者可以依照流程知道「現在在驗什麼」、「什麼情況會停」、「什麼情況會留下 FAIL 但繼續跑」。</p>
+        <div class="hero-row"><span class="tag">中文操作說明</span><span class="tag">Offline report friendly</span><span class="tag green">Hardware FAIL keep-going</span><span class="tag amber">Execution failure stops node</span></div>
+      </section>
+
+      <section id="input">
+        <div class="section-heading"><h2>1. 開始前：你需要準備什麼</h2></div>
+        <div class="panel">
+          <div class="notice"><strong>先釐清兩種結果：</strong>硬體檢查發現問題，代表結果是 FAIL，但只要腳本有完整執行，該 node 仍可依政策繼續 cycle；腳本沒有完整執行，代表結果不可信，PRE 會 blocked，POST 會停止該 node。</div>
+          <div class="grid-2" style="margin-top:16px">
+            <div class="mini"><h3>Controller 端</h3><p>Python 3、Bash、SSH／BMC 連線能力、可寫的 output 目錄，以及能執行所選專案腳本的憑證。正式部署在 Linux；本頁的離線範例不會碰真機。</p></div>
+            <div class="mini"><h3>被測 node</h3><p>Inventory 中的 BMC／OS 位址與 hostname 必須正確；OS 需能以 root 執行必要檢查。MFT／<code>mst</code> 是硬體檢查期待的 OS 工具，程式不會自動安裝 MFT。</p></div>
+          </div>
+          <h3>Inventory 最少要有的欄位</h3>
+          <div class="table-scroll"><table><thead><tr><th>欄位</th><th>用途</th><th>例子</th></tr></thead><tbody>
+            <tr><td><code>tray</code> / <code>node</code></td><td>組成唯一 node key，例：<code>L105-21R_n1</code></td><td><code>L105-21R,n1</code></td></tr>
+            <tr><td><code>bmc_ip</code> / <code>bmc_hostname</code></td><td>驗證 BMC 身分、SEL、電源狀態</td><td><code>192.0.2.10</code> / <code>bmc-n1</code></td></tr>
+            <tr><td><code>os_ip</code> / <code>os_hostname</code></td><td>驗證 OS 身分、boot ID、OS 檢查</td><td><code>192.0.2.11</code> / <code>os-n1</code></td></tr>
+          </tbody></table></div>
+        </div>
+      </section>
+
+      <section id="commands">
+        <div class="section-heading"><h2>2. 輸入什麼：啟動方式</h2></div>
+        <div class="panel">
+          <h3>互動式 wizard</h3>
+          <p>不帶參數執行時，程式會依序詢問 project、node、cycle mode、channel，以及用 loops 或 hours 限制執行時間。適合第一次操作或需要人工確認設定的情境。</p>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py">複製</button><code>python3 neutrin_cycle.py</code></div>
+          <h3>自動化／可重現命令</h3>
+          <p>以下例子對 Neutrino 的 n1 執行 3 輪。<code>--cycle</code> 才會在 PRE 後進入 START 與 Cycle；沒有它只做 PRE，且暫存 PRE evidence 不會保留成 campaign。</p>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle">複製</button><code>python3 neutrin_cycle.py --project neutrino --inventory cycle_inventory_neutrino.csv --node n1 --loops 3 --cycle-mode power_cycle --channel inband --output campaigns --cycle</code></div>
+          <h3>主要參數</h3>
+          <div class="table-scroll"><table><thead><tr><th>參數</th><th>可用值／規則</th><th>影響</th></tr></thead><tbody>
+            <tr><td><code>--project</code></td><td><code>neutrino</code> 或 <code>naboo</code></td><td>選擇對應硬體 config script。</td></tr>
+            <tr><td><code>--node</code></td><td><code>all</code>、node 名稱，或 tray/node；可重複</td><td>決定本次要做哪些 node。重複 endpoint 會在執行前 blocked。</td></tr>
+            <tr><td><code>--loops</code> / <code>--hours</code></td><td>二選一，必須是正數</td><td>到達限制後結束；零輪執行不會被標成 COMPLETE。</td></tr>
+            <tr><td><code>--cycle-mode</code></td><td><code>power_cycle</code>、<code>reboot</code>、<code>aux_cycle</code></td><td>決定送出的 action。</td></tr>
+            <tr><td><code>--channel</code></td><td><code>inband</code> 或 <code>outband</code></td><td>決定 OS／BMC 命令通道與 SEL 方式。</td></tr>
+            <tr><td><code>--boot-timeout</code> / <code>--poll-interval</code></td><td>timeout 至少 1 秒，poll 必須大於 0</td><td>等待 OS boot ID 變更的視窗與輪詢頻率。</td></tr>
+            <tr><td><code>--memory-min-ratio</code></td><td>0 到 1 之間，預設 0.90</td><td>OS 可見記憶體相對 SMBIOS 安裝容量的下限。</td></tr>
+          </tbody></table></div>
+        </div>
+      </section>
+
+      <section id="flow">
+        <div class="section-heading"><h2>3. 一次 Cycle 的總流程</h2></div>
+        <div class="panel">
+          <div class="flow" aria-label="流程圖">
+            <div class="flow-step"><b>① 輸入驗證</b><span>參數、inventory、target、limit</span></div>
+            <div class="flow-step"><b>② PRE</b><span>身分、依賴、硬體與 baseline</span></div>
+            <div class="flow-step"><b>③ 人工批准</b><span>接受 finding 與 node 排除</span></div>
+            <div class="flow-step"><b>④ START</b><span>再次驗身分並清理 dmesg／SEL</span></div>
+            <div class="flow-step"><b>⑤ Cycle / POST</b><span>action、boot、OS 檢查、證據</span></div>
+            <div class="flow-step"><b>⑥ 報告</b><span>counter、health、HTML、evidence</span></div>
+          </div>
+          <p class="muted">每一輪只會對仍為 active 的 node 發出 action。某個 node 被停止時，其他 node 仍可繼續；最後只要有 node 未完成或 health 有 FAIL，campaign 就不會被誤判成健康完成。</p>
+        </div>
+      </section>
+
+      <section id="pre">
+        <div class="section-heading"><h2>4. PRE Check：先建立可信的 baseline</h2></div>
+        <div class="panel">
+          <div class="step-list">
+            <div class="step"><div><h3>驗證每個 endpoint 的身分</h3><p>對 inventory 中的 BMC／OS（以及有設定的 Lily endpoint）執行 identity command。</p><ul><li>hostname 必須與 inventory 相符。</li><li>OS 必須回傳格式正確的 36 字元 boot ID。</li><li>身份不符或無法取得時，加入 <code>PRE_BLOCKED</code>／identity finding，不能安全執行 cycle。</li></ul></div></div>
+            <div class="step"><div><h3>驗 root 與 OS 依賴</h3><p>檢查 <code>id -u</code> 是否為 0，以及必要命令是否存在。缺少套件時會嘗試用 apt 安裝；<code>mst</code>／MFT 不由程式自動安裝。</p><ul><li>依賴安裝失敗或工具仍缺少，會留下 package finding。</li><li>這些 finding 必須在批准前閱讀；後續 command 仍會以 evidence 呈現成功或失敗。</li></ul></div></div>
+            <div class="step"><div><h3>執行第一次硬體與 OS capture</h3><p>收集 dmesg、PCI、sensor、SEL、BMC firmware、電源，以及 project config script 的檢查結果。</p><ul><li>PCI baseline 不可取得時，node 會 blocked，因為後續 PCI 比較沒有可信基準。</li><li>sensor 問題會保留在 PRE，供 operator review；不會用 shortcut 靜默吃掉 malformed row。</li></ul></div></div>
+            <div class="step"><div><h3>上傳並驗證 hardware script</h3><p>腳本只上傳一次，之後每次執行前都重新檢查檔案型態、不是 symlink、owner／權限為 <code>root:700</code>，以及 SHA-256。</p><div class="notice warn"><strong>注意：</strong><code>script_verified</code> 只代表遠端檔案可信，不代表這次 command 已經完整執行。還要通過下一個 execution gate。</div></div></div>
+            <div class="step"><div><h3>判斷 hardware execution 是否完整</h3><p>硬體命令必須是 transport <code>RETURNED</code>，exit code 與最後一行 RESULT 一致，且只能有一個 terminal RESULT。</p><ul><li><code>exit 0 + RESULT|PASS</code>：且沒有 finding，才算完整 PASS。</li><li><code>exit 1 + RESULT|FAIL</code>：算完整硬體 FAIL，保留 finding 並 keep-going。</li><li>NOT_ISSUED、timeout／RESPONSE_LOST、syntax error、缺 final RESULT、結果與 exit 不一致：PRE blocked。</li></ul></div></div>
+            <div class="step"><div><h3>完成 PRE 並等待批准</h3><p>PRE 會保存原始 evidence，建立 immutable baseline：PCI identity、sensor rows、dmesg fingerprint 與 boot identity。程式列出 runnable 與 excluded node，等待 operator 接受。</p><div class="command"><code>Start &lt;RUN_ID&gt; on &lt;N&gt; runnable target(s), accepting the listed findings and exclusions? [y/N]:</code></div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="start-stage">
+        <div class="section-heading"><h2>5. 批准後：START 不是新的 PRE</h2></div>
+        <div class="panel">
+          <p>批准後，程式建立獨立的 <code>START</code> record，不改寫已審核的 PRE。它會重新驗證 endpoint 身分；如果等待批准期間 OS boot ID 已變，代表原 baseline 可能已過期，會以 identity unsafe 停止，不能悄悄開始。</p>
+          <div class="grid-2">
+            <div class="mini"><h3>清理前要有可信 capture</h3><p>只有 PRE 的 dmesg／SEL capture 有效時才清理。若 PRE capture 失敗，會留下 <code>CLEAR_SKIPPED</code>，保留原 evidence，避免把不完整 baseline 當成已清空。</p></div>
+            <div class="mini"><h3>清理的目的</h3><p>START 清理 dmesg 與 SEL，讓後續每輪的 delta 能從乾淨的時間點開始；它不會刪除已寫入的 PRE evidence。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cycle">
+        <div class="section-heading"><h2>6. Cycle 與 POST：每輪實際檢查什麼</h2></div>
+        <div class="panel">
+          <div class="step-list">
+            <div class="step"><div><h3>Before action</h3><p>保存本輪 action 前的 OS／BMC identity 與 SEL snapshot，並以 PRE baseline 做比較。這一步是時間窗與 boot 判讀的基準。</p></div></div>
+            <div class="step"><div><h3>送出 power action</h3><p>依 mode／channel 發送 reboot、power cycle 或 aux cycle。command state 會分成 SENT、RESPONSE_LOST、NOT_ISSUED 或 COMMAND_FAILED。</p><ul><li>RESPONSE_LOST 不盲目重送；後面用 boot 與 power evidence reconciliation。</li><li>NOT_ISSUED／COMMAND_FAILED 若 OS boot 維持原值，仍可進 POST，保留 action failure。</li><li>如果 action 被拒絕後觀察到額外 boot，加入 <code>UNEXPECTED_BOOT_TRANSITION</code> 並停止該 node，不採用新 boot 當 expected baseline。</li></ul></div></div>
+            <div class="step"><div><h3>等待 OS recovery</h3><p>輪詢 OS identity，必須看到新的 boot ID；timeout 會停止 node。其他 endpoint 會在 OS recovery 後重新驗證。</p></div></div>
+            <div class="step"><div><h3>POST entry 與硬體 capture</h3><p>重新檢查 dmesg、PCI inventory、sensor、SEL delta、BMC firmware、chassis power、host power，並再次驗證及執行 hardware script。</p><ul><li>PCI 是和 PRE 比較，不是只看數量。</li><li>dmesg 保留完整 raw evidence；AER 多行的 BDF、status、error bit 一起形成 event identity。</li><li>正常的 NVMe shutdown timeout 設定訊息不算 failure；真正 I/O timeout、controller down、reset failure 仍會被記錄。</li></ul></div></div>
+            <div class="step"><div><h3>POST 結束 gate</h3><p>POST 完成前會再次確認 OS identity 沒有在檢查中多重開機。最後才計算 <code>post_complete</code>、<code>boot_confirmed</code> 與 <code>valid_cycle</code>。</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="checks">
+        <div class="section-heading"><h2>7. 檢查項目與 FAIL 判定</h2><div class="search-row"><input id="check-search" type="search" placeholder="搜尋檢查項目…" aria-label="搜尋檢查項目"><small id="check-count"></small></div></div>
+        <div class="panel">
+          <div class="legend"><span class="status pass">PASS</span><span class="status warn">WARN</span><span class="status fail">FAIL</span><span class="status na">UNSUPPORTED / N/A</span></div>
+          <div class="table-scroll"><table id="check-table"><thead><tr><th>檢查</th><th>看什麼</th><th>會怎樣算 FAIL</th><th>流程行為</th></tr></thead><tbody>
+            <tr><td><strong>Identity / boot</strong></td><td>hostname、OS boot ID、endpoint 連線</td><td>hostname 不符、boot ID 格式錯、無法取得 identity</td><td><span class="status fail">STOP / BLOCK</span></td></tr>
+            <tr><td><strong>CPU topology</strong></td><td>SMBIOS enabled、lscpu 的唯一 CPU ID、online 狀態、socket topology</td><td>offline CPU 漏算、duplicate CPU、malformed row、online 不等於 logical，或 topology 不一致</td><td><span class="status fail">硬體 FAIL</span> 完整執行仍可 keep-going</td></tr>
+            <tr><td><strong>Memory / DIMM</strong></td><td>已安裝 DIMM 數量與容量、OS MemTotal／設定比例</td><td>數量不符、容量不可讀、OS 可見容量低於 ratio 或超過 installed</td><td><span class="status fail">硬體 FAIL</span></td></tr>
+            <tr><td><strong>NVMe</strong></td><td>nvme controller／namespace 的可見數量與 dmesg</td><td>設備缺少、I/O timeout、controller down、reset failure</td><td><span class="status fail">硬體 FAIL</span></td></tr>
+            <tr><td><strong>MST / BF4</strong></td><td>MST module、完整 BDF、VPD board serial 與 BF4 physical identity</td><td>module 不在、duplicate BDF、VPD identity 缺失、inventory 與 identity 不一致、數量不符</td><td><span class="status fail">硬體 FAIL</span></td></tr>
+            <tr><td><strong>PCIe link</strong></td><td>一般 Endpoint 的 LnkSta、RCiEP／RCEC device type、link speed／width</td><td>一般 Endpoint 缺 LnkSta、access denied、宣告 LnkCap 卻缺 LnkSta、link downgrade</td><td><span class="status fail">硬體 FAIL</span></td></tr>
+            <tr><td><strong>RCiEP / RCEC</strong></td><td>是否為 Root Complex Integrated Endpoint／Event Collector；是否真的提供 optional link</td><td>有 link 卻 invalid 或 downgrade</td><td>沒有 physical link capability 時 <span class="status na">N/A</span></td></tr>
+            <tr><td><strong>Sensor</strong></td><td>名稱、format、value、status、缺失與恢復 reread</td><td>malformed row、控制字元、critical status、消失且確認 reread 仍缺</td><td><span class="status fail">FAIL</span>；收集失敗會明確標示</td></tr>
+            <tr><td><strong>dmesg</strong></td><td>AER、EDAC、APEI、NVMe、kernel 等事件與 PRE fingerprint</td><td>native severity 為 failure、NEW event、WORSENED count／severity</td><td>Known 仍影響 health；不代表 causal proof</td></tr>
+            <tr><td><strong>SEL</strong></td><td>Before／POST snapshot 的 new event delta</td><td>無法讀取、格式不合法、delta 不可判讀</td><td><span class="status warn">REVIEW</span>；不把 0 new 等同 cumulative empty</td></tr>
+            <tr><td><strong>Power</strong></td><td>Chassis Power is on、BMC host running</td><td>電源不是 on 或 host 狀態不符</td><td><span class="status fail">FAIL</span></td></tr>
+            <tr><td><strong>Hardware execution gate</strong></td><td>transport state、exit code、唯一 final RESULT、script SHA</td><td>NOT_ISSUED、timeout、syntax、缺 final RESULT、exit／RESULT 不一致</td><td><span class="status fail">PRE BLOCK / POST STOP</span></td></tr>
+          </tbody></table></div>
+          <div class="notice" style="margin-top:18px"><strong>關鍵判斷：</strong>完整 <code>RESULT|FAIL</code> 是「硬體檢查完成但發現問題」，不是「腳本沒跑完」。它會保留 FAIL 並繼續其他輪次；只有 execution incomplete 才會停止該 node。</div>
+        </div>
+      </section>
+
+      <section id="result">
+        <div class="section-heading"><h2>8. 怎樣算整場 PASS／FAIL</h2></div>
+        <div class="panel">
+          <div class="grid-2">
+            <div class="mini"><h3><span class="status pass">COMPLETE + PASS</span></h3><p>達到 loops／hours 限制、沒有 node 因故停止、health 沒有 FAIL，且至少有有效執行的 cycle。只有報告完整且所有 FAIL gate 都沒有觸發時才成立。</p></div>
+            <div class="mini"><h3><span class="status fail">COMPLETE + FAIL</span></h3><p>執行限制完成，但有 hardware／dmesg／sensor／power 等 FAIL。這不是假完成；代表流程跑完，但 campaign health 失敗。</p></div>
+            <div class="mini"><h3><span class="status warn">INCOMPLETE</span></h3><p>有 node 被停止、PRE 沒有可批准的 baseline、零輪 cycle、owner 中斷、rebuild 發現 evidence integrity 問題，或 graceful stop 尚未完成當前流程。</p></div>
+            <div class="mini"><h3><span class="status fail">valid_cycle = false</span></h3><p>不代表所有 collection 都沒做。它表示沒有同時滿足 boot recovery、stable POST identity、power on、verified script 與 hardware execution complete。</p></div>
+          </div>
+          <h3>Counter 的意義</h3>
+          <div class="table-scroll"><table><thead><tr><th>Counter</th><th>意思</th></tr></thead><tbody>
+            <tr><td><code>attempts</code></td><td>嘗試送出的 cycle action，包含 rejected／command failed。</td></tr>
+            <tr><td><code>boot_confirmed</code></td><td>觀察到預期的 OS boot transition。</td></tr>
+            <tr><td><code>completed</code></td><td>POST 到達結尾且 hardware execution 完整。</td></tr>
+            <tr><td><code>valid_cycles</code></td><td>recovered boot、POST identity 穩定、power on、script verified、execution complete 全部成立。</td></tr>
+          </tbody></table></div>
+        </div>
+      </section>
+
+      <section id="evidence">
+        <div class="section-heading"><h2>9. 使用者要看哪些 evidence</h2></div>
+        <div class="panel">
+          <div class="table-scroll"><table><thead><tr><th>檔案／位置</th><th>用途</th><th>使用者怎麼看</th></tr></thead><tbody>
+            <tr><td><code>campaign.json</code></td><td>完整 journal、node state、counter、state</td><td>先看 campaign completion／health，再看各 node active、blocked、stop_reason。</td></tr>
+            <tr><td><code>&lt;node&gt;/pre_report.json</code></td><td>immutable PRE baseline 與 PRE findings</td><td>確認批准時接受了什麼；不要用 POST 結果改寫 PRE。</td></tr>
+            <tr><td><code>&lt;node&gt;/start/report.json</code></td><td>批准後 identity recheck 與清理動作</td><td>若 boot 在批准期間改變，優先看 identity unsafe。</td></tr>
+            <tr><td><code>&lt;node&gt;/loop0001/report.json</code></td><td>每輪 action、recovery、POST checks、counter 條件</td><td>先看 <code>action</code>、<code>recovery</code>、<code>hardware_execution_complete</code>、<code>post_complete</code>。</td></tr>
+            <tr><td><code>hardware.txt</code> / <code>script_sha256</code></td><td>硬體腳本原始輸出、CHECK 與 final RESULT</td><td>確認是完整 RESULT FAIL，還是未派發／timeout／缺 RESULT。</td></tr>
+            <tr><td><code>dmesg.txt</code>、<code>sel_delta.txt</code></td><td>原始 kernel／SEL 證據</td><td>看 raw lines、BDF、subtype、severity、delta；native count 不是 lifetime counter。</td></tr>
+            <tr><td><code>CYCLE_REVIEW_REPORT.html</code></td><td>同一批 records 的可讀報告</td><td>Overview 看整場，Nodes 看時間序列，Issues 看 finding 的所有 occurrence。</td></tr>
+          </tbody></table></div>
+          <div class="notice warn" style="margin-top:17px"><strong>報告重建：</strong>只對已停止 campaign 使用 <code>python3 neutrin_cycle.py --report campaigns/&lt;run_id&gt;</code>。live owner 仍在時 rebuild 會拒絕；缺少 loop report 不會把 journal 裡保存的歷史 FAIL 變成 PASS。</div>
+        </div>
+      </section>
+
+      <section id="stop">
+        <div class="section-heading"><h2>10. 停止、交接與操作後確認</h2></div>
+        <div class="panel">
+          <h3>Graceful stop</h3>
+          <p>停止請求只會由 campaign owner 發出，程式會完成目前 POST，不再開始下一輪，也不使用廣泛的 <code>pkill</code>。</p>
+          <div class="command"><button class="copy" type="button" data-copy="python3 neutrin_cycle.py --stop RUN_ID">複製</button><code>python3 neutrin_cycle.py --stop RUN_ID</code></div>
+          <h3>操作後確認清單</h3>
+          <ul class="checklist" id="operator-checklist">
+            <li><input id="c1" type="checkbox"><label for="c1">我確認 campaign 的 project、node、mode、channel 與 loop／hour limit。</label></li>
+            <li><input id="c2" type="checkbox"><label for="c2">我已閱讀所有 PRE finding，知道哪些 node 被排除，以及為何仍批准其他 node。</label></li>
+            <li><input id="c3" type="checkbox"><label for="c3">每個要計入 valid cycle 的 loop 都有新的 boot ID、穩定 POST identity、power on 與 execution complete。</label></li>
+            <li><input id="c4" type="checkbox"><label for="c4">硬體 FAIL 與 execution incomplete 已分開判讀。</label></li>
+            <li><input id="c5" type="checkbox"><label for="c5">我已保留 campaign.json、HTML、console.log 與對應 evidence 目錄。</label></li>
+            <li><input id="c6" type="checkbox"><label for="c6">若需 rebuild，我確認 owner 已終止，且使用同一 controller 的 runtime root。</label></li>
+          </ul>
+          <p class="muted">勾選只保存在這個瀏覽器的 local storage，不會寫回 campaign，也不會改變測試結果。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer>VERA Cycle internal engineering guide · version 2026.10.01.2 · 本頁只說明程式邏輯；真機驗收仍需在受控環境執行。</footer>
+  <script>
+    (() => {
+      'use strict';
+      const copyButtons = document.querySelectorAll('[data-copy]');
+      copyButtons.forEach(button => button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy);
+          const old = button.textContent; button.textContent = '已複製';
+          setTimeout(() => { button.textContent = old; }, 1300);
+        } catch (_) { button.textContent = '請手動複製'; }
+      }));
+      const search = document.getElementById('check-search');
+      const rows = [...document.querySelectorAll('#check-table tbody tr')];
+      const count = document.getElementById('check-count');
+      const filter = () => {
+        const query = search.value.trim().toLowerCase(); let visible = 0;
+        rows.forEach(row => { const show = row.textContent.toLowerCase().includes(query); row.hidden = !show; if (show) visible++; });
+        count.textContent = `${visible} / ${rows.length} 項`;
+      };
+      search.addEventListener('input', filter); filter();
+      document.querySelectorAll('#operator-checklist input').forEach(input => {
+        const key = `vera-flow-${input.id}`; input.checked = localStorage.getItem(key) === '1';
+        input.addEventListener('change', () => localStorage.setItem(key, input.checked ? '1' : '0'));
+      });
+      const links = [...document.querySelectorAll('.toc a')];
+      const sections = links.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+      const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (entry.isIntersecting) links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`));
+      }), { rootMargin: '-15% 0px -70% 0px' });
+      sections.forEach(section => observer.observe(section));
+    })();
+  </script>
+</body>
+</html>

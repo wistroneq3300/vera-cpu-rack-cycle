@@ -144,6 +144,8 @@ CPU row accounting uses unique CPU IDs independently of socket topology. Offline
 
 Current release: **2026.10.01.2** (`python3 neutrin_cycle.py --version`). See [Run 2 implementation and verification](docs/RUN2_IMPLEMENTATION.md) and the [previous release record](docs/IMPLEMENTATION_2026-10-01.md).
 
+For a Chinese operator-facing walkthrough of inputs, PRE, OS checks, Cycle/POST, FAIL criteria and evidence, open the offline [VERA Cycle 測試流程與判定邏輯](docs/VERA_CYCLE_TEST_FLOW_zh-TW.html).
+
 ## Offline development checks
 
 ```bash
