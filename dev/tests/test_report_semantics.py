@@ -52,6 +52,14 @@ def campaign(records, issues=None):
 
 
 class ReportSemanticsTests(unittest.TestCase):
+    def test_report_uses_official_two_colour_wistron_wordmark(self):
+        page = render_html(campaign([new_record('PRE')]))
+        self.assertIn('class="brand-mark"', page)
+        self.assertIn('aria-label="Wistron"', page)
+        self.assertIn('#016c8c', page)
+        self.assertIn('#9acd66', page)
+        self.assertNotIn('brand">Wistron', page)
+
     def test_pci_devices_are_data_driven_and_grouped(self):
         devices = merge_pci_devices(parse_pci(PCI), parse_pci_verbose(VERBOSE))
         record = new_record('PRE')

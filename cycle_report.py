@@ -15,6 +15,17 @@ from cycle_storage import report_writer_lock, reject_live_rebuild
 
 ASSETS = Path(__file__).parent
 
+
+def _wistron_logo():
+    """Return the official two-colour Wistron wordmark for the self-contained report."""
+    try:
+        svg = (ASSETS / 'wistron-logo.svg').read_text(encoding='utf-8')
+    except OSError:
+        return '<span class="brand-fallback">Wistron</span>'
+    # The XML declaration/doctype are valid as a file but not inside an HTML body.
+    svg = re.sub(r'<\?xml[^>]*\?>|<!DOCTYPE[^>]*>', '', svg, flags=re.I)
+    return f'<span class="brand-mark" role="img" aria-label="Wistron">{svg}</span>'
+
 def esc(value):
     return html.escape(str(value), quote=True)
 
@@ -442,9 +453,10 @@ def render_html(campaign, console_log=''):
     overview = overview.replace('</section>', console_panel + '</section>', 1)
     css = (ASSETS / 'report.css').read_text(encoding='utf-8')
     js = (ASSETS / 'report.js').read_text(encoding='utf-8')
+    logo = _wistron_logo()
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>{esc(campaign['run_id'])} | Cycle review</title><style>{css}</style></head><body>
     <a class="skip" href="#main">Skip to report</a>{'<div class="sample">SYNTHETIC DEMONSTRATION — no hardware was operated</div>' if campaign.get('synthetic') else ''}
-    <div class="brandbar"><div class="brand">Wistron <small>System validation</small></div><span>Engineering / Cycle review</span></div><header><button id="print-report" class="print-button">Print report</button><h1>Cycle review</h1><div class="runline"><code>{esc(campaign['run_id'])}</code><span class="muted">Started {esc(campaign['started'])}</span></div><nav class="tabs" role="tablist" aria-label="Campaign views">{tab_html}</nav></header>
+    <div class="brandbar"><div class="brand-lockup">{logo}<span class="brand-caption">System validation</span></div><span>Engineering / Cycle review</span></div><header><button id="print-report" class="print-button">Print report</button><h1>Cycle review</h1><div class="runline"><code>{esc(campaign['run_id'])}</code><span class="muted">Started {esc(campaign['started'])}</span></div><nav class="tabs" role="tablist" aria-label="Campaign views">{tab_html}</nav></header>
     <main id="main">{overview}{node_panel}{issues_panel}</main><footer><p>Generated {esc(now())}. Offline report. Keep this HTML with its evidence folders to use log links.</p><p>Hardware script SHA-256: <code>{esc(campaign['script_sha256'])}</code></p></footer><script>{js}</script></body></html>'''
 
 def write_reports(root, campaign):
