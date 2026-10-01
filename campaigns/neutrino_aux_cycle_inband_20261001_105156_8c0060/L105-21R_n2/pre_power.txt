@@ -1,0 +1,8 @@
+UTC+8: 2026-10-01T10:52:18+08:00
+Role: oob
+Command: power status
+Exit: 0
+State: RETURNED
+Duration: 0.28s
+
+Chassis Power is on

@@ -1,0 +1,7 @@
+UTC+8: 2026-10-01T10:57:36+08:00
+Role: os
+Command: dmesg
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+

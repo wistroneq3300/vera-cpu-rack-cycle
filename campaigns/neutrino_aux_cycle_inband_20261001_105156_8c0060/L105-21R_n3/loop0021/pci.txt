@@ -1,0 +1,34 @@
+UTC+8: 2026-10-01T12:39:31+08:00
+Role: os
+Command: lspci -Dnn
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+
+0001:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]
+0002:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]
+0002:01:00.0 PCI bridge [0604]: ASPEED Technology, Inc. AST1150 PCI-to-PCI Bridge [1a03:1150] (rev 06)
+0002:02:00.0 VGA compatible controller [0300]: ASPEED Technology, Inc. ASPEED Graphics Family [1a03:2000] (rev 52)
+0002:20:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]
+0002:21:00.0 USB controller [0c03]: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller [1912:0014] (rev 03)
+0003:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]
+0003:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]
+0004:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+0004:01:00.0 Non-Volatile memory controller [0108]: KIOXIA Corporation Device [1e0f:001c] (rev 01)
+0004:40:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+0004:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+0004:c0:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+0005:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]
+0006:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]
+0009:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]
+000a:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]
+000a:20:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f98]
+000b:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]
+000b:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f96]
+000c:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+000c:01:00.0 Non-Volatile memory controller [0108]: KIOXIA Corporation NVMe SSD Controller XD8 [1e0f:002e] (rev 01)
+000c:40:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+000c:80:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+000c:c0:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f97]
+000d:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]
+000e:00:00.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:2f95]

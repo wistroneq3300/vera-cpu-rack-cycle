@@ -1,0 +1,8 @@
+UTC+8: 2026-10-01T12:55:02+08:00
+Role: os
+Command: ipmitool sel list
+Exit: 0
+State: RETURNED
+Duration: 0.73s
+
+SEL has no entries

@@ -1,0 +1,17 @@
+UTC+8: 2026-10-01T12:34:52+08:00
+Role: bmc
+Command: /usr/bin/stbypowerctrl.sh aux_cycle
+Exit: 0
+State: RETURNED
+Duration: 0.69s
+
+/etc/default/nvidia_event_logging.sh was sourced successfully
+/usr/bin/gpio_check.sh was sourced successfully
+/usr/bin/gpio_tools.sh was sourced successfully
+/usr/bin/filesystem_check.sh was sourced successfully
+/etc/default/nvidia_event_logging.sh was sourced successfully
+/usr/bin/gpio_check.sh was sourced successfully
+/usr/bin/gpio_tools.sh was sourced successfully
+/usr/bin/filesystem_check.sh was sourced successfully
+Standby Power Control
+Requesting xyz.openbmc_project.State.Chassis.Transition.AuxPowerCycle via x86-power-control

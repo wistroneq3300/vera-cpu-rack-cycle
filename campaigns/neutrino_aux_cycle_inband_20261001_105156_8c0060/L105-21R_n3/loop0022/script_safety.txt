@@ -1,0 +1,7 @@
+UTC+8: 2026-10-01T12:44:38+08:00
+Role: os
+Command: test -f /var/tmp/vera-neutrino_aux_cycle_inband_20261001_105156_8c0060-L105-21R_n3-f8fa49902f64.sh && test ! -L /var/tmp/vera-neutrino_aux_cycle_inband_20261001_105156_8c0060-L105-21R_n3-f8fa49902f64.sh && test "$(stat -c %u:%a /var/tmp/vera-neutrino_aux_cycle_inband_20261001_105156_8c0060-L105-21R_n3-f8fa49902f64.sh)" = "$(id -u):700"
+Exit: 0
+State: RETURNED
+Duration: 0.19s
+

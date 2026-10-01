@@ -1,0 +1,31 @@
+Target: L105-21R_n3
+Completed loops: 24
+Attempts: 24; boot confirmed: 24; valid cycles: 24
+Blocked: No
+Stop reason: 
+PRE: FAIL (5 findings)
+START: PASS (0 findings)
+LOOP 1: FAIL (5 findings)
+LOOP 2: FAIL (5 findings)
+LOOP 3: FAIL (5 findings)
+LOOP 4: FAIL (5 findings)
+LOOP 5: FAIL (5 findings)
+LOOP 6: FAIL (5 findings)
+LOOP 7: FAIL (5 findings)
+LOOP 8: FAIL (5 findings)
+LOOP 9: FAIL (5 findings)
+LOOP 10: FAIL (5 findings)
+LOOP 11: FAIL (5 findings)
+LOOP 12: FAIL (5 findings)
+LOOP 13: FAIL (5 findings)
+LOOP 14: FAIL (5 findings)
+LOOP 15: FAIL (5 findings)
+LOOP 16: FAIL (5 findings)
+LOOP 17: FAIL (5 findings)
+LOOP 18: FAIL (5 findings)
+LOOP 19: FAIL (5 findings)
+LOOP 20: FAIL (5 findings)
+LOOP 21: FAIL (5 findings)
+LOOP 22: FAIL (5 findings)
+LOOP 23: FAIL (5 findings)
+LOOP 24: FAIL (5 findings)

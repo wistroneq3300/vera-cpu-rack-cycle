@@ -1,0 +1,7 @@
+UTC+8: 2026-10-01T10:51:57+08:00
+Role: os
+Command: command -v lspci >/dev/null 2>&1 || printf 'MISSING=lspci\n'; command -v dmidecode >/dev/null 2>&1 || printf 'MISSING=dmidecode\n'; command -v nvme >/dev/null 2>&1 || printf 'MISSING=nvme\n'; command -v ipmitool >/dev/null 2>&1 || printf 'MISSING=ipmitool\n'; command -v lsusb >/dev/null 2>&1 || printf 'MISSING=lsusb\n'; command -v ip >/dev/null 2>&1 || printf 'MISSING=ip\n'
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+

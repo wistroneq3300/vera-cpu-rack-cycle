@@ -1,0 +1,72 @@
+{
+  "phase": "START",
+  "started": "2026-10-01T10:52:30+08:00",
+  "finished": "2026-10-01T10:52:32+08:00",
+  "status": "PASS",
+  "issues": [],
+  "evidence": [
+    "L105-21R_n3/start/bmc_identity.txt",
+    "L105-21R_n3/start/os_identity.txt",
+    "L105-21R_n3/start/start_dmesg_clear.txt"
+  ],
+  "commands": {
+    "bmc_identity": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n3/start/bmc_identity.txt",
+      "valid": true,
+      "output_excerpt": ""
+    },
+    "os_identity": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n3/start/os_identity.txt",
+      "valid": true,
+      "output_excerpt": ""
+    },
+    "start_dmesg_clear": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "L105-21R_n3/start/start_dmesg_clear.txt",
+      "valid": true,
+      "output_excerpt": ""
+    },
+    "start_sel_clear": {
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "",
+      "valid": true,
+      "output_excerpt": ""
+    }
+  },
+  "identities": {
+    "bmc": {
+      "hostname": "vc-256-bmc-n3",
+      "boot_id": "97cdf4cb-9436-4714-b7dd-52dfc02d992b"
+    },
+    "os": {
+      "hostname": "neutrino-n3",
+      "boot_id": "0ba5befd-ade7-478b-8491-b3f618ae0ebd"
+    }
+  },
+  "pci": {},
+  "sensors": [],
+  "action": [],
+  "recovery": {},
+  "revision": 5,
+  "duration_seconds": 2.0,
+  "check_summary": {
+    "bmc_identity": "PASS",
+    "os_identity": "PASS",
+    "start_dmesg_clear": "PASS",
+    "start_sel_clear": "PASS"
+  },
+  "dmesg_delta": {
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "dmesg_native_error_counts": {
+    "WARN": 0,
+    "FAIL": 0
+  }
+}

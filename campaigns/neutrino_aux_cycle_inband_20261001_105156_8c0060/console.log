@@ -1,0 +1,1028 @@
+2026-10-01T10:51:56+08:00 Run ID: neutrino_aux_cycle_inband_20261001_105156_8c0060
+2026-10-01T10:51:56+08:00 Time zone: UTC+8 (local time in Run ID and +08:00 in console/evidence timestamps)
+2026-10-01T10:51:56+08:00 Planned output: /root/vera-cycle/campaigns/neutrino_aux_cycle_inband_20261001_105156_8c0060
+2026-10-01T10:51:56+08:00 Project config: /root/vera-cycle/neutrino_config.sh
+2026-10-01T10:51:56+08:00 Selected targets: L105-21R_n1, L105-21R_n2, L105-21R_n3
+2026-10-01T10:51:56+08:00 Mode: aux_cycle; channel: inband; loops: unlimited; hours: 2.0
+2026-10-01T10:51:56+08:00 Auxiliary AC cycle uses the BMC standby controller for either selected channel.
+2026-10-01T10:51:56+08:00 PRE started. Missing standard tools will be installed with apt when available; mst is not installed by this program.
+2026-10-01T10:52:18+08:00 L105-21R_n3 | PRE | FAIL
+2026-10-01T10:52:18+08:00   Duration: 00:00:22
+2026-10-01T10:52:18+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-01T10:52:18+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:52:18+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:52:18+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-01T10:52:18+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00 L105-21R_n1 | PRE | FAIL
+2026-10-01T10:52:18+08:00   Duration: 00:00:22
+2026-10-01T10:52:18+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-01T10:52:18+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:52:18+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:52:18+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-01T10:52:18+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:18+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:19+08:00 L105-21R_n2 | PRE | FAIL
+2026-10-01T10:52:19+08:00   Duration: 00:00:23
+2026-10-01T10:52:19+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-01T10:52:19+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:52:19+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:52:19+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-01T10:52:19+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:19+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-01T10:52:19+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:19+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-01T10:52:30+08:00 Operator decision: START
+2026-10-01T10:52:30+08:00 Campaign started. Output: /root/vera-cycle/campaigns/neutrino_aux_cycle_inband_20261001_105156_8c0060
+2026-10-01T10:52:30+08:00 Stop after the current POST: ./stop_cycle.sh neutrino_aux_cycle_inband_20261001_105156_8c0060
+2026-10-01T10:52:32+08:00 L105-21R_n3 | log clearing | PASS
+2026-10-01T10:52:32+08:00 L105-21R_n1 | log clearing | PASS
+2026-10-01T10:52:32+08:00 L105-21R_n2 | log clearing | PASS
+2026-10-01T10:52:32+08:00 Loop 1: starting 3 target(s) concurrently
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n3 | aux cycle sent
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n3 | waiting OS boot
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n2 | aux cycle sent
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n2 | waiting OS boot
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n1 | aux cycle sent
+2026-10-01T10:52:34+08:00 Loop 1: L105-21R_n1 | waiting OS boot
+2026-10-01T10:53:02+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:53:32+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:54:02+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:54:32+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:55:02+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:55:32+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:56:02+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:56:32+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:57:02+08:00 Loop 1: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:57:12+08:00 Loop 1: L105-21R_n2 | OS up, system check running
+2026-10-01T10:57:13+08:00 Loop 1: L105-21R_n3 | OS up, system check running
+2026-10-01T10:57:14+08:00 Loop 1: L105-21R_n1 | OS up, system check running
+2026-10-01T10:57:32+08:00 Loop 1: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T10:57:33+08:00 Loop 1: L105-21R_n2 | system check done
+2026-10-01T10:57:33+08:00 Loop 1: L105-21R_n2 | DONE
+2026-10-01T10:57:33+08:00 L105-21R_n2 | LOOP 1 | FAIL
+2026-10-01T10:57:33+08:00   Duration: 00:04:59
+2026-10-01T10:57:33+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:57:33+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:57:33+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T10:57:34+08:00 Loop 1: L105-21R_n3 | system check done
+2026-10-01T10:57:34+08:00 Loop 1: L105-21R_n3 | DONE
+2026-10-01T10:57:34+08:00 L105-21R_n3 | LOOP 1 | FAIL
+2026-10-01T10:57:34+08:00   Duration: 00:05:00
+2026-10-01T10:57:34+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:57:34+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:57:34+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T10:57:35+08:00 Loop 1: L105-21R_n1 | system check done
+2026-10-01T10:57:35+08:00 Loop 1: L105-21R_n1 | DONE
+2026-10-01T10:57:35+08:00 L105-21R_n1 | LOOP 1 | FAIL
+2026-10-01T10:57:35+08:00   Duration: 00:05:01
+2026-10-01T10:57:35+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T10:57:35+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T10:57:35+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T10:57:35+08:00 Loop 2: starting 3 target(s) concurrently
+2026-10-01T10:57:36+08:00 Loop 2: L105-21R_n2 | aux cycle sent
+2026-10-01T10:57:36+08:00 Loop 2: L105-21R_n2 | waiting OS boot
+2026-10-01T10:57:37+08:00 Loop 2: L105-21R_n3 | aux cycle sent
+2026-10-01T10:57:37+08:00 Loop 2: L105-21R_n3 | waiting OS boot
+2026-10-01T10:57:37+08:00 Loop 2: L105-21R_n1 | aux cycle sent
+2026-10-01T10:57:37+08:00 Loop 2: L105-21R_n1 | waiting OS boot
+2026-10-01T10:58:05+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:58:35+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:59:05+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T10:59:35+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:00:05+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:00:35+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:01:05+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:01:35+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:02:05+08:00 Loop 2: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:02:14+08:00 Loop 2: L105-21R_n2 | OS up, system check running
+2026-10-01T11:02:14+08:00 Loop 2: L105-21R_n3 | OS up, system check running
+2026-10-01T11:02:15+08:00 Loop 2: L105-21R_n1 | OS up, system check running
+2026-10-01T11:02:35+08:00 Loop 2: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:02:35+08:00 Loop 2: L105-21R_n2 | system check done
+2026-10-01T11:02:35+08:00 Loop 2: L105-21R_n2 | DONE
+2026-10-01T11:02:35+08:00 L105-21R_n2 | LOOP 2 | FAIL
+2026-10-01T11:02:35+08:00   Duration: 00:04:59
+2026-10-01T11:02:35+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:02:35+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:02:35+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:02:36+08:00 Loop 2: L105-21R_n3 | system check done
+2026-10-01T11:02:36+08:00 Loop 2: L105-21R_n3 | DONE
+2026-10-01T11:02:36+08:00 L105-21R_n3 | LOOP 2 | FAIL
+2026-10-01T11:02:36+08:00   Duration: 00:05:00
+2026-10-01T11:02:36+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:02:36+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:02:36+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:02:36+08:00 Loop 2: L105-21R_n1 | system check done
+2026-10-01T11:02:36+08:00 Loop 2: L105-21R_n1 | DONE
+2026-10-01T11:02:36+08:00 L105-21R_n1 | LOOP 2 | FAIL
+2026-10-01T11:02:36+08:00   Duration: 00:05:00
+2026-10-01T11:02:36+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:02:36+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:02:36+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:02:37+08:00 Loop 3: starting 3 target(s) concurrently
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n2 | aux cycle sent
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n2 | waiting OS boot
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n3 | aux cycle sent
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n1 | aux cycle sent
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n3 | waiting OS boot
+2026-10-01T11:02:38+08:00 Loop 3: L105-21R_n1 | waiting OS boot
+2026-10-01T11:03:07+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:03:37+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:04:07+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:04:37+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:05:07+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:05:37+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:06:07+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:06:37+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:07:07+08:00 Loop 3: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:07:16+08:00 Loop 3: L105-21R_n1 | OS up, system check running
+2026-10-01T11:07:16+08:00 Loop 3: L105-21R_n2 | OS up, system check running
+2026-10-01T11:07:37+08:00 Loop 3: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: waiting OS boot
+2026-10-01T11:07:38+08:00 Loop 3: L105-21R_n1 | system check done
+2026-10-01T11:07:38+08:00 Loop 3: L105-21R_n1 | DONE
+2026-10-01T11:07:38+08:00 L105-21R_n1 | LOOP 3 | FAIL
+2026-10-01T11:07:38+08:00   Duration: 00:05:00
+2026-10-01T11:07:38+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:07:38+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:07:38+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:07:38+08:00 Loop 3: L105-21R_n2 | system check done
+2026-10-01T11:07:38+08:00 Loop 3: L105-21R_n2 | DONE
+2026-10-01T11:07:38+08:00 L105-21R_n2 | LOOP 3 | FAIL
+2026-10-01T11:07:38+08:00   Duration: 00:05:00
+2026-10-01T11:07:38+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:07:38+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:07:38+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:07:46+08:00 Loop 3: L105-21R_n3 | OS up, system check running
+2026-10-01T11:08:07+08:00 Loop 3: L105-21R_n3 | system check done
+2026-10-01T11:08:07+08:00 Loop 3: L105-21R_n3 | DONE
+2026-10-01T11:08:07+08:00 L105-21R_n3 | LOOP 3 | FAIL
+2026-10-01T11:08:07+08:00   Duration: 00:05:29
+2026-10-01T11:08:07+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:08:07+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:08:07+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:08:07+08:00 Loop 4: starting 3 target(s) concurrently
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n3 | aux cycle sent
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n3 | waiting OS boot
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n2 | aux cycle sent
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n2 | waiting OS boot
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n1 | aux cycle sent
+2026-10-01T11:08:09+08:00 Loop 4: L105-21R_n1 | waiting OS boot
+2026-10-01T11:08:37+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:09:07+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:09:37+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:10:07+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:10:37+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:11:07+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:11:37+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:12:07+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:12:37+08:00 Loop 4: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:12:48+08:00 Loop 4: L105-21R_n3 | OS up, system check running
+2026-10-01T11:12:48+08:00 Loop 4: L105-21R_n2 | OS up, system check running
+2026-10-01T11:12:48+08:00 Loop 4: L105-21R_n1 | OS up, system check running
+2026-10-01T11:13:07+08:00 Loop 4: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:13:09+08:00 Loop 4: L105-21R_n3 | system check done
+2026-10-01T11:13:09+08:00 Loop 4: L105-21R_n3 | DONE
+2026-10-01T11:13:09+08:00 L105-21R_n3 | LOOP 4 | FAIL
+2026-10-01T11:13:09+08:00   Duration: 00:05:01
+2026-10-01T11:13:09+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:13:09+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:13:09+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:13:10+08:00 Loop 4: L105-21R_n2 | system check done
+2026-10-01T11:13:10+08:00 Loop 4: L105-21R_n2 | DONE
+2026-10-01T11:13:10+08:00 L105-21R_n2 | LOOP 4 | FAIL
+2026-10-01T11:13:10+08:00   Duration: 00:05:02
+2026-10-01T11:13:10+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:13:10+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:13:10+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:13:10+08:00 Loop 4: L105-21R_n1 | system check done
+2026-10-01T11:13:10+08:00 Loop 4: L105-21R_n1 | DONE
+2026-10-01T11:13:10+08:00 L105-21R_n1 | LOOP 4 | FAIL
+2026-10-01T11:13:10+08:00   Duration: 00:05:02
+2026-10-01T11:13:10+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:13:10+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:13:10+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:13:10+08:00 Loop 5: starting 3 target(s) concurrently
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n1 | aux cycle sent
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n1 | waiting OS boot
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n3 | aux cycle sent
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n3 | waiting OS boot
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n2 | aux cycle sent
+2026-10-01T11:13:12+08:00 Loop 5: L105-21R_n2 | waiting OS boot
+2026-10-01T11:13:40+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:14:10+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:14:40+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:15:10+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:15:40+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:16:10+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:16:40+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:17:10+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:17:40+08:00 Loop 5: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:17:52+08:00 Loop 5: L105-21R_n1 | OS up, system check running
+2026-10-01T11:17:52+08:00 Loop 5: L105-21R_n2 | OS up, system check running
+2026-10-01T11:17:52+08:00 Loop 5: L105-21R_n3 | OS up, system check running
+2026-10-01T11:18:10+08:00 Loop 5: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:18:13+08:00 Loop 5: L105-21R_n2 | system check done
+2026-10-01T11:18:13+08:00 Loop 5: L105-21R_n2 | DONE
+2026-10-01T11:18:13+08:00 L105-21R_n2 | LOOP 5 | FAIL
+2026-10-01T11:18:13+08:00   Duration: 00:05:01
+2026-10-01T11:18:13+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:18:13+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:18:13+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:18:14+08:00 Loop 5: L105-21R_n1 | system check done
+2026-10-01T11:18:14+08:00 Loop 5: L105-21R_n1 | DONE
+2026-10-01T11:18:14+08:00 L105-21R_n1 | LOOP 5 | FAIL
+2026-10-01T11:18:14+08:00   Duration: 00:05:02
+2026-10-01T11:18:14+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:18:14+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:18:14+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:18:14+08:00 Loop 5: L105-21R_n3 | system check done
+2026-10-01T11:18:14+08:00 Loop 5: L105-21R_n3 | DONE
+2026-10-01T11:18:14+08:00 L105-21R_n3 | LOOP 5 | FAIL
+2026-10-01T11:18:14+08:00   Duration: 00:05:02
+2026-10-01T11:18:14+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:18:14+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:18:14+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:18:14+08:00 Loop 6: starting 3 target(s) concurrently
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n3 | aux cycle sent
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n3 | waiting OS boot
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n1 | aux cycle sent
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n1 | waiting OS boot
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n2 | aux cycle sent
+2026-10-01T11:18:16+08:00 Loop 6: L105-21R_n2 | waiting OS boot
+2026-10-01T11:18:44+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:19:14+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:19:44+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:20:14+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:20:44+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:21:14+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:21:44+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:22:14+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:22:44+08:00 Loop 6: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:22:53+08:00 Loop 6: L105-21R_n2 | OS up, system check running
+2026-10-01T11:22:54+08:00 Loop 6: L105-21R_n3 | OS up, system check running
+2026-10-01T11:22:54+08:00 Loop 6: L105-21R_n1 | OS up, system check running
+2026-10-01T11:23:14+08:00 Loop 6: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n2 | system check done
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n2 | DONE
+2026-10-01T11:23:15+08:00 L105-21R_n2 | LOOP 6 | FAIL
+2026-10-01T11:23:15+08:00   Duration: 00:05:00
+2026-10-01T11:23:15+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:23:15+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:23:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n3 | system check done
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n3 | DONE
+2026-10-01T11:23:15+08:00 L105-21R_n3 | LOOP 6 | FAIL
+2026-10-01T11:23:15+08:00   Duration: 00:05:00
+2026-10-01T11:23:15+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:23:15+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:23:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n1 | system check done
+2026-10-01T11:23:15+08:00 Loop 6: L105-21R_n1 | DONE
+2026-10-01T11:23:15+08:00 L105-21R_n1 | LOOP 6 | FAIL
+2026-10-01T11:23:15+08:00   Duration: 00:05:00
+2026-10-01T11:23:15+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:23:15+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:23:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:23:15+08:00 Loop 7: starting 3 target(s) concurrently
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n3 | aux cycle sent
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n3 | waiting OS boot
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n1 | aux cycle sent
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n1 | waiting OS boot
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n2 | aux cycle sent
+2026-10-01T11:23:17+08:00 Loop 7: L105-21R_n2 | waiting OS boot
+2026-10-01T11:23:45+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:24:15+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:24:45+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:25:15+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:25:45+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:26:15+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:26:45+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:27:15+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:27:45+08:00 Loop 7: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:27:57+08:00 Loop 7: L105-21R_n1 | OS up, system check running
+2026-10-01T11:27:57+08:00 Loop 7: L105-21R_n3 | OS up, system check running
+2026-10-01T11:27:57+08:00 Loop 7: L105-21R_n2 | OS up, system check running
+2026-10-01T11:28:15+08:00 Loop 7: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:28:18+08:00 Loop 7: L105-21R_n3 | system check done
+2026-10-01T11:28:18+08:00 Loop 7: L105-21R_n3 | DONE
+2026-10-01T11:28:18+08:00 L105-21R_n3 | LOOP 7 | FAIL
+2026-10-01T11:28:18+08:00   Duration: 00:05:01
+2026-10-01T11:28:18+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:28:18+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:28:18+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:28:19+08:00 Loop 7: L105-21R_n1 | system check done
+2026-10-01T11:28:19+08:00 Loop 7: L105-21R_n1 | DONE
+2026-10-01T11:28:19+08:00 L105-21R_n1 | LOOP 7 | FAIL
+2026-10-01T11:28:19+08:00   Duration: 00:05:02
+2026-10-01T11:28:19+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:28:19+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:28:19+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:28:19+08:00 Loop 7: L105-21R_n2 | system check done
+2026-10-01T11:28:19+08:00 Loop 7: L105-21R_n2 | DONE
+2026-10-01T11:28:19+08:00 L105-21R_n2 | LOOP 7 | FAIL
+2026-10-01T11:28:19+08:00   Duration: 00:05:02
+2026-10-01T11:28:19+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:28:19+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:28:19+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:28:19+08:00 Loop 8: starting 3 target(s) concurrently
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n3 | aux cycle sent
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n3 | waiting OS boot
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n2 | aux cycle sent
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n2 | waiting OS boot
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n1 | aux cycle sent
+2026-10-01T11:28:21+08:00 Loop 8: L105-21R_n1 | waiting OS boot
+2026-10-01T11:28:49+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:29:19+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:29:49+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:30:19+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:30:49+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:31:19+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:31:49+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:32:19+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:32:49+08:00 Loop 8: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:33:00+08:00 Loop 8: L105-21R_n2 | OS up, system check running
+2026-10-01T11:33:00+08:00 Loop 8: L105-21R_n1 | OS up, system check running
+2026-10-01T11:33:01+08:00 Loop 8: L105-21R_n3 | OS up, system check running
+2026-10-01T11:33:19+08:00 Loop 8: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n2 | system check done
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n2 | DONE
+2026-10-01T11:33:22+08:00 L105-21R_n2 | LOOP 8 | FAIL
+2026-10-01T11:33:22+08:00   Duration: 00:05:02
+2026-10-01T11:33:22+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:33:22+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:33:22+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n1 | system check done
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n1 | DONE
+2026-10-01T11:33:22+08:00 L105-21R_n1 | LOOP 8 | FAIL
+2026-10-01T11:33:22+08:00   Duration: 00:05:02
+2026-10-01T11:33:22+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:33:22+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:33:22+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n3 | system check done
+2026-10-01T11:33:22+08:00 Loop 8: L105-21R_n3 | DONE
+2026-10-01T11:33:22+08:00 L105-21R_n3 | LOOP 8 | FAIL
+2026-10-01T11:33:22+08:00   Duration: 00:05:02
+2026-10-01T11:33:22+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:33:22+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:33:22+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:33:22+08:00 Loop 9: starting 3 target(s) concurrently
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n3 | aux cycle sent
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n1 | aux cycle sent
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n3 | waiting OS boot
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n1 | waiting OS boot
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n2 | aux cycle sent
+2026-10-01T11:33:24+08:00 Loop 9: L105-21R_n2 | waiting OS boot
+2026-10-01T11:33:52+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:34:22+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:34:52+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:35:22+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:35:52+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:36:22+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:36:52+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:37:22+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:37:52+08:00 Loop 9: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:38:01+08:00 Loop 9: L105-21R_n2 | OS up, system check running
+2026-10-01T11:38:02+08:00 Loop 9: L105-21R_n1 | OS up, system check running
+2026-10-01T11:38:03+08:00 Loop 9: L105-21R_n3 | OS up, system check running
+2026-10-01T11:38:22+08:00 Loop 9: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:38:23+08:00 Loop 9: L105-21R_n2 | system check done
+2026-10-01T11:38:23+08:00 Loop 9: L105-21R_n2 | DONE
+2026-10-01T11:38:23+08:00 L105-21R_n2 | LOOP 9 | FAIL
+2026-10-01T11:38:23+08:00   Duration: 00:05:00
+2026-10-01T11:38:23+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:38:23+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:38:23+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:38:23+08:00 Loop 9: L105-21R_n1 | system check done
+2026-10-01T11:38:23+08:00 Loop 9: L105-21R_n1 | DONE
+2026-10-01T11:38:23+08:00 L105-21R_n1 | LOOP 9 | FAIL
+2026-10-01T11:38:23+08:00   Duration: 00:05:00
+2026-10-01T11:38:23+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:38:23+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:38:23+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:38:24+08:00 Loop 9: L105-21R_n3 | system check done
+2026-10-01T11:38:24+08:00 Loop 9: L105-21R_n3 | DONE
+2026-10-01T11:38:24+08:00 L105-21R_n3 | LOOP 9 | FAIL
+2026-10-01T11:38:24+08:00   Duration: 00:05:01
+2026-10-01T11:38:24+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:38:24+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:38:24+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:38:24+08:00 Loop 10: starting 3 target(s) concurrently
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n3 | aux cycle sent
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n3 | waiting OS boot
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n1 | aux cycle sent
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n1 | waiting OS boot
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n2 | aux cycle sent
+2026-10-01T11:38:26+08:00 Loop 10: L105-21R_n2 | waiting OS boot
+2026-10-01T11:38:54+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:39:24+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:39:54+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:40:24+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:40:54+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:41:24+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:41:54+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:42:24+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:42:52+08:00 Loop 10: L105-21R_n2 | OS up, system check running
+2026-10-01T11:42:54+08:00 Loop 10: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: OS up, system check running, L105-21R_n3: waiting OS boot
+2026-10-01T11:43:05+08:00 Loop 10: L105-21R_n3 | OS up, system check running
+2026-10-01T11:43:05+08:00 Loop 10: L105-21R_n1 | OS up, system check running
+2026-10-01T11:43:13+08:00 Loop 10: L105-21R_n2 | system check done
+2026-10-01T11:43:13+08:00 Loop 10: L105-21R_n2 | DONE
+2026-10-01T11:43:13+08:00 L105-21R_n2 | LOOP 10 | FAIL
+2026-10-01T11:43:13+08:00   Duration: 00:04:48
+2026-10-01T11:43:13+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:43:13+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:43:13+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:43:26+08:00 Loop 10: L105-21R_n3 | system check done
+2026-10-01T11:43:26+08:00 Loop 10: L105-21R_n3 | DONE
+2026-10-01T11:43:26+08:00 L105-21R_n3 | LOOP 10 | FAIL
+2026-10-01T11:43:26+08:00   Duration: 00:05:01
+2026-10-01T11:43:26+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:43:26+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:43:26+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:43:26+08:00 Loop 10: L105-21R_n1 | system check done
+2026-10-01T11:43:26+08:00 Loop 10: L105-21R_n1 | DONE
+2026-10-01T11:43:26+08:00 L105-21R_n1 | LOOP 10 | FAIL
+2026-10-01T11:43:26+08:00   Duration: 00:05:01
+2026-10-01T11:43:26+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:43:26+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:43:26+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:43:26+08:00 Loop 11: starting 3 target(s) concurrently
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n3 | aux cycle sent
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n3 | waiting OS boot
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n1 | aux cycle sent
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n1 | waiting OS boot
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n2 | aux cycle sent
+2026-10-01T11:43:28+08:00 Loop 11: L105-21R_n2 | waiting OS boot
+2026-10-01T11:43:56+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:44:26+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:44:56+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:45:26+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:45:56+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:46:26+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:46:56+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:47:26+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:47:56+08:00 Loop 11: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:48:08+08:00 Loop 11: L105-21R_n1 | OS up, system check running
+2026-10-01T11:48:08+08:00 Loop 11: L105-21R_n2 | OS up, system check running
+2026-10-01T11:48:08+08:00 Loop 11: L105-21R_n3 | OS up, system check running
+2026-10-01T11:48:26+08:00 Loop 11: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n2 | system check done
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n2 | DONE
+2026-10-01T11:48:29+08:00 L105-21R_n2 | LOOP 11 | FAIL
+2026-10-01T11:48:29+08:00   Duration: 00:05:01
+2026-10-01T11:48:29+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:48:29+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:48:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n3 | system check done
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n3 | DONE
+2026-10-01T11:48:29+08:00 L105-21R_n3 | LOOP 11 | FAIL
+2026-10-01T11:48:29+08:00   Duration: 00:05:02
+2026-10-01T11:48:29+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:48:29+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:48:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n1 | system check done
+2026-10-01T11:48:29+08:00 Loop 11: L105-21R_n1 | DONE
+2026-10-01T11:48:29+08:00 L105-21R_n1 | LOOP 11 | FAIL
+2026-10-01T11:48:29+08:00   Duration: 00:05:01
+2026-10-01T11:48:29+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:48:29+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:48:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:48:29+08:00 Loop 12: starting 3 target(s) concurrently
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n3 | aux cycle sent
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n3 | waiting OS boot
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n2 | aux cycle sent
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n2 | waiting OS boot
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n1 | aux cycle sent
+2026-10-01T11:48:31+08:00 Loop 12: L105-21R_n1 | waiting OS boot
+2026-10-01T11:48:59+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:49:29+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:49:59+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:50:29+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:50:59+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:51:29+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:51:59+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:52:29+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:52:59+08:00 Loop 12: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:53:09+08:00 Loop 12: L105-21R_n2 | OS up, system check running
+2026-10-01T11:53:09+08:00 Loop 12: L105-21R_n1 | OS up, system check running
+2026-10-01T11:53:10+08:00 Loop 12: L105-21R_n3 | OS up, system check running
+2026-10-01T11:53:29+08:00 Loop 12: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T11:53:30+08:00 Loop 12: L105-21R_n1 | system check done
+2026-10-01T11:53:30+08:00 Loop 12: L105-21R_n1 | DONE
+2026-10-01T11:53:30+08:00 L105-21R_n1 | LOOP 12 | FAIL
+2026-10-01T11:53:30+08:00   Duration: 00:04:59
+2026-10-01T11:53:30+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:53:30+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:53:30+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:53:31+08:00 Loop 12: L105-21R_n2 | system check done
+2026-10-01T11:53:31+08:00 Loop 12: L105-21R_n2 | DONE
+2026-10-01T11:53:31+08:00 L105-21R_n2 | LOOP 12 | FAIL
+2026-10-01T11:53:31+08:00   Duration: 00:05:00
+2026-10-01T11:53:31+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:53:31+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:53:31+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:53:31+08:00 Loop 12: L105-21R_n3 | system check done
+2026-10-01T11:53:31+08:00 Loop 12: L105-21R_n3 | DONE
+2026-10-01T11:53:31+08:00 L105-21R_n3 | LOOP 12 | FAIL
+2026-10-01T11:53:31+08:00   Duration: 00:05:00
+2026-10-01T11:53:31+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:53:31+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:53:31+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:53:31+08:00 Loop 13: starting 3 target(s) concurrently
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n3 | aux cycle sent
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n3 | waiting OS boot
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n2 | aux cycle sent
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n2 | waiting OS boot
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n1 | aux cycle sent
+2026-10-01T11:53:33+08:00 Loop 13: L105-21R_n1 | waiting OS boot
+2026-10-01T11:54:01+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:54:31+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:55:01+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:55:31+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:56:01+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:56:31+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:57:01+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:57:31+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:58:01+08:00 Loop 13: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:58:04+08:00 Loop 13: L105-21R_n1 | OS up, system check running
+2026-10-01T11:58:06+08:00 Loop 13: L105-21R_n2 | OS up, system check running
+2026-10-01T11:58:15+08:00 Loop 13: L105-21R_n3 | OS up, system check running
+2026-10-01T11:58:26+08:00 Loop 13: L105-21R_n1 | system check done
+2026-10-01T11:58:26+08:00 Loop 13: L105-21R_n1 | DONE
+2026-10-01T11:58:26+08:00 L105-21R_n1 | LOOP 13 | FAIL
+2026-10-01T11:58:26+08:00   Duration: 00:04:53
+2026-10-01T11:58:26+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:58:26+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:58:26+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:58:27+08:00 Loop 13: L105-21R_n2 | system check done
+2026-10-01T11:58:27+08:00 Loop 13: L105-21R_n2 | DONE
+2026-10-01T11:58:27+08:00 L105-21R_n2 | LOOP 13 | FAIL
+2026-10-01T11:58:27+08:00   Duration: 00:04:55
+2026-10-01T11:58:27+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:58:27+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:58:27+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:58:36+08:00 Loop 13: L105-21R_n3 | system check done
+2026-10-01T11:58:36+08:00 Loop 13: L105-21R_n3 | DONE
+2026-10-01T11:58:36+08:00 L105-21R_n3 | LOOP 13 | FAIL
+2026-10-01T11:58:36+08:00   Duration: 00:05:04
+2026-10-01T11:58:36+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T11:58:36+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T11:58:36+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T11:58:36+08:00 Loop 14: starting 3 target(s) concurrently
+2026-10-01T11:58:37+08:00 Loop 14: L105-21R_n3 | aux cycle sent
+2026-10-01T11:58:37+08:00 Loop 14: L105-21R_n3 | waiting OS boot
+2026-10-01T11:58:37+08:00 Loop 14: L105-21R_n2 | aux cycle sent
+2026-10-01T11:58:37+08:00 Loop 14: L105-21R_n2 | waiting OS boot
+2026-10-01T11:58:38+08:00 Loop 14: L105-21R_n1 | aux cycle sent
+2026-10-01T11:58:38+08:00 Loop 14: L105-21R_n1 | waiting OS boot
+2026-10-01T11:59:06+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T11:59:36+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:00:06+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:00:36+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:01:06+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:01:36+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:02:06+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:02:36+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:03:06+08:00 Loop 14: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:03:08+08:00 Loop 14: L105-21R_n2 | OS up, system check running
+2026-10-01T12:03:18+08:00 Loop 14: L105-21R_n3 | OS up, system check running
+2026-10-01T12:03:29+08:00 Loop 14: L105-21R_n2 | system check done
+2026-10-01T12:03:29+08:00 Loop 14: L105-21R_n2 | DONE
+2026-10-01T12:03:29+08:00 L105-21R_n2 | LOOP 14 | FAIL
+2026-10-01T12:03:29+08:00   Duration: 00:04:52
+2026-10-01T12:03:29+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:03:29+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:03:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:03:35+08:00 Loop 14: L105-21R_n1 | OS up, system check running
+2026-10-01T12:03:39+08:00 Loop 14: L105-21R_n3 | system check done
+2026-10-01T12:03:39+08:00 Loop 14: L105-21R_n3 | DONE
+2026-10-01T12:03:39+08:00 L105-21R_n3 | LOOP 14 | FAIL
+2026-10-01T12:03:39+08:00   Duration: 00:05:02
+2026-10-01T12:03:39+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:03:39+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:03:39+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:03:57+08:00 Loop 14: L105-21R_n1 | system check done
+2026-10-01T12:03:57+08:00 Loop 14: L105-21R_n1 | DONE
+2026-10-01T12:03:57+08:00 L105-21R_n1 | LOOP 14 | FAIL
+2026-10-01T12:03:57+08:00   Duration: 00:05:20
+2026-10-01T12:03:57+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:03:57+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:03:57+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:03:57+08:00 Loop 15: starting 3 target(s) concurrently
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n1 | aux cycle sent
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n1 | waiting OS boot
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n3 | aux cycle sent
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n3 | waiting OS boot
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n2 | aux cycle sent
+2026-10-01T12:03:59+08:00 Loop 15: L105-21R_n2 | waiting OS boot
+2026-10-01T12:04:27+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:04:57+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:05:27+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:05:57+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:06:27+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:06:57+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:07:27+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:07:57+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:08:27+08:00 Loop 15: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:08:30+08:00 Loop 15: L105-21R_n1 | OS up, system check running
+2026-10-01T12:08:31+08:00 Loop 15: L105-21R_n2 | OS up, system check running
+2026-10-01T12:08:41+08:00 Loop 15: L105-21R_n3 | OS up, system check running
+2026-10-01T12:08:52+08:00 Loop 15: L105-21R_n1 | system check done
+2026-10-01T12:08:52+08:00 Loop 15: L105-21R_n1 | DONE
+2026-10-01T12:08:52+08:00 L105-21R_n1 | LOOP 15 | FAIL
+2026-10-01T12:08:52+08:00   Duration: 00:04:54
+2026-10-01T12:08:52+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:08:52+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:08:52+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:08:53+08:00 Loop 15: L105-21R_n2 | system check done
+2026-10-01T12:08:53+08:00 Loop 15: L105-21R_n2 | DONE
+2026-10-01T12:08:53+08:00 L105-21R_n2 | LOOP 15 | FAIL
+2026-10-01T12:08:53+08:00   Duration: 00:04:54
+2026-10-01T12:08:53+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:08:53+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:08:53+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:09:02+08:00 Loop 15: L105-21R_n3 | system check done
+2026-10-01T12:09:02+08:00 Loop 15: L105-21R_n3 | DONE
+2026-10-01T12:09:02+08:00 L105-21R_n3 | LOOP 15 | FAIL
+2026-10-01T12:09:02+08:00   Duration: 00:05:04
+2026-10-01T12:09:02+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:09:02+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:09:02+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:09:03+08:00 Loop 16: starting 3 target(s) concurrently
+2026-10-01T12:09:04+08:00 Loop 16: L105-21R_n3 | aux cycle sent
+2026-10-01T12:09:04+08:00 Loop 16: L105-21R_n3 | waiting OS boot
+2026-10-01T12:09:05+08:00 Loop 16: L105-21R_n1 | aux cycle sent
+2026-10-01T12:09:05+08:00 Loop 16: L105-21R_n1 | waiting OS boot
+2026-10-01T12:09:05+08:00 Loop 16: L105-21R_n2 | aux cycle sent
+2026-10-01T12:09:05+08:00 Loop 16: L105-21R_n2 | waiting OS boot
+2026-10-01T12:09:33+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:10:03+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:10:33+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:11:03+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:11:33+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:12:03+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:12:33+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:13:03+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:13:33+08:00 Loop 16: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:13:44+08:00 Loop 16: L105-21R_n1 | OS up, system check running
+2026-10-01T12:13:44+08:00 Loop 16: L105-21R_n2 | OS up, system check running
+2026-10-01T12:13:45+08:00 Loop 16: L105-21R_n3 | OS up, system check running
+2026-10-01T12:14:03+08:00 Loop 16: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n2 | system check done
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n2 | DONE
+2026-10-01T12:14:06+08:00 L105-21R_n2 | LOOP 16 | FAIL
+2026-10-01T12:14:06+08:00   Duration: 00:05:02
+2026-10-01T12:14:06+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:14:06+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:14:06+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n1 | system check done
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n1 | DONE
+2026-10-01T12:14:06+08:00 L105-21R_n1 | LOOP 16 | FAIL
+2026-10-01T12:14:06+08:00   Duration: 00:05:02
+2026-10-01T12:14:06+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:14:06+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:14:06+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n3 | system check done
+2026-10-01T12:14:06+08:00 Loop 16: L105-21R_n3 | DONE
+2026-10-01T12:14:06+08:00 L105-21R_n3 | LOOP 16 | FAIL
+2026-10-01T12:14:06+08:00   Duration: 00:05:02
+2026-10-01T12:14:06+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:14:06+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:14:06+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:14:06+08:00 Loop 17: starting 3 target(s) concurrently
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n2 | aux cycle sent
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n2 | waiting OS boot
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n3 | aux cycle sent
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n3 | waiting OS boot
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n1 | aux cycle sent
+2026-10-01T12:14:08+08:00 Loop 17: L105-21R_n1 | waiting OS boot
+2026-10-01T12:14:36+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:15:06+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:15:36+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:16:06+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:16:36+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:17:06+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:17:36+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:18:06+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:18:36+08:00 Loop 17: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:18:40+08:00 Loop 17: L105-21R_n1 | OS up, system check running
+2026-10-01T12:18:41+08:00 Loop 17: L105-21R_n2 | OS up, system check running
+2026-10-01T12:18:49+08:00 Loop 17: L105-21R_n3 | OS up, system check running
+2026-10-01T12:19:02+08:00 Loop 17: L105-21R_n1 | system check done
+2026-10-01T12:19:02+08:00 Loop 17: L105-21R_n1 | DONE
+2026-10-01T12:19:02+08:00 L105-21R_n1 | LOOP 17 | FAIL
+2026-10-01T12:19:02+08:00   Duration: 00:04:54
+2026-10-01T12:19:02+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:19:02+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:19:02+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:19:03+08:00 Loop 17: L105-21R_n2 | system check done
+2026-10-01T12:19:03+08:00 Loop 17: L105-21R_n2 | DONE
+2026-10-01T12:19:03+08:00 L105-21R_n2 | LOOP 17 | FAIL
+2026-10-01T12:19:03+08:00   Duration: 00:04:55
+2026-10-01T12:19:03+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:19:03+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:19:03+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:19:10+08:00 Loop 17: L105-21R_n3 | system check done
+2026-10-01T12:19:10+08:00 Loop 17: L105-21R_n3 | DONE
+2026-10-01T12:19:10+08:00 L105-21R_n3 | LOOP 17 | FAIL
+2026-10-01T12:19:10+08:00   Duration: 00:05:02
+2026-10-01T12:19:10+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:19:10+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:19:10+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:19:10+08:00 Loop 18: starting 3 target(s) concurrently
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n3 | aux cycle sent
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n3 | waiting OS boot
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n1 | aux cycle sent
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n1 | waiting OS boot
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n2 | aux cycle sent
+2026-10-01T12:19:12+08:00 Loop 18: L105-21R_n2 | waiting OS boot
+2026-10-01T12:19:40+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:20:10+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:20:40+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:21:10+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:21:40+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:22:10+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:22:40+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:23:10+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:23:40+08:00 Loop 18: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:23:50+08:00 Loop 18: L105-21R_n2 | OS up, system check running
+2026-10-01T12:23:50+08:00 Loop 18: L105-21R_n1 | OS up, system check running
+2026-10-01T12:23:50+08:00 Loop 18: L105-21R_n3 | OS up, system check running
+2026-10-01T12:24:10+08:00 Loop 18: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:24:11+08:00 Loop 18: L105-21R_n3 | system check done
+2026-10-01T12:24:11+08:00 Loop 18: L105-21R_n3 | DONE
+2026-10-01T12:24:11+08:00 L105-21R_n3 | LOOP 18 | FAIL
+2026-10-01T12:24:11+08:00   Duration: 00:05:00
+2026-10-01T12:24:11+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:24:11+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:24:11+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:24:11+08:00 Loop 18: L105-21R_n2 | system check done
+2026-10-01T12:24:11+08:00 Loop 18: L105-21R_n2 | DONE
+2026-10-01T12:24:11+08:00 L105-21R_n2 | LOOP 18 | FAIL
+2026-10-01T12:24:11+08:00   Duration: 00:05:00
+2026-10-01T12:24:11+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:24:11+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:24:11+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:24:12+08:00 Loop 18: L105-21R_n1 | system check done
+2026-10-01T12:24:12+08:00 Loop 18: L105-21R_n1 | DONE
+2026-10-01T12:24:12+08:00 L105-21R_n1 | LOOP 18 | FAIL
+2026-10-01T12:24:12+08:00   Duration: 00:05:01
+2026-10-01T12:24:12+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:24:12+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:24:12+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:24:12+08:00 Loop 19: starting 3 target(s) concurrently
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n2 | aux cycle sent
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n2 | waiting OS boot
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n3 | aux cycle sent
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n3 | waiting OS boot
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n1 | aux cycle sent
+2026-10-01T12:24:14+08:00 Loop 19: L105-21R_n1 | waiting OS boot
+2026-10-01T12:24:42+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:25:12+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:25:42+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:26:12+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:26:42+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:27:12+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:27:42+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:28:12+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:28:42+08:00 Loop 19: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:28:53+08:00 Loop 19: L105-21R_n1 | OS up, system check running
+2026-10-01T12:28:53+08:00 Loop 19: L105-21R_n2 | OS up, system check running
+2026-10-01T12:29:12+08:00 Loop 19: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: waiting OS boot
+2026-10-01T12:29:12+08:00 Loop 19: L105-21R_n3 | OS up, system check running
+2026-10-01T12:29:15+08:00 Loop 19: L105-21R_n2 | system check done
+2026-10-01T12:29:15+08:00 Loop 19: L105-21R_n2 | DONE
+2026-10-01T12:29:15+08:00 L105-21R_n2 | LOOP 19 | FAIL
+2026-10-01T12:29:15+08:00   Duration: 00:05:02
+2026-10-01T12:29:15+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:29:15+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:29:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:29:15+08:00 Loop 19: L105-21R_n1 | system check done
+2026-10-01T12:29:15+08:00 Loop 19: L105-21R_n1 | DONE
+2026-10-01T12:29:15+08:00 L105-21R_n1 | LOOP 19 | FAIL
+2026-10-01T12:29:15+08:00   Duration: 00:05:02
+2026-10-01T12:29:15+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:29:15+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:29:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:29:33+08:00 Loop 19: L105-21R_n3 | system check done
+2026-10-01T12:29:33+08:00 Loop 19: L105-21R_n3 | DONE
+2026-10-01T12:29:33+08:00 L105-21R_n3 | LOOP 19 | FAIL
+2026-10-01T12:29:33+08:00   Duration: 00:05:20
+2026-10-01T12:29:33+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:29:33+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:29:33+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:29:34+08:00 Loop 20: starting 3 target(s) concurrently
+2026-10-01T12:29:35+08:00 Loop 20: L105-21R_n3 | aux cycle sent
+2026-10-01T12:29:35+08:00 Loop 20: L105-21R_n3 | waiting OS boot
+2026-10-01T12:29:36+08:00 Loop 20: L105-21R_n1 | aux cycle sent
+2026-10-01T12:29:36+08:00 Loop 20: L105-21R_n1 | waiting OS boot
+2026-10-01T12:29:36+08:00 Loop 20: L105-21R_n2 | aux cycle sent
+2026-10-01T12:29:36+08:00 Loop 20: L105-21R_n2 | waiting OS boot
+2026-10-01T12:30:04+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:30:34+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:31:04+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:31:34+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:32:04+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:32:34+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:33:04+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:33:34+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:34:04+08:00 Loop 20: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:34:15+08:00 Loop 20: L105-21R_n3 | OS up, system check running
+2026-10-01T12:34:15+08:00 Loop 20: L105-21R_n1 | OS up, system check running
+2026-10-01T12:34:28+08:00 Loop 20: L105-21R_n2 | OS up, system check running
+2026-10-01T12:34:34+08:00 Loop 20: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:34:36+08:00 Loop 20: L105-21R_n3 | system check done
+2026-10-01T12:34:36+08:00 Loop 20: L105-21R_n3 | DONE
+2026-10-01T12:34:36+08:00 L105-21R_n3 | LOOP 20 | FAIL
+2026-10-01T12:34:36+08:00   Duration: 00:05:01
+2026-10-01T12:34:36+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:34:36+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:34:36+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:34:37+08:00 Loop 20: L105-21R_n1 | system check done
+2026-10-01T12:34:37+08:00 Loop 20: L105-21R_n1 | DONE
+2026-10-01T12:34:37+08:00 L105-21R_n1 | LOOP 20 | FAIL
+2026-10-01T12:34:37+08:00   Duration: 00:05:02
+2026-10-01T12:34:37+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:34:37+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:34:37+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:34:50+08:00 Loop 20: L105-21R_n2 | system check done
+2026-10-01T12:34:50+08:00 Loop 20: L105-21R_n2 | DONE
+2026-10-01T12:34:50+08:00 L105-21R_n2 | LOOP 20 | FAIL
+2026-10-01T12:34:50+08:00   Duration: 00:05:15
+2026-10-01T12:34:50+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:34:50+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:34:50+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:34:50+08:00 Loop 21: starting 3 target(s) concurrently
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n2 | aux cycle sent
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n2 | waiting OS boot
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n3 | aux cycle sent
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n3 | waiting OS boot
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n1 | aux cycle sent
+2026-10-01T12:34:52+08:00 Loop 21: L105-21R_n1 | waiting OS boot
+2026-10-01T12:35:20+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:35:50+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:36:20+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:36:50+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:37:20+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:37:50+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:38:20+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:38:50+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:39:20+08:00 Loop 21: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:39:30+08:00 Loop 21: L105-21R_n2 | OS up, system check running
+2026-10-01T12:39:31+08:00 Loop 21: L105-21R_n1 | OS up, system check running
+2026-10-01T12:39:31+08:00 Loop 21: L105-21R_n3 | OS up, system check running
+2026-10-01T12:39:50+08:00 Loop 21: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:39:50+08:00 Loop 21: L105-21R_n2 | system check done
+2026-10-01T12:39:50+08:00 Loop 21: L105-21R_n2 | DONE
+2026-10-01T12:39:50+08:00 L105-21R_n2 | LOOP 21 | FAIL
+2026-10-01T12:39:50+08:00   Duration: 00:04:59
+2026-10-01T12:39:50+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:39:50+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:39:50+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:39:51+08:00 Loop 21: L105-21R_n3 | system check done
+2026-10-01T12:39:51+08:00 Loop 21: L105-21R_n3 | DONE
+2026-10-01T12:39:51+08:00 L105-21R_n3 | LOOP 21 | FAIL
+2026-10-01T12:39:51+08:00   Duration: 00:05:00
+2026-10-01T12:39:51+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:39:51+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:39:51+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:39:53+08:00 Loop 21: L105-21R_n1 | system check done
+2026-10-01T12:39:53+08:00 Loop 21: L105-21R_n1 | DONE
+2026-10-01T12:39:53+08:00 L105-21R_n1 | LOOP 21 | FAIL
+2026-10-01T12:39:53+08:00   Duration: 00:05:01
+2026-10-01T12:39:53+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:39:53+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:39:53+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:39:53+08:00 Loop 22: starting 3 target(s) concurrently
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n3 | aux cycle sent
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n3 | waiting OS boot
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n1 | aux cycle sent
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n1 | waiting OS boot
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n2 | aux cycle sent
+2026-10-01T12:39:55+08:00 Loop 22: L105-21R_n2 | waiting OS boot
+2026-10-01T12:40:23+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:40:53+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:41:23+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:41:53+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:42:23+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:42:53+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:43:23+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:43:53+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:44:23+08:00 Loop 22: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:44:34+08:00 Loop 22: L105-21R_n2 | OS up, system check running
+2026-10-01T12:44:34+08:00 Loop 22: L105-21R_n1 | OS up, system check running
+2026-10-01T12:44:35+08:00 Loop 22: L105-21R_n3 | OS up, system check running
+2026-10-01T12:44:53+08:00 Loop 22: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n2 | system check done
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n2 | DONE
+2026-10-01T12:44:56+08:00 L105-21R_n2 | LOOP 22 | FAIL
+2026-10-01T12:44:56+08:00   Duration: 00:05:02
+2026-10-01T12:44:56+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:44:56+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:44:56+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n3 | system check done
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n3 | DONE
+2026-10-01T12:44:56+08:00 L105-21R_n3 | LOOP 22 | FAIL
+2026-10-01T12:44:56+08:00   Duration: 00:05:02
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n1 | system check done
+2026-10-01T12:44:56+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:44:56+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:44:56+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:44:56+08:00 Loop 22: L105-21R_n1 | DONE
+2026-10-01T12:44:56+08:00 L105-21R_n1 | LOOP 22 | FAIL
+2026-10-01T12:44:56+08:00   Duration: 00:05:02
+2026-10-01T12:44:56+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:44:56+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:44:56+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:44:57+08:00 Loop 23: starting 3 target(s) concurrently
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n3 | aux cycle sent
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n3 | waiting OS boot
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n2 | aux cycle sent
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n2 | waiting OS boot
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n1 | aux cycle sent
+2026-10-01T12:44:58+08:00 Loop 23: L105-21R_n1 | waiting OS boot
+2026-10-01T12:45:27+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:45:57+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:46:27+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:46:57+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:47:27+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:47:57+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:48:27+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:48:57+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:49:27+08:00 Loop 23: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:49:38+08:00 Loop 23: L105-21R_n2 | OS up, system check running
+2026-10-01T12:49:38+08:00 Loop 23: L105-21R_n1 | OS up, system check running
+2026-10-01T12:49:38+08:00 Loop 23: L105-21R_n3 | OS up, system check running
+2026-10-01T12:49:57+08:00 Loop 23: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:49:59+08:00 Loop 23: L105-21R_n2 | system check done
+2026-10-01T12:49:59+08:00 Loop 23: L105-21R_n2 | DONE
+2026-10-01T12:49:59+08:00 L105-21R_n2 | LOOP 23 | FAIL
+2026-10-01T12:49:59+08:00   Duration: 00:05:01
+2026-10-01T12:49:59+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:49:59+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:49:59+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:49:59+08:00 Loop 23: L105-21R_n3 | system check done
+2026-10-01T12:49:59+08:00 Loop 23: L105-21R_n3 | DONE
+2026-10-01T12:49:59+08:00 L105-21R_n3 | LOOP 23 | FAIL
+2026-10-01T12:49:59+08:00   Duration: 00:05:01
+2026-10-01T12:49:59+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:49:59+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:49:59+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:50:00+08:00 Loop 23: L105-21R_n1 | system check done
+2026-10-01T12:50:00+08:00 Loop 23: L105-21R_n1 | DONE
+2026-10-01T12:50:00+08:00 L105-21R_n1 | LOOP 23 | FAIL
+2026-10-01T12:50:00+08:00   Duration: 00:05:02
+2026-10-01T12:50:00+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:50:00+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:50:00+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:50:00+08:00 Loop 24: starting 3 target(s) concurrently
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n2 | aux cycle sent
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n2 | waiting OS boot
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n3 | aux cycle sent
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n3 | waiting OS boot
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n1 | aux cycle sent
+2026-10-01T12:50:02+08:00 Loop 24: L105-21R_n1 | waiting OS boot
+2026-10-01T12:50:30+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:51:00+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:51:30+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:52:00+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:52:30+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:53:00+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:53:30+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:54:00+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:54:30+08:00 Loop 24: still running — L105-21R_n1: waiting OS boot, L105-21R_n2: waiting OS boot, L105-21R_n3: waiting OS boot
+2026-10-01T12:54:42+08:00 Loop 24: L105-21R_n1 | OS up, system check running
+2026-10-01T12:54:42+08:00 Loop 24: L105-21R_n2 | OS up, system check running
+2026-10-01T12:54:42+08:00 Loop 24: L105-21R_n3 | OS up, system check running
+2026-10-01T12:55:00+08:00 Loop 24: still running — L105-21R_n1: OS up, system check running, L105-21R_n2: OS up, system check running, L105-21R_n3: OS up, system check running
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n3 | system check done
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n3 | DONE
+2026-10-01T12:55:03+08:00 L105-21R_n3 | LOOP 24 | FAIL
+2026-10-01T12:55:03+08:00   Duration: 00:05:02
+2026-10-01T12:55:03+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:55:03+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:55:03+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n2 | system check done
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n2 | DONE
+2026-10-01T12:55:03+08:00 L105-21R_n2 | LOOP 24 | FAIL
+2026-10-01T12:55:03+08:00   Duration: 00:05:02
+2026-10-01T12:55:03+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:55:03+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:55:03+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n1 | system check done
+2026-10-01T12:55:03+08:00 Loop 24: L105-21R_n1 | DONE
+2026-10-01T12:55:03+08:00 L105-21R_n1 | LOOP 24 | FAIL
+2026-10-01T12:55:03+08:00   Duration: 00:05:02
+2026-10-01T12:55:03+08:00   Checks: dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | NIC PASS | BF4 FAIL
+2026-10-01T12:55:03+08:00   New dmesg observations: WARN=0, FAIL=0
+2026-10-01T12:55:03+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-01T12:55:04+08:00 ============================================================
+2026-10-01T12:55:04+08:00 FINISHED: COMPLETE | Health: FAIL | Completed node-loops: 72
+2026-10-01T12:55:04+08:00 Campaign elapsed: 02:02:34
+2026-10-01T12:55:04+08:00 Report: /root/vera-cycle/campaigns/neutrino_aux_cycle_inband_20261001_105156_8c0060/CYCLE_REVIEW_REPORT.html
+2026-10-01T12:55:04+08:00 ============================================================

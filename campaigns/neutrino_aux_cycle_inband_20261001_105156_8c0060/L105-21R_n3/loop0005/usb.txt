@@ -1,0 +1,12 @@
+UTC+8: 2026-10-01T11:17:55+08:00
+Role: os
+Command: lsusb
+Exit: 0
+State: RETURNED
+Duration: 0.18s
+
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 1d6b:0107 Linux Foundation USB Virtual Hub
+Bus 001 Device 003: ID 0525:a4a2 Netchip Technology, Inc. Linux-USB Ethernet/RNDIS Gadget
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 002 Device 002: ID 0bda:8153 Realtek Semiconductor Corp. RTL8153 Gigabit Ethernet Adapter
