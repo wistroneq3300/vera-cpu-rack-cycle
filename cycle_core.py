@@ -299,10 +299,125 @@ def compare_sensors(baseline, initial, confirmation=None):
 def parse_pci(text):
     rows = {}
     for line in text.splitlines():
-        match = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s+.*?\[([0-9a-f]{4}:[0-9a-f]{4})\]", line, re.I)
+        match = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s+(.*)$", line, re.I)
         if match:
-            rows[match[1].lower()] = dict(id=match[2].lower(), raw=line.strip())
+            bdf, description = match[1].lower(), match[2].strip()
+            ids = re.search(r"\[([0-9a-f]{4}:[0-9a-f]{4})\]", description, re.I)
+            if not ids:
+                continue
+            class_match = re.match(r"(.*?)\s+\[([0-9a-f]{4})\]:\s*(.*?)\s+\[[0-9a-f]{4}:[0-9a-f]{4}\]", description, re.I)
+            if class_match:
+                class_name, class_id, device_name = (v.strip() for v in class_match.groups())
+            else:
+                class_name = description.split(" [", 1)[0].strip()
+                class_id = ""
+                device_name = class_name
+            rows[bdf] = dict(id=ids[1].lower(), raw=line.strip(), device_name=device_name,
+                             raw_name=device_name,
+                             class_name=class_name, class_id=class_id.lower())
     return rows
+
+
+def parse_pci_verbose(text):
+    """Parse only link/device facts already returned by ``lspci -Dvvv``.
+
+    This is deliberately a bounded parser.  It never probes a device and it
+    leaves an unknown link state visible when a verbose block is incomplete.
+    """
+    rows, current = {}, None
+    for line in text.splitlines():
+        header = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s+(.*)$", line, re.I)
+        if header:
+            current = header[1].lower()
+            rows[current] = dict(bdf=current, verbose_available=True, capabilities_seen=False,
+                                 device_name_explicit=False, access_denied=False,
+                                 device_name=header[2].strip(),
+                                 pcie_type=None, link_capability=None, link_current=None,
+                                 link_result='UNKNOWN', link_reason='Link capability was not classified')
+            continue
+        if not current:
+            continue
+        item = rows[current]
+        if re.search(r"access denied|permission denied", line, re.I):
+            item.update(access_denied=True, link_result='UNKNOWN', link_reason='lspci verbose output was access denied')
+            continue
+        if re.search(r"^\s*Capabilities:\s*", line, re.I):
+            item['capabilities_seen'] = True
+        express = re.search(r"Capabilities:\s*\[[^]]+\]\s+Express\s+\([^)]*\)\s+(.+?)(?:,|$)", line, re.I)
+        if express:
+            item['pcie_type'] = express[1].strip()
+            continue
+        cap = re.search(r"\bLnkCap:\s*(.*)$", line, re.I)
+        if cap:
+            item['link_capability'] = cap[1].strip()
+            continue
+        sta = re.search(r"\bLnkSta:\s*(.*)$", line, re.I)
+        if sta:
+            item['link_current'] = sta[1].strip()
+            continue
+        name = re.search(r"^\s*DeviceName:\s*(.*)$", line, re.I)
+        if name and name[1].strip():
+            item['device_name'] = name[1].strip()
+            item['device_name_explicit'] = True
+
+    endpoint_re = re.compile(r"(?:Legacy\s+)?Endpoint$", re.I)
+    integrated_re = re.compile(r"Root Complex Integrated Endpoint|Root Complex Event Collector", re.I)
+    for item in rows.values():
+        pcie_type = item.get('pcie_type') or ''
+        current_link = item.get('link_current') or ''
+        capability = item.get('link_capability') or ''
+        if current_link:
+            if re.search(r"Speed\s+unknown|Width\s+x0\b", current_link, re.I):
+                item.update(link_result='FAIL', link_reason='Current link reports unknown speed or x0 width')
+            elif re.search(r"down[\s-]*grad|degrad", current_link, re.I):
+                item.update(link_result='FAIL', link_reason='Current link is reported as downgraded')
+            elif not re.search(r"Speed\s+\S+.*Width\s+x\d+", current_link, re.I):
+                item.update(link_result='FAIL', link_reason='Current link status does not include a usable speed and width')
+            else:
+                item.update(link_result='PASS', link_reason='Current link status was evaluated')
+        elif integrated_re.search(pcie_type) and not capability:
+            item.update(link_result='N/A', link_reason='This integrated device has no reported physical link capability')
+        elif endpoint_re.search(pcie_type) or capability:
+            item.update(link_result='FAIL', link_reason='Required LnkSta is missing from the verbose record')
+        elif pcie_type:
+            item.update(link_result='N/A', link_reason='This PCIe type does not expose an end-device link check')
+        else:
+            item.update(link_result='UNKNOWN', link_reason='Verbose record is insufficient to determine link applicability')
+    return rows
+
+
+def merge_pci_devices(pci, verbose):
+    """Join the two already-captured lspci views without inventing devices."""
+    merged = {}
+    for bdf, base in (pci or {}).items():
+        item = dict(base)
+        base_name = item.get('device_name')
+        item.setdefault('raw_name', base_name or base.get('raw', bdf))
+        item.setdefault('device_name', base.get('raw', bdf))
+        item.setdefault('class_name', '')
+        item.setdefault('class_id', '')
+        verbose_item = (verbose or {}).get(bdf, {})
+        item.update(verbose_item)
+        if verbose_item and not verbose_item.get('device_name_explicit') and base_name:
+            item['device_name'] = base_name
+        if item.get('access_denied') and not str(item.get('class_id', '')).startswith('06'):
+            if re.search(r'Root Complex Integrated Endpoint|Root Complex Event Collector', str(item.get('pcie_type') or ''), re.I):
+                item.update(link_result='UNKNOWN', link_reason='Access denied; RCiEP/RCEC link applicability cannot be confirmed')
+            else:
+                item.update(link_result='FAIL', link_reason='Access denied while reading the PCIe link record')
+        item['bdf'] = bdf
+        # A complete verbose record for a display function can prove that no
+        # PCIe Express/link capability was advertised.  Keep this conditional
+        # on the captured capabilities evidence; a truncated/unknown record
+        # must remain UNKNOWN rather than being guessed as N/A.
+        if (item.get('link_result') == 'UNKNOWN' and item.get('verbose_available')
+                and item.get('capabilities_seen') and str(item.get('class_id', '')).lower() == '0300'
+                and not item.get('pcie_type') and not item.get('link_capability')
+                and not item.get('link_current')):
+            item.update(link_result='N/A',
+                        link_reason='Verbose record shows no PCIe Express/link capability for this display function')
+        merged[bdf] = item
+    return merged
 
 def pci_issues(baseline, current):
     found = []

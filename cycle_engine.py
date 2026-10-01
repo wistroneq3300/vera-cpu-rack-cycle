@@ -16,9 +16,11 @@ from cycle_core import (
     health,
     issue,
     issue_baseline,
+    merge_pci_devices,
     missing_sensors,
     now,
     parse_pci,
+    parse_pci_verbose,
     parse_sensors,
     pci_issues,
     sel_delta,
@@ -42,7 +44,7 @@ CAPTURES = {
 
 def new_record(phase):
     return dict(phase=phase, started=now(), finished=None, status="PENDING", issues=[],
-                evidence=[], commands={}, identities={}, pci={}, sensors=[], action=[], recovery={})
+                evidence=[], commands={}, identities={}, pci={}, pci_devices={}, sensors=[], action=[], recovery={})
 
 class NodeSession:
     def __init__(self, target, transport, root, run_id, script, script_hash, options, rules):
@@ -153,7 +155,9 @@ class NodeSession:
         ipmi_error = (role == "oob" or cmd.startswith("ipmitool ")) and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
         valid = result.code == 0 and not ipmi_error
         if record_command:
-            record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": valid, "output_excerpt": result.output[-2000:] if not valid else ""}
+            record["commands"][stem] = {"command": cmd, "role": role, "code": result.code,
+                                        "state": result.state, "evidence": evidence, "valid": valid,
+                                        "output_excerpt": result.output[-2000:] if not valid else ""}
         if check and result.code != 0:
             self.add(record, "COLLECTION_FAILED", stem, f"Exit {result.code} ({result.state}); see evidence", evidence=evidence)
             record['issues'][-1]['snippet'] = result.output[-2000:]
@@ -248,10 +252,14 @@ class NodeSession:
             result = self.command(record, stem, "os", cmd, sudo=sudo)
             if stem == "pci":
                 record["pci"] = parse_pci(result.output) if result.code == 0 else {}
+                record["pci_devices"] = merge_pci_devices(record["pci"], record.get("pci_verbose", {}))
                 if not record["pci"]:
                     self.add(record, "PCI_EMPTY", "PCIe", "No valid full-BDF PCI inventory")
                 elif post:
                     record["issues"] += pci_issues(self.baseline["pci"], record["pci"])
+            elif stem == "pci_verbose" and result.code == 0:
+                record["pci_verbose"] = parse_pci_verbose(result.output)
+                record["pci_devices"] = merge_pci_devices(record.get("pci", {}), record["pci_verbose"])
         try:
             self.ensure_verified_script(record)
         except IdentityUnsafe:
@@ -283,6 +291,7 @@ class NodeSession:
                 if not post:
                     self.node['blocked'].append('Hardware script execution incomplete')
             record['hardware_checks'] = {}
+            record['hardware_check_details'] = {}
             for line in config.output.splitlines():
                 if line.startswith('CHECK|'):
                     cells = line.split('|')
@@ -295,6 +304,7 @@ class NodeSession:
                         state = 'FAIL'
                     key = f'{name}/{component}' if 'bdf' in values else name
                     record['hardware_checks'][key] = state
+                    record['hardware_check_details'][key] = dict(name=name, values=values, raw=line, status=state)
         record['script_verified'] = self.script_verified
         sensor = self.command(record, "sensor", "oob", "sensor list")
         record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
@@ -319,7 +329,12 @@ class NodeSession:
                 record['issues'] += sensor_issues(record['sensors'])
         else:
             record["issues"] += sensor_issues(record["sensors"])
-        sel = self.sel_command(record, "sel", "list", save_evidence=post)
+        sel = self.sel_command(record, "sel", "list", save_evidence=True)
+        sel_meta = self._sel_metadata(record, 'sel', sel.output, 'POST' if post else 'PRE')
+        if post:
+            record['sel_post_meta'] = sel_meta
+        else:
+            record['sel_collection'] = sel_meta
         if post:
             valid = record['commands']['sel']['valid'] and record.get('sel_before_valid', False)
             record['sel_status'] = 'REVIEW REQUIRED' if valid else 'COLLECTION FAILED'
@@ -328,6 +343,16 @@ class NodeSession:
                 path = self.folder(record) / "sel_delta.txt"
                 atomic_write(path, "\n".join(record['sel_events']) or "No new SEL records.\n")
                 record['evidence'].append(path.relative_to(self.root).as_posix())
+                record['sel_delta_meta'] = dict(phase='LOOP', status='COMPARED', valid=True,
+                                                new_event_count=len(record['sel_events']),
+                                                evidence=path.relative_to(self.root).as_posix(),
+                                                reason='Before-cycle and POST SEL snapshots were valid')
+            else:
+                reason = 'Before-cycle SEL collection was unavailable'
+                if not record['commands']['sel'].get('valid', False):
+                    reason = 'POST SEL collection was unavailable or malformed'
+                record['sel_delta_meta'] = dict(phase='LOOP', status='UNAVAILABLE', valid=False,
+                                                new_event_count=None, evidence='', reason=reason)
             record.pop('sel_before', None)
         self.command(record, "bmc_firmware", "oob", "mc info")
         power = self.command(record, "power", "oob", "power status")
@@ -374,6 +399,17 @@ class NodeSession:
         self.finish(record, preserve_timing=True)
         return self.node
 
+    def _sel_metadata(self, record, stem, output, phase):
+        command = record.get('commands', {}).get(stem, {})
+        lines = [line.strip() for line in output.splitlines() if line.strip()]
+        event_count = sum(1 for line in lines if '|' in line and re.match(r'^[0-9a-f]+\s*\|', line, re.I))
+        valid = bool(command.get('valid'))
+        return dict(phase=phase, status='COLLECTED' if valid else 'FAILED', valid=valid,
+                    command=command.get('command', ('ipmitool sel list' if self.options.channel == 'inband' else 'sel list')),
+                    state=command.get('state', 'UNKNOWN'), code=command.get('code'),
+                    evidence=command.get('evidence', ''), event_count=event_count if valid else None,
+                    reason='' if valid else 'SEL command failed or returned an unrecognized format')
+
     def sel_command(self, record, stem, action, **kwargs):
         inband = self.options.channel == 'inband'
         result = self.command(record, stem, 'os' if inband else 'oob',
@@ -406,7 +442,7 @@ class NodeSession:
                 self.add(record, 'CLEAR_SKIPPED', stem, 'PRE capture failed; original evidence was not cleared')
                 continue
             if stem == 'sel':
-                self.sel_command(record, 'start_sel_clear', 'clear', save_evidence=False)
+                self.sel_command(record, 'start_sel_clear', 'clear', save_evidence=True)
             else:
                 self.collect_dmesg(record, 'start_dmesg_clear', clear=True)
         self.finish(record)
@@ -475,9 +511,10 @@ class NodeSession:
             if self.expected_boot and record['identities']['os']['boot_id'] != self.expected_boot:
                 raise IdentityUnsafe('Unexpected OS boot transition between captures')
             self.collect_dmesg(record, 'before_action_dmesg')
-            before = self.sel_command(record, 'sel_before', 'list', save_evidence=False)
+            before = self.sel_command(record, 'sel_before', 'list', save_evidence=True)
             record['sel_before_valid'] = record['commands']['sel_before']['valid']
             record['sel_before'] = before.output if record['sel_before_valid'] else ''
+            record['sel_before_meta'] = self._sel_metadata(record, 'sel_before', before.output, 'BEFORE_CYCLE')
             old_boot = record["identities"]["os"]["boot_id"]
             record["recovery"]["old_boot_id"] = old_boot
             deadline = time.monotonic() + self.options.boot_timeout

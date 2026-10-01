@@ -392,9 +392,15 @@ class EngineTests(unittest.TestCase):
         record = self.session.one_loop(1)
         self.assertEqual(record['sel_events'], [fresh.strip()])
         self.assertNotIn('sel_before', record)
-        self.assertFalse(list((self.root/'tray1_n1').glob('pre_sel*')))
-        self.assertFalse((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'pre_sel.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'start'/'start_sel_clear.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_delta.txt').exists())
+        self.assertTrue(self.session.node['pre']['sel_collection']['valid'])
+        self.assertEqual(self.session.node['start']['commands']['start_sel_clear']['command'], 'ipmitool sel clear')
+        self.assertEqual(record['sel_before_meta']['phase'], 'BEFORE_CYCLE')
+        self.assertEqual(record['sel_post_meta']['phase'], 'POST')
         self.assertGreaterEqual(record['duration_seconds'], 0)
 
     def test_sel_channel_and_clear_once(self):
