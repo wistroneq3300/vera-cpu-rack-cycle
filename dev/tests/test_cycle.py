@@ -366,7 +366,8 @@ class EngineTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.options = SimpleNamespace(project='neutrino',cycle_mode='power_cycle',channel='inband',
                                        boot_timeout=.03,poll_interval=.001,loops=2,hours=0,cycle=True,
-                                       config_script=BASE/'neutrino_config.sh',issue_policy=BASE/'issue_policy.md',output=self.root/'output')
+                                       config_script=BASE/'neutrino_config.sh',issue_policy=BASE/'issue_policy.md',output=self.root/'output',
+                                       sensor_retry_delay=0)
         self.fake = FakeTransport({}, self.root/'ssh')
         self.session = NodeSession(target(),self.fake,self.root,'test',b'script',digest(b'script'),self.options,
                                    parse_policy(self.options.issue_policy.read_text()))
@@ -540,9 +541,12 @@ class EngineTests(unittest.TestCase):
                     return Command(124, 'timeout', 'RESPONSE_LOST')
             return original(t, cmd, timeout)
         self.fake.oob = oob
-        self.session.precheck()
+        self.options.sensor_retry_delay = 10
+        with patch('cycle_engine.time.sleep') as wait:
+            self.session.precheck()
         record = self.session.node['pre']
         self.assertEqual(reads['count'], 2)
+        wait.assert_called_once_with(10)
         self.assertTrue(record['commands']['sensor_retry']['valid'])
         self.assertTrue((self.root/'tray1_n1'/'pre_sensor_retry.txt').exists())
         self.assertIn('COLLECTION_FAILED', [item['code'] for item in record['issues']])
@@ -571,9 +575,12 @@ class EngineTests(unittest.TestCase):
     def test_missing_sensor_reread_and_preserved_warning(self):
         self.fake.sensor_drop = True
         self.ready()
-        result = self.session.one_loop(1)
+        self.options.sensor_retry_delay = 10
+        with patch('cycle_engine.time.sleep') as wait:
+            result = self.session.one_loop(1)
         self.assertIn('SENSOR_RECOVERED',[i['code'] for i in result['issues']])
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sensor_confirm.txt').exists())
+        wait.assert_any_call(10)
 
     def test_sensor_transport_failure_is_not_missing_hardware(self):
         self.ready()

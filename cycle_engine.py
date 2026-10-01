@@ -31,6 +31,7 @@ from cycle_transport import Command, IdentityUnsafe
 
 PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
             "ipmitool": "ipmitool", "lsusb": "usbutils", "ip": "iproute2"}
+SENSOR_RETRY_DELAY = 10
 IDENTITY = "printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id"
 CAPTURES = {
     "pci": ("lspci -Dnn", False), "pci_tree": ("lspci -Dtv", False),
@@ -136,6 +137,11 @@ class NodeSession:
 
     def add(self, record, code, component, detail, severity="FAIL", evidence=""):
         record["issues"].append(issue(code, component, detail, severity, evidence))
+
+    def wait_sensor_retry(self):
+        delay = getattr(self.options, 'sensor_retry_delay', SENSOR_RETRY_DELAY)
+        if delay > 0:
+            time.sleep(delay)
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
                 save_evidence=True, record_command=True, include_output=True):
@@ -318,6 +324,7 @@ class NodeSession:
         # the first failure and both evidence files; a successful retry only
         # supplies the rows used for the current phase's validation.
         if not post and not sensor_valid:
+            self.wait_sensor_retry()
             retry = self.command(record, 'sensor_retry', 'oob', 'sensor list')
             sensor_valid = record['commands']['sensor_retry']['valid']
             if sensor_valid:
@@ -325,12 +332,14 @@ class NodeSession:
         if post:
             valid = record['commands']['sensor']['valid']
             if not valid:
+                self.wait_sensor_retry()
                 retry = self.command(record, 'sensor_retry', 'oob', 'sensor list')
                 valid = record['commands']['sensor_retry']['valid']
                 if valid:
                     record['sensors'] = parse_sensors(retry.output)
             confirmation = None
             if valid and missing_sensors(self.baseline["sensors"], record["sensors"]):
+                self.wait_sensor_retry()
                 retry = self.command(record, "sensor_confirm", "oob", "sensor list")
                 if record['commands']['sensor_confirm']['valid']:
                     confirmation = parse_sensors(retry.output)
