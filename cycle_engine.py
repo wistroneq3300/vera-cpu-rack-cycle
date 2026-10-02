@@ -595,8 +595,6 @@ class NodeSession:
                 continue
             entries_path = path + "/Entries"
             result = self.transport.redfish_get(self.target, entries_path, disc['token'])
-            evidence = ""
-            filename = ('pre_' if record['phase'] == 'PRE' else '') + f"{stem}.json"
             body = result.output if result.code == 0 else ""
             entries = redfish_entries(self._redfish_json(body)) if not result.code else []
             valid = result.code == 0 and body.strip().startswith("{") and "Members" in body
@@ -621,7 +619,10 @@ class NodeSession:
         self.persist(record)
 
     def _write_redfish_evidence(self, record, stem, name, result, entries, valid, verdict, counts):
-        path = self.folder(record) / (f"pre_{stem}.json" if record['phase'] == 'PRE' else f"{stem}.json")
+        # Plain-text transcript (header + one line per entry), not JSON: keep a
+        # .txt suffix so the file is served as text/plain rather than parsed as
+        # application/json by the browser's JSON viewer.
+        path = self.folder(record) / (f"pre_{stem}.txt" if record['phase'] == 'PRE' else f"{stem}.txt")
         lines = [f"UTC+8: {now()}", f"Role: oob", f"Source: Redfish {name}",
                  f"Exit: {result.code}", f"State: {result.state}",
                  f"Entries: {len(entries)}", f"Verdict: {verdict}",
