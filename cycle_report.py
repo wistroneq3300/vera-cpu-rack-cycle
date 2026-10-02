@@ -402,11 +402,12 @@ def _render_action(record):
     if phase == 'START':
         rows = []
         for name, command in record.get('commands', {}).items():
-            if name.startswith('start_') or name == 'start_dmesg_clear':
+            if name.startswith('start_'):
                 rows.append(f'<tr><td><code>{esc(name)}</code></td><td>{badge("SUCCEEDED" if command.get("valid") else "FAILED")}</td><td>{esc(command.get("state", "UNKNOWN"))}</td><td>{_record_evidence(record, command.get("evidence", ""))}</td></tr>')
+        note = 'START only re-verifies identity; log clearing (dmesg / IPMI SEL / Redfish) already ran in PRE.'
         if not rows:
-            rows.append('<tr><td colspan="4">No START clear command was recorded. Check the findings above.</td></tr>')
-        return '<h3>START preparation</h3><p class="muted">START 只做身分確認與準備清除，不是一次 cycle recovery；沒有 action 或 boot recovery 結果可供宣稱。</p><div class="tablewrap"><table><thead><tr><th>Command</th><th>Result</th><th>Transport</th><th>Evidence</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>'
+            return f'<h3>START preparation</h3><p class="muted">{esc(note)} No temporary clearing is performed here.</p>'
+        return f'<h3>START preparation</h3><p class="muted">{esc(note)}</p><div class="tablewrap"><table><thead><tr><th>Command</th><th>Result</th><th>Transport</th><th>Evidence</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>'
     if phase != 'LOOP':
         return ''
     rows = ''.join(f'<tr><td><code>{esc(a.get("command", ""))}</code></td><td>{esc(a.get("role", ""))}</td><td>{badge(a.get("state", "UNKNOWN"))}</td><td>{esc(a.get("code", ""))}</td></tr>' for a in record.get('action', []))
@@ -489,18 +490,10 @@ def _render_sel(record):
         evidence = _record_evidence(record, command.get('evidence', ''))
         return f'<div class="sel-panel"><h3>PRE SEL collection</h3><p>Collection: {badge("PASS" if command.get("valid") else "UNKNOWN")} · Snapshot events: -- · Delta: N/A — NOT RETAINED — legacy run</p><p>Evidence: {evidence}</p><p class="muted">Event count and raw retention metadata were not recorded by this legacy run; no baseline claim is made.</p></div>'
     if phase == 'START':
-        command = record.get('commands', {}).get('start_sel_clear')
-        skipped = any(i.get('code') == 'CLEAR_SKIPPED' and i.get('component') == 'sel' for i in record.get('issues', []))
-        if skipped:
-            result, reason = 'SKIPPED', 'PRE SEL capture was not valid'
-        elif command:
-            result, reason = ('SUCCEEDED' if command.get('valid') else 'FAILED'), ('Command returned successfully' if command.get('valid') else 'Command failed')
-        else:
-            result, reason = 'UNKNOWN', 'No start_sel_clear record'
-        evidence = _record_evidence(record, command.get('evidence', '') if command else '')
-        command_text = command.get('command', '') if command else ''
-        command_label = f' · Command: <code>{esc(command_text)}</code>' if command_text else ''
-        return f'<div class="sel-panel"><h3>START SEL preparation</h3><p>SEL delta: N/A — START preparation phase</p><p>Clear command: {badge(result)} · {esc(reason)}{command_label} · Evidence: {evidence}</p><p class="muted">A successful clear command is not a claim that SEL was verified empty; no additional read or retry is performed here.</p></div>'
+        # Clearing moved to PRE; START has no SEL command of its own.
+        return ('<div class="sel-panel"><h3>START SEL preparation</h3>'
+                '<p>SEL is not cleared here: log clearing (dmesg / IPMI SEL / Redfish) now runs in PRE, '
+                'before the baseline. See the PRE section for the clear result.</p></div>')
     before = record.get('sel_before_meta')
     after = record.get('sel_post_meta')
     delta = record.get('sel_delta_meta')

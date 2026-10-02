@@ -424,19 +424,23 @@ class NodeSession:
     def _prepare_clean_state(self, record):
         """Clear dmesg, IPMI SEL and Redfish logs before the PRE baseline.
 
-        Each source is probed first: a source we cannot read is skipped (never
-        wiped blind) and recorded as CLEAR_SKIPPED. A source that reads fine is
-        cleared so PRE captures a clean baseline. Redfish clear happens inside
-        collect_redfish(clear=True) at PRE time, driven from here.
+        dmesg: `dmesg -c` reads and clears in one step, so the clear itself is
+        the probe -- no separate read is needed (and it would only discard the
+        pre-clear content the operator does not want anyway).
+
+        IPMI SEL: `sel clear` does NOT return the contents, and blindly clearing
+        an erroring SEL would destroy unread evidence, so SEL is read first
+        (`sel list`); only a healthy SEL is cleared.
+
+        Redfish clear is driven from collect_redfish(clear=True).
         """
-        # dmesg: probe with a read, then clear.
-        probe = self.command(record, "pre_dmesg_probe", "os", "dmesg", sudo=True, check=False)
-        if probe.code == 0:
-            self.collect_dmesg(record, "pre_dmesg_clear", clear=True)
-        else:
-            self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg read failed; original was not cleared', severity='WARN')
-        # IPMI SEL: probe with a list, then clear.
-        listed = self.sel_command(record, "pre_sel_probe", "list", save_evidence=False)
+        # dmesg: `dmesg -c` reads and clears in one step; failure means no clear.
+        self.collect_dmesg(record, "pre_dmesg_clear", clear=True)
+        if not record['commands']['pre_dmesg_clear']['valid']:
+            self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg could not be read/cleared', severity='WARN')
+        # IPMI SEL: read first; `sel clear` returns no contents, so a broken SEL
+        # must be left intact rather than wiped blind.
+        self.sel_command(record, "pre_sel_probe", "list", save_evidence=False)
         if record['commands']['pre_sel_probe']['valid']:
             self.sel_command(record, "pre_sel_clear", "clear", save_evidence=False)
         else:

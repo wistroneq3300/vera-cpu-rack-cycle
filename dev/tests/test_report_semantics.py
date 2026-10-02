@@ -142,9 +142,10 @@ class ReportSemanticsTests(unittest.TestCase):
                      commands={'start_sel_clear': {'valid': True, 'state': 'RETURNED', 'code': 0,
                                                    'command': 'ipmitool sel clear', 'evidence': 'start/start_sel_clear.txt'}})
         start_html = record_html(start, 0)
-        self.assertIn('SEL delta: N/A — START preparation phase', start_html)
-        self.assertIn('SUCCEEDED', start_html)
-        self.assertIn('ipmitool sel clear', start_html)
+        # START no longer clears SEL; clearing moved to PRE.
+        self.assertIn('SEL is not cleared here', start_html)
+        self.assertIn('runs in PRE', start_html)
+        self.assertNotIn('No start_sel_clear record', start_html)
         self.assertNotIn('BMC SEL delta: MISSING', start_html)
         self.assertNotIn('OS boot changed', start_html)
 
