@@ -48,6 +48,12 @@ Nodes: OS `root/password`, BMC `root/0penBmc`.
 - Sensor judgement rules and the `coruti` no-reading whitelist live in
   `cycle_core.py`; garbled (`U+FFFD`) sensor names are always FAIL.
 - BF4 detection uses two sources (`mst status -v` + `lspci -nn`).
+- Hostname is a **soft check**: if the inventory `bmc_hostname`/`os_hostname`
+  does not match what the host reports, the node is NOT blocked — a
+  `HOSTNAME_MISMATCH` WARN is recorded and the run continues (a blank expected
+  hostname means "do not check"). Boot-ID validation is still a hard stop
+  (it guards against a real reboot). `inventory_blocks` still blocks a row with
+  no hostname at all (placeholder semantics).
 
 ## Redfish EventLog / SEL (added 2026-10-02)
 

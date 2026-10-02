@@ -485,19 +485,25 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(any(name.endswith('_before_cycle.txt') or name.endswith('_after_cycle.txt') for name in loop_files))
         self.assertFalse(any(name.startswith('post_') for name in loop_files))
 
-    def test_wrong_hostname_prevents_any_mutation(self):
+    def test_wrong_hostname_warns_but_still_runs(self):
+        # Hostname is a soft check: a mismatch is surfaced as a WARN and the run
+        # continues (operator decides). It must not block the node.
         self.fake.mismatch = True
         self.session.precheck()
-        self.assertTrue(self.session.node['blocked'])
-        self.assertFalse(self.fake.uploaded)
-        self.assertFalse(any('apt-get' in cmd or cmd=='dmesg -c' for _,_,cmd in self.fake.calls))
+        self.assertFalse(self.session.node['blocked'])
+        self.assertIn('HOSTNAME_MISMATCH', [i['code'] for i in self.session.node['pre']['issues']])
+        self.assertTrue(any(i.get('code') == 'HOSTNAME_MISMATCH' and i.get('severity') == 'WARN'
+                            for i in self.session.node['pre']['issues']))
+        self.assertTrue(self.fake.uploaded)
+        self.assertTrue(any(cmd == 'dmesg -c' for _, _, cmd in self.fake.calls))
 
-    def test_post_hostname_mismatch_prevents_another_cycle(self):
+    def test_post_hostname_mismatch_keeps_running_with_warning(self):
         self.ready()
-        self.fake.on_action=lambda: setattr(self.fake,'mismatch',True)
-        result=self.session.one_loop(1)
-        self.assertFalse(self.session.node['active'])
-        self.assertIn('IDENTITY_UNSAFE',[i['code'] for i in result['issues']])
+        self.fake.on_action = lambda: setattr(self.fake, 'mismatch', True)
+        result = self.session.one_loop(1)
+        # Still active so the campaign continues; a warning is recorded instead.
+        self.assertTrue(self.session.node['active'])
+        self.assertIn('HOSTNAME_MISMATCH', [i['code'] for i in result['issues']])
 
     def test_bmc_transient_after_os_boot_retries(self):
         self.options.boot_timeout=.5
