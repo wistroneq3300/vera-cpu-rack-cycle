@@ -109,6 +109,39 @@ class FakeTransport:
             return Command(0, 'OK')
         return Command(127, 'Unsupported fake OOB command: ' + cmd)
 
+    # --- Redfish fake -----------------------------------------------------
+    # A merged-style BMC: EventLog exists, no separate SEL service.
+    redfish_eventlog = [{"Id": "1", "Severity": "OK", "Created": "2000-01-03T04:44:02Z",
+                         "Message": "xyz.openbmc_project.Logging.Cleared"}]
+    redfish_sel_present = False
+    redfish_fail = False
+
+    def redfish_login(self, target, timeout=20):
+        if self.redfish_fail:
+            raise RuntimeError('redfish login failed (fake)')
+        return 'FAKETOKEN'
+
+    def redfish_get(self, target, path, token, timeout=30):
+        self.calls.append((target.key, 'redfish', path))
+        if self.redfish_fail:
+            return Command(255, 'unreachable', 'NOT_ISSUED')
+        if path == '/redfish/v1/Systems':
+            return Command(0, json.dumps({"Members": [{"@odata.id": "/redfish/v1/Systems/System_0"}]}))
+        if path == '/redfish/v1/Systems/System_0/LogServices':
+            members = [{"@odata.id": "/redfish/v1/Systems/System_0/LogServices/EventLog"}]
+            if self.redfish_sel_present:
+                members.append({"@odata.id": "/redfish/v1/Systems/System_0/LogServices/SEL"})
+            return Command(0, json.dumps({"Members": members}))
+        if path.endswith('/EventLog/Entries'):
+            return Command(0, json.dumps({"Members": self.redfish_eventlog}))
+        if path.endswith('/SEL/Entries'):
+            return Command(0, json.dumps({"Members": []}))
+        return Command(127, 'Unsupported fake Redfish path: ' + path)
+
+    def redfish_clear(self, target, path, token, timeout=30):
+        self.calls.append((target.key, 'redfish-clear', path))
+        return Command(0, 'OK')
+
 class PureTests(unittest.TestCase):
     def test_truncated_sensor_row_cannot_disappear_from_pre(self):
         rows=parse_sensors(SENSORS+'Temp_CPU2 | 90 | degrees C\n')
@@ -394,12 +427,11 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(record['sel_events'], [fresh.strip()])
         self.assertNotIn('sel_before', record)
         self.assertTrue((self.root/'tray1_n1'/'pre_sel.txt').exists())
-        self.assertTrue((self.root/'tray1_n1'/'start'/'start_sel_clear.txt').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel.txt').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_delta.txt').exists())
         self.assertTrue(self.session.node['pre']['sel_collection']['valid'])
-        self.assertEqual(self.session.node['start']['commands']['start_sel_clear']['command'], 'ipmitool sel clear')
+        self.assertEqual(self.session.node['pre']['commands']['pre_sel_clear']['command'], 'ipmitool sel clear')
         self.assertEqual(record['sel_before_meta']['phase'], 'BEFORE_CYCLE')
         self.assertEqual(record['sel_post_meta']['phase'], 'POST')
         self.assertGreaterEqual(record['duration_seconds'], 0)
@@ -503,7 +535,7 @@ class EngineTests(unittest.TestCase):
         self.fake.oob=oob
         self.ready()
         self.assertFalse(any(cmd=='sel clear' for _,_,cmd in self.fake.calls))
-        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['start']['issues']])
+        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['pre']['issues']])
 
     def test_all_cycle_modes_and_channels(self):
         self.ready()
@@ -553,15 +585,17 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(record['sensors']), 2)
 
     def test_failed_dmesg_clear_still_attempts_sel_without_key_error(self):
-        self.session.precheck()
         original=self.fake.ssh
         def ssh(t,role,cmd,timeout=60,sudo=False):
             return Command(1,'permission denied') if cmd=='dmesg -c' else original(t,role,cmd,timeout,sudo)
         self.fake.ssh=ssh
-        self.session.start()
-        self.assertFalse(self.session.node['start']['commands']['start_dmesg_clear']['valid'])
-        self.assertTrue(self.session.node['start']['commands']['start_sel_clear']['valid'])
+        self.session.precheck()
+        # Clean-start clearing lives in PRE now: a failed dmesg clear must not
+        # stop SEL from being cleared, and the run still reaches a usable PRE.
+        self.assertFalse(self.session.node['pre']['commands']['pre_dmesg_clear']['valid'])
+        self.assertTrue(self.session.node['pre']['commands']['pre_sel_clear']['valid'])
         self.assertEqual(sum(cmd=='sel clear' for _,_,cmd in self.fake.calls),1)
+        self.assertFalse(self.session.node['blocked'])
 
     def test_dispatch_not_issued_and_exception_paths(self):
         record=self.session.node['pre']
@@ -642,7 +676,9 @@ class EngineTests(unittest.TestCase):
     def test_cancel_discards_pre_and_sends_no_cycle(self):
         self.assertEqual(self.run_campaign(confirm=lambda _: 'no'),0)
         self.assertFalse(list(self.options.output.iterdir()))
-        self.assertFalse(any(cmd in ('dmesg -c','sel clear','ipmitool power cycle') for _,_,cmd in self.fake.calls))
+        # Clean-start policy: PRE prepares the node (clears dmesg/SEL/logs) so the
+        # baseline is clean, but no power/cycle command is ever sent on cancel.
+        self.assertFalse(any(cmd in ('reboot','ipmitool power cycle','/usr/bin/stbypowerctrl.sh aux_cycle') for _,_,cmd in self.fake.calls))
 
     def test_messages_between_dmesg_read_and_clear_are_preserved(self):
         self.ready()

@@ -23,6 +23,9 @@ from cycle_core import (
     parse_pci_verbose,
     parse_sensors,
     pci_issues,
+    redfish_delta,
+    redfish_entries,
+    redfish_verdict,
     sel_delta,
     sensor_issues,
     write_json,
@@ -115,11 +118,23 @@ class NodeSession:
         record['check_summary'] = {name: ('PASS' if command.get('valid') else 'FAIL')
                                    for name, command in record['commands'].items()}
         record['check_summary'].update(record.get('hardware_checks', {}))
+        # Redfish logs report their own worst-severity verdict; a service that is
+        # simply absent (merged BMC build) stays PASS rather than a failure.
+        for stem in ('eventlog', 'redfish_sel'):
+            meta = record.get(f'{stem}_meta')
+            if not meta:
+                continue
+            if not meta.get('present'):
+                record['check_summary'][stem] = 'PASS'
+            elif meta.get('verdict'):
+                record['check_summary'][stem] = meta['verdict']
         for item in record['issues']:
             code, component = item['code'], item['component']
             stem = ('dmesg' if code.startswith('DMESG_') or 'dmesg' in component else
                     'sensor' if code.startswith('SENSOR_') else
                     'pci' if code in {'PCI_DRIFT', 'PCI_EMPTY'} else
+                    'eventlog' if code.startswith('REDFISH_') and component == 'eventlog' else
+                    'redfish_sel' if code.startswith('REDFISH_') and component == 'redfish_sel' else
                     component if component in record['commands'] else
                     'recovery' if component == 'recovery' else 'hardware')
             if record['check_summary'].get(stem) != 'FAIL':
@@ -377,6 +392,19 @@ class NodeSession:
                 record['sel_delta_meta'] = dict(phase='LOOP', status='UNAVAILABLE', valid=False,
                                                 new_event_count=None, evidence='', reason=reason)
             record.pop('sel_before', None)
+        # Redfish EventLog/SEL: collection failure is a finding, but an absent
+        # service (merged build) or a benign entry is not. Verdict is by worst
+        # severity; POST adds a content delta against the before-cycle snapshot.
+        try:
+            self.collect_redfish(record)
+        except Exception as exc:
+            self.add(record, 'REDFISH_UNAVAILABLE', 'eventlog',
+                     f'Redfish BMC log collection unavailable: {exc}')
+            for stem in ('eventlog', 'redfish_sel'):
+                record.setdefault('commands', {}).setdefault(stem, {"command": "redfish", "role": "oob",
+                    "code": 255, "state": "NOT_ISSUED", "evidence": "", "valid": False, "output_excerpt": str(exc)})
+        if post:
+            self._redfish_loop_delta(record)
         self.command(record, "bmc_firmware", "oob", "mc info")
         power = self.command(record, "power", "oob", "power status")
         record["power_on"] = record['commands']['power']['valid'] and bool(re.search(r"Chassis Power is on", power.output, re.I))
@@ -393,6 +421,33 @@ class NodeSession:
                 stem = component if component in record['commands'] else "sensor" if item["code"].startswith("SENSOR") else "pci" if item["code"] == "PCI_DRIFT" else "dmesg" if component == "dmesg" else "hardware"
                 item["evidence"] = record["commands"].get(stem, {}).get("evidence", "")
 
+    def _prepare_clean_state(self, record):
+        """Clear dmesg, IPMI SEL and Redfish logs before the PRE baseline.
+
+        Each source is probed first: a source we cannot read is skipped (never
+        wiped blind) and recorded as CLEAR_SKIPPED. A source that reads fine is
+        cleared so PRE captures a clean baseline. Redfish clear happens inside
+        collect_redfish(clear=True) at PRE time, driven from here.
+        """
+        # dmesg: probe with a read, then clear.
+        probe = self.command(record, "pre_dmesg_probe", "os", "dmesg", sudo=True, check=False)
+        if probe.code == 0:
+            self.collect_dmesg(record, "pre_dmesg_clear", clear=True)
+        else:
+            self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg read failed; original was not cleared', severity='WARN')
+        # IPMI SEL: probe with a list, then clear.
+        listed = self.sel_command(record, "pre_sel_probe", "list", save_evidence=False)
+        if record['commands']['pre_sel_probe']['valid']:
+            self.sel_command(record, "pre_sel_clear", "clear", save_evidence=False)
+        else:
+            self.add(record, 'CLEAR_SKIPPED', 'sel', 'PRE SEL read failed; original was not cleared', severity='WARN')
+        # Redfish EventLog/SEL: collect_redfish(clear=True) fetches then clears.
+        try:
+            self.collect_redfish(record, clear=True)
+        except Exception as exc:
+            self.add(record, 'CLEAR_SKIPPED', 'eventlog',
+                     f'Redfish logs could not be read/cleared before PRE: {exc}', severity='WARN')
+
     def precheck(self):
         record = self.node["pre"]
         self.persist(record)
@@ -403,6 +458,12 @@ class NodeSession:
             if uid.code or uid.output.strip() != "0":
                 self.add(record, "ROOT_UNAVAILABLE", "privileges", "Root execution is unavailable; privileged checks may fail")
             self.dependencies(record)
+            # Clean-start policy: clear dmesg, IPMI SEL and the BMC Redfish logs
+            # BEFORE the PRE baseline is captured, so the baseline (and every
+            # later loop delta) reflect only this campaign. No pre-clear backlog
+            # is retained by operator decision. Each log is probed first so a
+            # log we cannot read is never wiped blind.
+            self._prepare_clean_state(record)
             self.capture(record)
             # Sensor parse/health failures remain visible PRE FAIL findings. The
             # operator must be able to review them and decide whether to run;
@@ -449,6 +510,179 @@ class NodeSession:
                 self.persist(record)
         return result
 
+    # --- Redfish BMC log services (EventLog / SEL) -----------------------
+    # Different vendors' OpenBMC builds use different resource IDs and may or
+    # may not expose a separate SEL service, so nothing here is hard-coded:
+    # we discover the System id and its LogServices, then fetch whatever exists.
+
+    def _redfish_discover(self):
+        """Return dict(system_id, services={name: odata_id}) or raise.
+
+        Discovery runs against the BMC endpoint directly (same transport host),
+        so its failure is a real collection failure, not a missing log.
+        """
+        token = self._redfish_token()
+        systems = self.transport.redfish_get(self.target, "/redfish/v1/Systems", token)
+        if systems.code or not systems.output:
+            raise RuntimeError("Redfish /Systems unavailable")
+        payload = self._redfish_json(systems.output)
+        members = payload.get("Members") or []
+        if not members:
+            raise RuntimeError("Redfish /Systems returned no members")
+        system_id = str(members[0].get("@odata.id", "")).rstrip("/").split("/")[-1]
+        services = self.transport.redfish_get(self.target, f"/redfish/v1/Systems/{system_id}/LogServices", token)
+        listing = self._redfish_json(services.output) if services.code == 0 else {}
+        mapping = {}
+        for item in listing.get("Members", []) or []:
+            path = str(item.get("@odata.id", ""))
+            if path:
+                mapping[path.rstrip("/").split("/")[-1]] = path
+        return dict(system_id=system_id, services=mapping, token=token)
+
+    def _redfish_token(self):
+        return self.transport.redfish_login(self.target)
+
+    @staticmethod
+    def _redfish_json(text):
+        import json as _json
+        start = text.find("{")
+        if start < 0:
+            return {}
+        try:
+            return _json.loads(text[start:])
+        except ValueError:
+            return {}
+
+    def _redfish_stem(self, name):
+        return 'eventlog' if name == 'EventLog' else 'redfish_sel'
+
+    def collect_redfish(self, record, clear=False):
+        """Fetch EventLog and (if present) SEL for this node.
+
+        Called once per phase. On ``clear`` the same entries are fetched first
+        (already handled by callers storing evidence) and then each service is
+        cleared. A service that does not exist is recorded as NOT PRESENT, not
+        a failure. Entries feed a PASS/WARN/FAIL verdict by worst severity.
+        """
+        disc = self._redfish_discover()
+        record['redfish_system_id'] = disc['system_id']
+        record['redfish_services'] = sorted(disc['services'])
+        found = []
+        for name in ('EventLog', 'SEL'):
+            path = disc['services'].get(name)
+            stem = self._redfish_stem(name)
+            if not path:
+                # Vendor build without this service. Not a failure; note it so
+                # the report can explain a merged/split layout.
+                record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
+                                            "code": 0, "state": "NOT_PRESENT", "evidence": "",
+                                            "valid": True, "output_excerpt": ""}
+                record[f'{stem}_meta'] = dict(phase='COLLECT', status='NOT PRESENT', present=False,
+                                              verdict='PASS', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
+                                              entries=[], reason=f'No {name} log service on this BMC')
+                continue
+            entries_path = path + "/Entries"
+            result = self.transport.redfish_get(self.target, entries_path, disc['token'])
+            evidence = ""
+            filename = ('pre_' if record['phase'] == 'PRE' else '') + f"{stem}.json"
+            body = result.output if result.code == 0 else ""
+            entries = redfish_entries(self._redfish_json(body)) if not result.code else []
+            valid = result.code == 0 and body.strip().startswith("{") and "Members" in body
+            verdict, counts = redfish_verdict(entries) if valid else ("FAIL", {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0})
+            evidence = self._write_redfish_evidence(record, stem, name, result, entries, valid, verdict, counts)
+            record['commands'][stem] = {"command": f"redfish {name} ({entries_path})", "role": "oob",
+                                        "code": result.code, "state": result.state, "evidence": evidence,
+                                        "valid": valid, "output_excerpt": "" if valid else result.output[-2000:]}
+            record[f'{stem}_meta'] = dict(phase='COLLECT', status='COLLECTED' if valid else 'FAILED',
+                                          present=True, verdict=verdict, counts=counts, evidence=evidence,
+                                          entries=entries, path=entries_path,
+                                          reason='' if valid else 'Redfish collection failed or returned unrecognized output')
+            record[f'{stem}_entries'] = entries
+            if not valid:
+                self.add(record, 'REDFISH_COLLECTION_FAILED', stem,
+                         f'Redfish {name} collection failed; see evidence', evidence=evidence)
+                if record['issues']:
+                    record['issues'][-1]['snippet'] = result.output[-2000:]
+            found.append(name)
+            if clear and valid:
+                self._redfish_clear_service(record, name, path, disc['token'], stem)
+        self.persist(record)
+
+    def _write_redfish_evidence(self, record, stem, name, result, entries, valid, verdict, counts):
+        path = self.folder(record) / (f"pre_{stem}.json" if record['phase'] == 'PRE' else f"{stem}.json")
+        lines = [f"UTC+8: {now()}", f"Role: oob", f"Source: Redfish {name}",
+                 f"Exit: {result.code}", f"State: {result.state}",
+                 f"Entries: {len(entries)}", f"Verdict: {verdict}",
+                 f"Counts: Critical={counts['Critical']} Warning={counts['Warning']} OK={counts['OK']}",
+                 ""]
+        for entry in entries:
+            lines.append(f"{entry.get('id','')} | {entry.get('severity','')} | {entry.get('created','')} | {entry.get('message','')}")
+        if not valid:
+            lines.append("[raw output]")
+            lines.append(result.output[-4000:])
+        atomic_write(path, "\n".join(lines) + "\n")
+        rel = path.relative_to(self.root).as_posix()
+        record['evidence'].append(rel)
+        return rel
+
+    def _redfish_clear_service(self, record, name, path, token, stem):
+        result = self.transport.redfish_clear(self.target, path + "/Actions/LogService.ClearLog", token)
+        ok = result.code == 0
+        record[f'{stem}_clear'] = dict(status='SUCCEEDED' if ok else 'FAILED', command=f"ClearLog {name}",
+                                       code=result.code, state=result.state)
+        if not ok:
+            self.add(record, 'REDFISH_CLEAR_FAILED', stem,
+                     f'Redfish {name} clear failed: state={result.state} exit={result.code}', severity='WARN')
+
+    def _redfish_before_snapshot(self, record):
+        """Capture the pre-cycle EventLog/SEL entries for delta comparison.
+
+        Stored on the LOOP record (not as a separate command) since it is a
+        lightweight read; failure leaves the field absent and the delta is
+        reported as unavailable rather than silently empty.
+        """
+        try:
+            disc = self._redfish_discover()
+        except Exception as exc:
+            record['redfish_before'] = dict(available=False, reason=str(exc), eventlog=[], sel=[])
+            record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE', status='UNAVAILABLE', reason=str(exc))
+            self.persist(record)
+            return
+        snapshot = {"available": True, "eventlog": [], "sel": []}
+        for name, key in (('EventLog', 'eventlog'), ('SEL', 'sel')):
+            path = disc['services'].get(name)
+            if not path:
+                continue
+            result = self.transport.redfish_get(self.target, path + "/Entries", disc['token'])
+            if result.code == 0:
+                snapshot[key] = redfish_entries(self._redfish_json(result.output))
+        record['redfish_before'] = snapshot
+        record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE', status='COLLECTED', available=True,
+                                             eventlog_count=len(snapshot['eventlog']), sel_count=len(snapshot['sel']))
+        self.persist(record)
+
+    def _redfish_loop_delta(self, record):
+        """Compare POST entries with the before-cycle snapshot for each service."""
+        before = record.get('redfish_before') or {}
+        for name, stem, key in (('EventLog', 'eventlog', 'eventlog'), ('SEL', 'redfish_sel', 'sel')):
+            meta = record.get(f'{stem}_meta')
+            if not meta:
+                continue
+            current = record.get(f'{stem}_entries') or []
+            if not before.get('available') or not meta.get('present'):
+                meta['delta'] = dict(status='UNAVAILABLE', new_count=None, new_entries=[],
+                                     reason=meta.get('reason') or 'Before-cycle snapshot unavailable')
+                continue
+            new = redfish_delta(before.get(key, []), current)
+            meta['delta'] = dict(status='COMPARED', new_count=len(new), new_entries=new,
+                                 reason='Before-cycle and POST snapshots compared by content')
+            if new:
+                path = self.folder(record) / f"{stem}_delta.txt"
+                atomic_write(path, "\n".join(
+                    f"{e.get('id','')} | {e.get('severity','')} | {e.get('message','')}" for e in new) + "\n")
+                record['evidence'].append(path.relative_to(self.root).as_posix())
+        self.persist(record)
+
     def start(self):
         record = new_record('START')
         self.node['start'] = record
@@ -460,14 +694,8 @@ class NodeSession:
         except IdentityUnsafe:
             self.cleanup_safe = False
             raise
-        for stem in ('dmesg', 'sel'):
-            if not self.node['pre']['commands'].get(stem, {}).get('valid'):
-                self.add(record, 'CLEAR_SKIPPED', stem, 'PRE capture failed; original evidence was not cleared')
-                continue
-            if stem == 'sel':
-                self.sel_command(record, 'start_sel_clear', 'clear', save_evidence=True)
-            else:
-                self.collect_dmesg(record, 'start_dmesg_clear', clear=True)
+        # Log clearing moved to PRE (_prepare_clean_state): the baseline and all
+        # loop deltas now reflect a clean start. START only re-verifies identity.
         self.finish(record)
 
     def wait_boot(self, record, old_boot, deadline):
@@ -538,6 +766,7 @@ class NodeSession:
             record['sel_before_valid'] = record['commands']['sel_before']['valid']
             record['sel_before'] = before.output if record['sel_before_valid'] else ''
             record['sel_before_meta'] = self._sel_metadata(record, 'sel_before', before.output, 'BEFORE_CYCLE')
+            self._redfish_before_snapshot(record)
             old_boot = record["identities"]["os"]["boot_id"]
             record["recovery"]["old_boot_id"] = old_boot
             deadline = time.monotonic() + self.options.boot_timeout

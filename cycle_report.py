@@ -416,6 +416,59 @@ def _render_action(record):
     return action
 
 
+def _render_redfish(record):
+    """Render the Redfish EventLog/SEL collection panel (one block per service).
+
+    Severity is colour-tagged in the entry list; the verdict (worst severity)
+    is shown as a badge. An absent service means a merged vendor layout, not a
+    failure, and is labelled as such.
+    """
+    blocks = []
+    for stem, label in (('eventlog', 'Redfish EventLog'), ('redfish_sel', 'Redfish SEL')):
+        meta = record.get(f'{stem}_meta')
+        if not meta:
+            continue
+        if not meta.get('present'):
+            blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Not present on this BMC: '
+                          f'{esc(meta.get("reason", "merged into EventLog"))}</p></div>')
+            continue
+        if meta.get('status') != 'COLLECTED':
+            ev = _record_evidence(record, meta.get('evidence'))
+            blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Collection: {badge("COLLECTION FAILED")} · '
+                          f'{esc(meta.get("reason", ""))} · Evidence: {ev}</p></div>')
+            continue
+        verdict = meta.get('verdict', 'PASS')
+        counts = meta.get('counts', {})
+        summary = (f'Collection: {badge("PASS")} · Verdict: {badge(verdict)} · '
+                   f'Critical: {esc(counts.get("Critical", 0))} · Warning: {esc(counts.get("Warning", 0))} · '
+                   f'OK: {esc(counts.get("OK", 0))}')
+        entries = meta.get('entries') or []
+        rows = ''
+        for entry in entries:
+            sev = (entry.get('severity') or '').strip()
+            cls = 'badge' + (' fail' if sev.lower() == 'critical' else ' warn' if sev.lower() == 'warning' else '')
+            rows += (f'<tr><td>{esc(entry.get("id", ""))}</td><td><span class="{cls}">{esc(sev or "--")}</span></td>'
+                     f'<td>{esc(entry.get("created", ""))}</td><td>{esc(entry.get("message", ""))}</td></tr>')
+        table = ('<div class="tablewrap"><table><thead><tr><th>ID</th><th>Severity</th><th>Created</th>'
+                 '<th>Message</th></tr></thead><tbody>' + (rows or '<tr><td colspan="4">No entries.</td></tr>') +
+                 '</tbody></table></div>')
+        delta = meta.get('delta')
+        delta_line = ''
+        if delta:
+            if delta.get('status') == 'COMPARED':
+                delta_line = f'<p><strong>New this loop: {esc(delta.get("new_count", 0))}</strong></p>'
+                new_rows = ''.join(f'<li><code>{esc(e.get("id",""))} | {esc(e.get("severity",""))} | {esc(e.get("message",""))}</code></li>'
+                                   for e in (delta.get('new_entries') or []))
+                if new_rows:
+                    delta_line += f'<details><summary>New entries ({len(delta.get("new_entries") or [])})</summary><ul>{new_rows}</ul></details>'
+            else:
+                delta_line = f'<p>Delta: UNAVAILABLE · {esc(delta.get("reason", ""))}</p>'
+        ev = _record_evidence(record, meta.get('evidence'))
+        blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>{summary} · Evidence: {ev}</p>'
+                      f'{delta_line}{table}<p class="muted">Collection success is not a hardware verdict; '
+                      f'only Critical/Warning severities are flagged, benign entries are listed for review.</p></div>')
+    return ''.join(blocks)
+
 def _render_sel(record):
     phase = _phase_kind(record)
     if phase == 'PRE':
@@ -514,7 +567,7 @@ def record_html(record, node_index, baseline=None):
     collection = ''.join(f'<li><strong>{esc(name)}</strong> {badge("COLLECTION FAILED")}<pre class="snippet">{esc(cmd.get("output_excerpt") or "No output captured; check the command evidence.")}</pre></li>' for name, cmd in record.get('commands', {}).items() if not cmd.get('valid', True) and name not in {'hardware', 'sel_before', 'sel'} and not name.startswith('cycle_'))
     collection = '<details><summary>Collection failures</summary><ul>' + collection + '</ul></details>' if collection else ''
     action = _render_action(record)
-    sel = _render_sel(record)
+    sel = _render_sel(record) + _render_redfish(record)
     return f'''<details id="{phase_id}"><summary><strong>{esc(record['phase'])}</strong> {badge(record['status'])}<span class="phase-count">{esc(_finding_summary(record))} · {esc(duration(record.get('duration_seconds')))} · {esc(record.get('finished') or 'Not finished')}</span></summary><div class="detail-body">
       {_render_summary_groups(record)}{_render_pci_group(record, baseline) if phase != 'START' or record.get('pci') or record.get('pci_devices') else ''}<h3>Findings</h3>{_finding_html(record)}{collection}{sel}<details><summary>{'START preparation and verified identities' if phase == 'START' else 'Cycle action and verified identities' if phase == 'LOOP' else 'Verified identities'}</summary>{action}{identity}</details>
       <p class="muted">{esc(record.get('sel_review', ''))}</p><details><summary>Original evidence files</summary><ul class="evidence-list">{evidence or '<li>Evidence paths were not recorded.</li>'}</ul></details></div></details>'''

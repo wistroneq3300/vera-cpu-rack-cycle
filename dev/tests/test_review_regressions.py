@@ -146,17 +146,20 @@ class EngineReviewTests(unittest.TestCase):
             self.assertIn('SCRIPT_VALIDATION_FAILED', [i['code'] for i in record['issues']])
 
     def test_pre_immutable_and_start_evidence_retained(self):
-        self.session.precheck()
-        original = copy.deepcopy(self.session.node['pre'])
-        before = (self.root/'tray1_n1/pre_report.json').read_bytes()
-        ssh = self.fake.ssh
+        # Clean-start clearing moved into PRE; START only re-verifies identity.
+        # A panic arriving with the PRE clear must be captured in the (immutable)
+        # PRE record, and starting the campaign must not rewrite PRE evidence.
+        original_dmesg = self.fake.ssh
         with patch.object(self.fake, 'ssh', side_effect=lambda t, r, c, timeout=60, sudo=False:
-                          Command(0, 'Kernel panic before start') if c == 'dmesg -c' else ssh(t, r, c, timeout, sudo)):
-            self.session.start()
-        self.assertEqual(self.session.node['pre'], original)
+                          Command(0, 'Kernel panic before start') if c == 'dmesg -c' else original_dmesg(t, r, c, timeout, sudo)):
+            self.session.precheck()
+        self.assertTrue(any('panic' in i.get('detail', '') for i in self.session.node['pre']['issues']))
+        frozen = copy.deepcopy(self.session.node['pre'])
+        before = (self.root/'tray1_n1/pre_report.json').read_bytes()
+        self.session.start()
+        self.assertEqual(self.session.node['pre'], frozen)
         self.assertEqual((self.root/'tray1_n1/pre_report.json').read_bytes(), before)
-        self.assertIn('panic', self.session.node['start']['issues'][0]['detail'])
-        self.assertTrue((self.root/'tray1_n1/start/start_dmesg_clear.txt').is_file())
+        self.assertTrue(self.session.node['start']['identities'])
 
     def test_ring_buffer_check_tail_and_next_action_evidence(self):
         self.ready()

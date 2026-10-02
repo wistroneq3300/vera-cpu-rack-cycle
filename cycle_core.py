@@ -510,6 +510,80 @@ def sel_delta(previous, current):
             result.append(line)
     return "\n".join(result) + ("\n" if result else "")
 
+# Redfish log entries carry a vendor Severity of OK/Warning/Critical. Rank them
+# like dmesg native severity so both sources share one "worst wins" verdict.
+REDFISH_SEVERITY_RANK = {"ok": 0, "warning": 1, "critical": 2}
+
+def redfish_entries(payload):
+    """Parse a Redfish LogService Entries collection into normalised records.
+
+    Accepts the decoded JSON payload (dict) and returns a list of entries with
+    the fields needed for comparison and display. Vendor id/severity/message are
+    kept verbatim; missing pieces become empty strings rather than guesses.
+    """
+    if not isinstance(payload, dict):
+        return []
+    members = payload.get("Members")
+    if not isinstance(members, list):
+        return []
+    entries = []
+    for item in members:
+        if not isinstance(item, dict):
+            continue
+        severity = str(item.get("Severity", "") or "")
+        entries.append(dict(
+            id=str(item.get("Id", "") or ""),
+            severity=severity,
+            severity_key=severity.strip().lower(),
+            created=str(item.get("Created", "") or ""),
+            message=str(item.get("Message", "") or ""),
+            resolved=bool(item.get("Resolved", False)),
+        ))
+    return entries
+
+def redfish_verdict(entries):
+    """Return (verdict, counts) for a list of parsed Redfish entries.
+
+    Worst severity wins, matching dmesg policy: any Critical -> FAIL, else any
+    Warning -> WARN, else PASS (including empty). ``counts`` tallies each raw
+    severity so console summaries can show Critical/Warning/OK breakdowns.
+    """
+    counts = {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0}
+    worst = 0
+    for entry in entries:
+        key = entry.get("severity_key") or ""
+        rank = REDFISH_SEVERITY_RANK.get(key, 0)
+        if key == "critical":
+            counts["Critical"] += 1
+        elif key == "warning":
+            counts["Warning"] += 1
+        elif key == "ok":
+            counts["OK"] += 1
+        else:
+            counts["Other"] += 1
+        worst = max(worst, rank)
+    verdict = "FAIL" if worst >= 2 else "WARN" if worst == 1 else "PASS"
+    return verdict, counts
+
+def redfish_delta(previous, current):
+    """Return entries present in ``current`` but not ``previous``.
+
+    Comparison uses Id + Message + Severity so a reused Id with new content is
+    still reported. Timestamps are deliberately excluded: RTC-less BMCs (e.g.
+    2000-01-03) make time-based diffing unreliable.
+    """
+    def key(entry):
+        return (entry.get("id", ""), entry.get("message", ""), entry.get("severity", ""))
+    old = Counter(key(e) for e in previous)
+    result = []
+    for entry in current:
+        k = key(entry)
+        if old[k]:
+            old[k] -= 1
+        else:
+            result.append(entry)
+    return result
+
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:

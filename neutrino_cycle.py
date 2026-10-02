@@ -112,7 +112,27 @@ def show_result(console, node, record):
     if record['phase'] == 'PRE':
         console('  Identity: ' + ' | '.join(f"{role.upper()} SSH {'OK' if role in record['identities'] else 'NOT VERIFIED'}" for role in ('bmc', 'os')))
     if record.get('check_summary'):
-        console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in {'hardware', 'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'sensor', 'pci', 'dmesg', 'sel', 'power'}))
+        visible = {'hardware', 'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4',
+                   'sensor', 'pci', 'dmesg', 'sel', 'eventlog', 'redfish_sel', 'power'}
+        console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in visible))
+    # BMC log services: one summary line each, never one line per event. Entries
+    # are severity-tagged in the HTML; console stays compact to avoid flooding.
+    for stem, label in (('eventlog', 'EventLog'), ('redfish_sel', 'Redfish SEL')):
+        meta = record.get(f'{stem}_meta')
+        if not meta:
+            continue
+        if not meta.get('present'):
+            console(f'  {label}: not present on this BMC (merged layout)')
+            continue
+        if meta.get('status') != 'COLLECTED':
+            console(f'  {label}: COLLECTION FAILED')
+            continue
+        counts = meta.get('counts', {})
+        delta = meta.get('delta')
+        line = f"  {label}: {meta.get('verdict')} · Critical:{counts.get('Critical', 0)} Warning:{counts.get('Warning', 0)} OK:{counts.get('OK', 0)}"
+        if delta and delta.get('status') == 'COMPARED':
+            line += f" · new:{delta.get('new_count', 0)}"
+        console(line)
     if record.get('dmesg_delta'):
         console('  New dmesg observations: ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_delta'].items()))
     if any(record.get('dmesg_native_error_counts', {}).values()):

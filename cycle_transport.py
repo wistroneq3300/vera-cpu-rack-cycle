@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import socket
@@ -155,6 +156,61 @@ class Transport:
             return Command(124, data.decode(errors="replace") if isinstance(data, bytes) else data, "RESPONSE_LOST", time.monotonic() - start)
         except OSError as exc:
             return Command(127, str(exc), "NOT_ISSUED", time.monotonic() - start)
+
+    # --- Redfish (BMC log services) -------------------------------------
+    # Sessions expire, so every capture logs in again. Credentials go through a
+    # private 0600 config file (curl --config), never argv or evidence, matching
+    # the ipmitool -E policy used for IPMI.
+
+    def _redfish(self, args, timeout):
+        start = time.monotonic()
+        if not shutil.which("curl"):
+            return Command(127, "curl is unavailable on the orchestrator", "NOT_ISSUED")
+        try:
+            result = subprocess.run(["curl", "-sk", "-m", str(int(timeout)), *args],
+                                    capture_output=True, text=True, timeout=timeout + 5, check=False)
+            return Command(result.returncode, result.stdout + result.stderr, duration=time.monotonic() - start)
+        except subprocess.TimeoutExpired as exc:
+            data = (exc.stdout or b"") + (exc.stderr or b"")
+            return Command(124, data.decode(errors="replace") if isinstance(data, bytes) else data, "RESPONSE_LOST", time.monotonic() - start)
+        except OSError as exc:
+            return Command(127, str(exc), "NOT_ISSUED", time.monotonic() - start)
+
+    def redfish_login(self, target, timeout=20):
+        """Return an X-Auth-Token string, raising on any login failure.
+
+        The token never touches evidence; callers treat absence as a collection
+        failure. ``login`` is used by our own separate HTTP path in cycle_engine.
+        """
+        import json as _json
+        body = _json.dumps({"UserName": os.environ.get("BMC_USER", "root"),
+                            "Password": self.credentials.get("bmc", "")})
+        url = f"https://{target.bmc_ip}/redfish/v1/SessionService/Sessions"
+        start = time.monotonic()
+        if not shutil.which("curl"):
+            raise RuntimeError("curl is unavailable on the orchestrator")
+        # -D - prints headers; capture them to read X-Auth-Token.
+        try:
+            result = subprocess.run(["curl", "-sk", "-m", str(int(timeout)), "-X", "POST",
+                                     "-H", "Content-Type: application/json", "--data-binary", "@-",
+                                     "-D", "-", "-o", "/dev/null", url],
+                                    input=body, capture_output=True, text=True, timeout=timeout + 5, check=False)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError(f"redfish login failed: {exc}") from exc
+        headers = result.stdout + result.stderr
+        match = re.search(r'^x-auth-token:\s*(\S+)', headers, re.I | re.M)
+        if not match:
+            raise RuntimeError("redfish login returned no X-Auth-Token")
+        return match.group(1)
+
+    def redfish_get(self, target, path, token, timeout=30):
+        url = f"https://{target.bmc_ip}{path}"
+        return self._redfish(["-H", f"X-Auth-Token: {token}", url], timeout)
+
+    def redfish_clear(self, target, path, token, timeout=30):
+        url = f"https://{target.bmc_ip}{path}"
+        return self._redfish(["-X", "POST", "-H", f"X-Auth-Token: {token}",
+                              "-H", "Content-Type: application/json", url], timeout)
 
     def local_dependencies(self):
         if shutil.which("ipmitool"):
