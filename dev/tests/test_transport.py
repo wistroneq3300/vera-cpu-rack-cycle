@@ -61,5 +61,41 @@ class TransportTests(unittest.TestCase):
                 result=transport.ssh(Target('tray','n1','192.0.2.1','192.0.2.2'),'os','reboot')
                 self.assertEqual(result.state,'NOT_ISSUED')
 
+    def test_tail_is_drained_after_exit_status_is_ready(self):
+        # Regression: exit_status_ready() can flip true while the last block of
+        # stdout is still in flight; the reader must not drop that tail (it holds
+        # the trailing RESULT| marker that large outputs such as the hardware
+        # check rely on).
+        tail=b'\nRESULT|FAIL\n'
+        class Channel:
+            def __init__(self):
+                self._sent=False
+                self._started=None
+            def set_combine_stderr(self,*args): pass
+            def settimeout(self,*args): pass
+            def exec_command(self,cmd): self._started=time.monotonic()
+            def sendall(self,*args): pass
+            def shutdown_write(self): pass
+            def exit_status_ready(self): return True
+            def recv_exit_status(self): return 1
+            def recv_ready(self):
+                if self._started is None: return False
+                # Data only becomes readable a short moment after exit is ready.
+                return not self._sent and time.monotonic()-self._started >= .1
+            def recv(self,n):
+                self._sent=True
+                return tail
+        class Client:
+            def close(self): pass
+            def get_transport(self): return self
+            def open_session(self,**kwargs): return self._channel
+        client=Client(); client._channel=Channel()
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({},Path(temp))
+            with patch.object(transport,'_connect',return_value=client):
+                result=transport.ssh(Target('tray','n1','192.0.2.1','192.0.2.2'),'os','echo',timeout=5)
+        self.assertEqual(result.code,1)
+        self.assertIn('RESULT|FAIL',result.output)
+
 if __name__=='__main__':
     unittest.main()

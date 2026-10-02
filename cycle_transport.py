@@ -104,6 +104,19 @@ class Transport:
                     if time.monotonic() - start >= timeout:
                         raise TimeoutError("Command deadline exceeded")
                 if channel.exit_status_ready() and not channel.recv_ready():
+                    # The exit status can become ready before the channel has
+                    # flushed all of stdout, so a large output (for example
+                    # lspci -vv) may lose its tail and any final RESULT| marker.
+                    # Drain with a bounded idle grace: keep reading while data
+                    # arrives, and stop after one second of silence. The outer
+                    # command deadline still caps the total wait.
+                    idle = time.monotonic() + 1.0
+                    while time.monotonic() < idle and time.monotonic() - start < timeout:
+                        if channel.recv_ready():
+                            chunks.append(channel.recv(65536))
+                            idle = time.monotonic() + 1.0
+                        else:
+                            time.sleep(0.02)
                     code = channel.recv_exit_status()
                     return Command(code, b"".join(chunks).decode(errors="replace"), "RETURNED" if code >= 0 else "RESPONSE_LOST", time.monotonic() - start)
                 if time.monotonic() - start >= timeout:
