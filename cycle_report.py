@@ -301,7 +301,10 @@ def _pci_class(item):
 
 def _pci_link_evidence(record):
     commands = record.get('commands', {})
-    paths = [commands.get(name, {}).get('evidence', '') for name in ('pci_verbose', 'pci')]
+    # ``hardware.txt`` carries the full ``lspci`` text; ``pci_verbose.txt`` is
+    # narrowed to end devices and ``pci`` is the one-line inventory. Prefer the
+    # complete capture, then fall back to whichever narrower file exists.
+    paths = [commands.get(name, {}).get('evidence', '') for name in ('hardware', 'pci_verbose', 'pci')]
     return [path for path in paths if path]
 
 
@@ -661,7 +664,16 @@ def _write_reports(root, campaign):
     result = status(campaign)
     # The journal is independent of HTML generation and is written first.
     write_json(root / "campaign.json", campaign)
-    write_json(root / "cycle_summary.json", {**campaign, "summary": result})
+    # ``cycle_summary.json`` is a portable overview, not a second journal: it
+    # keeps campaign metadata and per-node counts but drops ``pre``/``start``
+    # and every ``loops`` body, which live once in campaign.json and the
+    # loop*/report.json files. ``summary`` carries the aggregated verdict.
+    summary_campaign = {k: v for k, v in campaign.items() if k != 'nodes'}
+    summary_campaign['nodes'] = [
+        {k: v for k, v in node.items() if k not in ('pre', 'start', 'loops')}
+        for node in campaign['nodes']
+    ]
+    write_json(root / "cycle_summary.json", {**summary_campaign, "summary": result})
     lines = [f"Run ID: {campaign['run_id']}", f"Execution: {result['completion']}", f"Health: {result['health']}",
              f"Requested limits: {campaign['limits']}", f"Completed node-loops: {result['completed_node_loops']}",
              f"Attempts: {result['attempted_node_loops']}; boot confirmed: {result['boot_confirmed_node_loops']}; valid cycles: {result['valid_node_cycles']}",

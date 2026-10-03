@@ -386,6 +386,44 @@ def parse_pci_verbose(text):
     return rows
 
 
+def filter_pci_verbose(text):
+    """Reduce an ``lspci -Dvvv`` dump to the end-device blocks the report shows.
+
+    Kept blocks are exactly those the cycle report renders as PCIe End Device
+    rows: any device that is not a PCI bridge. Bridges and other switch fabric
+    are dropped, while their full plain-text form remains embedded in
+    ``hardware.txt`` via the hardware script's own ``lspci`` evidence. Whole
+    blank-line-separated blocks are kept so each surviving record stays a
+    valid, self-contained lspci entry.
+    """
+    blocks, current = [], []
+    for line in text.splitlines():
+        if not line.strip():
+            if current:
+                blocks.append(current)
+                current = []
+            continue
+        current.append(line)
+    if current:
+        blocks.append(current)
+
+    header_re = re.compile(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s+(.*)$", re.I)
+    kept = []
+    for block in blocks:
+        header = header_re.match(block[0])
+        if not header:
+            continue
+        descriptor = header[2]
+        # Mirrors cycle_report._pci_devices: PCI bridge class 06 and anything
+        # whose descriptor names a bridge are switch fabric, not end devices.
+        class_id = re.search(r"\[([0-9a-f]{4})\]", descriptor, re.I)
+        if class_id and class_id[1].startswith('06'):
+            continue
+        if 'bridge' in descriptor.lower():
+            continue
+        kept.append('\n'.join(block))
+    return '\n\n'.join(kept) + ('\n' if kept else '')
+
 def merge_pci_devices(pci, verbose):
     """Join the two already-captured lspci views without inventing devices."""
     merged = {}

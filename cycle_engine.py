@@ -13,6 +13,7 @@ from cycle_core import (
     compare_sensors,
     config_issues,
     dmesg_issues,
+    filter_pci_verbose,
     health,
     issue,
     issue_baseline,
@@ -159,7 +160,7 @@ class NodeSession:
             time.sleep(delay)
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
-                save_evidence=True, record_command=True, include_output=True):
+                save_evidence=True, record_command=True, include_output=True, filter_output=None):
         try:
             result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
                       self.transport.ssh(self.target, role, cmd, timeout, sudo))
@@ -175,6 +176,8 @@ class NodeSession:
             path = self.folder(record) / filename
             evidence = path.relative_to(self.root).as_posix()
             body = result.output if include_output else "[Command output suppressed; status retained in this evidence file.]\n"
+            if filter_output is not None:
+                body = filter_output(body)
             atomic_write(path, f"UTC+8: {now()}\nRole: {role}\nCommand: {cmd}\nExit: {result.code}\nState: {result.state}\nDuration: {result.duration:.2f}s\n\n{body}")
             record["evidence"].append(evidence)
         ipmi_error = (role == "oob" or cmd.startswith("ipmitool ")) and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
@@ -246,8 +249,16 @@ class NodeSession:
             raise RuntimeError('Remote hardware script hash verification failed; no execution')
         self.script_verified = True
 
-    def collect_dmesg(self, record, stem, clear=False):
-        result = self.command(record, stem, 'os', 'dmesg -c' if clear else 'dmesg', sudo=True)
+    def collect_dmesg(self, record, stem, clear=False, save_evidence=None, evidence_stem=None):
+        # The plain ``dmesg`` read only establishes the baseline count; its
+        # buffer is re-read verbatim by ``dmesg -c`` moments later, so keeping
+        # both files would double the largest evidence artefact. Only the
+        # clear variant is retained on disk, and events seen by the non-clear
+        # read cite that retained file instead.
+        if save_evidence is None:
+            save_evidence = clear
+        result = self.command(record, stem, 'os', 'dmesg -c' if clear else 'dmesg', sudo=True,
+                              save_evidence=save_evidence)
         if result.code:
             return
         boot = record['identities'].get('os', {}).get('boot_id', '')
@@ -260,7 +271,11 @@ class NodeSession:
             counts[key] = counts.get(key, 0) + 1
             if counts[key] <= self.dmesg_seen.get(key, 0):
                 continue
-            event.update(boot_id=boot, phase=stem, evidence=record['commands'][stem]['evidence'])
+            retention = record['commands'][stem]['evidence']
+            if not retention and evidence_stem:
+                folder = self.folder(record).relative_to(self.root).as_posix()
+                retention = f'{folder}/{evidence_stem}.txt'
+            event.update(boot_id=boot, phase=stem, evidence=retention)
             record['issues'].append(event)
         if clear:
             self.dmesg_seen = {}
@@ -270,11 +285,15 @@ class NodeSession:
     def capture(self, record, post=False):
         self.hardware_execution_complete = False
         record['hardware_execution_complete'] = False
-        self.collect_dmesg(record, 'dmesg')
+        self.collect_dmesg(record, 'dmesg', evidence_stem='dmesg_clear')
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
                 continue
-            result = self.command(record, stem, "os", cmd, sudo=sudo)
+            # ``pci_verbose`` is parsed in full from the in-memory output; only
+            # the on-disk evidence is narrowed to link-bearing end devices so
+            # the artefact stays reviewable without duplicating hardware.txt.
+            result = self.command(record, stem, "os", cmd, sudo=sudo,
+                                  filter_output=filter_pci_verbose if stem == 'pci_verbose' else None)
             if stem == "pci":
                 record["pci"] = parse_pci(result.output) if result.code == 0 else {}
                 record["pci_devices"] = merge_pci_devices(record["pci"], record.get("pci_verbose", {}))
@@ -766,7 +785,9 @@ class NodeSession:
                               save_evidence=False, record_command=False)
             if self.expected_boot and record['identities']['os']['boot_id'] != self.expected_boot:
                 raise IdentityUnsafe('Unexpected OS boot transition between captures')
-            self.collect_dmesg(record, 'before_action_dmesg')
+            # This read is the only capture of events that arrive before the
+            # power action, so it must keep its own evidence file.
+            self.collect_dmesg(record, 'before_action_dmesg', save_evidence=True)
             before = self.sel_command(record, 'sel_before', 'list', save_evidence=True)
             record['sel_before_valid'] = record['commands']['sel_before']['valid']
             record['sel_before'] = before.output if record['sel_before_valid'] else ''

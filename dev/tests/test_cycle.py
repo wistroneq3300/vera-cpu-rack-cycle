@@ -701,6 +701,10 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(data['summary']['health'],'FAIL')
         self.assertEqual(data['nodes'][0]['completed'],2)
         self.assertEqual(len(data['summary']['issues']),1)
+        # The summary is a portable overview: loop bodies stay in the journal.
+        self.assertNotIn('loops', data['nodes'][0])
+        self.assertNotIn('pre', data['nodes'][0])
+        data = json.loads((output/'campaign.json').read_text())
         data['nodes'][0]['pre']['issues'][0]['detail']='<script>alert(1)</script>'
         page=render_html(data)
         self.assertNotIn('<script>alert(1)</script>',page)

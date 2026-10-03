@@ -32,6 +32,19 @@ collect() {
     if ((rc != 0)); then fail COLLECTION_FAILED "$component" "Command exited $rc"; fi
     return "$rc"
 }
+
+# One ``lspci -Dvv -nn`` call answers everything the checks need: full BDF and
+# class ids for the inventory, LnkCap/LnkSta for link validation, and the VPD
+# ``[SN] Serial number`` used to count BlueField cards. Capturing it once keeps
+# hardware.txt to a single copy instead of three near-identical ones.
+pci_capture() {
+    local rc
+    PCI_VERBOSE=$(lspci -Dvv -nn 2>&1); rc=$?
+    PCI=$(printf '%s\n' "$PCI_VERBOSE" | grep -E '^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ')
+    printf '\n[Evidence] PCI-inventory\n%s\n' "$PCI"
+    printf '\n[Evidence] PCIe-links\n%s\n' "$PCI_VERBOSE"
+    return "$rc"
+}
 cpu_check() {
     local data qty
     collect data CPU dmidecode -t processor || return
@@ -104,7 +117,7 @@ nic_bf4_check() {
         return
     fi
     local verbose identities identified
-    collect verbose BF4-identity lspci -Dvvv || return
+    verbose="$PCI_VERBOSE"
     identities=$(printf '%s\n' "$verbose" | awk '
       function flush() {if (bf4) print bdf "|" serial}
       /^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ {
@@ -142,7 +155,7 @@ pci_count() {
 }
 link_check() {
     local data line bdf="" name="" endpoint=false integrated=false seen=false denied=false pcie=false
-    collect data PCIe-links lspci -Dvv || return
+    data="$PCI_VERBOSE"
     # Flush at every function boundary, including the last function.
     while IFS= read -r line; do
         if [[ "$line" == __END__ || "$line" =~ ^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ]]; then
@@ -193,7 +206,7 @@ firmware() {
 mode="${1:-all}"
 case "$mode" in all|-S|-N|-B|-F) ;; *) echo 'Usage: neutrino_config.sh [-S|-N|-B|-F]'; exit 2;; esac
 PCI_VALID=true
-if [[ "$mode" != -F ]]; then collect PCI PCI-inventory lspci -Dnn || PCI_VALID=false; fi
+if [[ "$mode" != -F ]]; then pci_capture || PCI_VALID=false; fi
 if [[ "$mode" != -F && "$PCI_VALID" == true ]]; then
     duplicates=$(printf '%s\n' "$PCI" | awk '/^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ {v=tolower($1); if (++a[v]==2) print v}')
     if [[ -n "$duplicates" ]]; then fail DUPLICATE_BDF PCIe "Duplicate full BDF: ${duplicates//$'\n'/, }"; fi
