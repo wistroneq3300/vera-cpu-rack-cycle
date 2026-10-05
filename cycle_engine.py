@@ -203,8 +203,16 @@ class NodeSession:
         values = dict(re.findall(r"^(HOSTNAME|BOOT_ID)=(.*)$", result.output, re.M))
         expected = getattr(self.target, role + "_hostname")
         actual = values.get("HOSTNAME", "").strip()
-        if not expected or actual.lower().rstrip(".") != expected.lower().rstrip("."):
-            raise IdentityUnsafe(f"{role} hostname mismatch: expected '{expected}', received '{actual}'")
+        # Hostname is a soft check: run either way, but surface a mismatch so the
+        # operator can review it. A blank expected hostname means "do not check".
+        # (Boot ID below stays a hard stop — that guards against a real reboot.)
+        if expected and actual and actual.lower().rstrip(".") != expected.lower().rstrip("."):
+            if not any(i.get('code') == 'HOSTNAME_MISMATCH' and i.get('component') == role
+                       for i in record.get('issues', [])):
+                self.add(record, 'HOSTNAME_MISMATCH', role,
+                         f"{role} hostname mismatch: inventory says '{expected}', host reports '{actual}'; "
+                         f"continuing, but confirm this is the intended machine",
+                         severity='WARN', evidence=record.get('commands', {}).get(stem or (role + "_identity"), {}).get('evidence', ''))
         if role == "os" and not re.fullmatch(r"[0-9a-fA-F-]{36}", values.get("BOOT_ID", "").strip()):
             raise IdentityUnsafe("OS did not provide a valid boot ID")
         record["identities"][role] = dict(hostname=actual, boot_id=values.get("BOOT_ID", "").strip())

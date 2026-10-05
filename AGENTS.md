@@ -48,10 +48,12 @@ Nodes: OS `root/password`, BMC `root/0penBmc`.
 - Sensor judgement rules and the `coruti` no-reading whitelist live in
   `cycle_core.py`; garbled (`U+FFFD`) sensor names are always FAIL.
 - BF4 detection uses two sources (`mst status -v` + `lspci -nn`).
-- Hostname is a **hard check**: if the inventory `bmc_hostname`/`os_hostname`
-  does not match what the host reports (or is blank), the node is blocked with
-  an `IdentityUnsafe` error before any mutation. Boot-ID validation is a hard
-  stop as well (it guards against a real reboot).
+- Hostname is a **soft check**: if the inventory `bmc_hostname`/`os_hostname`
+  does not match what the host reports, the node is NOT blocked Ñ a
+  `HOSTNAME_MISMATCH` WARN is recorded and the run continues (a blank expected
+  hostname means "do not check"). Boot-ID validation is still a hard stop
+  (it guards against a real reboot). `inventory_blocks` still blocks a row with
+  no hostname at all (placeholder semantics).
 
 ## Redfish EventLog / SEL (added 2026-10-02)
 
@@ -77,3 +79,13 @@ Nodes: OS `root/password`, BMC `root/0penBmc`.
 - Samba is a backup/share mount (`/root/samba`, incl. `/root/samba/vera-cycle`
   and `/root/samba/Netruino cycle`). Only copy there when the user explicitly asks.
 - Orchestrator host is the sandbox itself (`10.35.228.144`); it has no BMC.
+
+## Session 2026-10-05 â€” sheng push to branch
+
+- sheng/vera-cycle work pushed to branch `dev/sheng-dmesg-wipe-evidence-links` (commit be2eddf),
+  rebased onto origin/main (865e5be). 170/170 tests pass.
+- Branch keeps **soft-WARN hostname** behavior (engine+tests+AGENTS), per 0c27941 note that
+  soft-WARN lives only in the sheng branch; main/vera-cycle keep hard block.
+- `/root/vera-cycle` (main) = 865e5be pushed: PRE dmesg -C wipe, hide clean dmesg/eventlog
+  lines, evidence links. 164/164 tests pass.
+- sheng extra (stop_cycle.sh +182, neutrino_config.sh) bundled in the branch snapshot.
