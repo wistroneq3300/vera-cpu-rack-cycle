@@ -9,6 +9,7 @@ import socket
 import subprocess
 import threading
 import time
+import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -44,6 +45,12 @@ class Transport:
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message=r'.*TripleDES.*', category=UserWarning)
             import paramiko
+        # The transport thread logs SSH banner/EOF failures at ERROR level. With
+        # no handler on the paramiko logger they propagate to the root logger's
+        # last-resort handler and spam the operator's console during an aux
+        # cycle (the BMC drops SSH while the host reboots). The failures are
+        # already handled by the caller; keep them off the console.
+        logging.getLogger("paramiko").setLevel(logging.CRITICAL)
         client = paramiko.SSHClient()
         # Campaign-isolated TOFU; later key changes fail. Hostname is separately
         # checked against operator-supplied inventory before any remote mutation.
