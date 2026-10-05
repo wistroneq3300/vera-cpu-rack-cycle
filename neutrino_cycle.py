@@ -546,7 +546,7 @@ def main(argv=None):
             if role in roles:
                 credentials[role] = os.environ.get(f'{options.project.upper()}_{role.upper()}_PASSWORD', os.environ.get(role.upper() + '_PASSWORD'))
                 if credentials[role] is None:
-                    credentials[role] = getpass.getpass(f'{role} password (blank for SSH key; BMC IPMI needs a password): ')
+                    credentials[role] = input(f'{role} password [VISIBLE] (blank for SSH key; BMC IPMI needs a password): ')
         return campaign(options, targets, credentials)
     except (ValueError, OSError, RuntimeError, EOFError) as exc:
         print(f'ERROR: {exc}', file=sys.stderr)
