@@ -249,17 +249,25 @@ class NodeSession:
             raise RuntimeError('Remote hardware script hash verification failed; no execution')
         self.script_verified = True
 
-    def collect_dmesg(self, record, stem, clear=False, save_evidence=None, evidence_stem=None):
+    def collect_dmesg(self, record, stem, clear=False, save_evidence=None, evidence_stem=None,
+                      wipe_only=False):
         # The plain ``dmesg`` read only establishes the baseline count; its
         # buffer is re-read verbatim by ``dmesg -c`` moments later, so keeping
         # both files would double the largest evidence artefact. Only the
         # clear variant is retained on disk, and events seen by the non-clear
         # read cite that retained file instead.
+        #
+        # ``wipe_only`` uses ``dmesg -C`` to discard the buffer without reading
+        # its contents, so the pre-clear backlog never becomes a finding.
         if save_evidence is None:
-            save_evidence = clear
-        result = self.command(record, stem, 'os', 'dmesg -c' if clear else 'dmesg', sudo=True,
+            save_evidence = clear and not wipe_only
+        command = 'dmesg -C' if wipe_only else 'dmesg -c' if clear else 'dmesg'
+        result = self.command(record, stem, 'os', command, sudo=True,
                               save_evidence=save_evidence)
         if result.code:
+            return
+        if wipe_only:
+            self.dmesg_seen = {}
             return
         boot = record['identities'].get('os', {}).get('boot_id', '')
         events = dmesg_issues(result.output)
@@ -443,9 +451,9 @@ class NodeSession:
     def _prepare_clean_state(self, record):
         """Clear dmesg, IPMI SEL and Redfish logs before the PRE baseline.
 
-        dmesg: `dmesg -c` reads and clears in one step, so the clear itself is
-        the probe -- no separate read is needed (and it would only discard the
-        pre-clear content the operator does not want anyway).
+        dmesg: `dmesg -C` discards the pre-PRE backlog without reading it, so
+        the boot-to-PRE noise never enters the PRE baseline (previously
+        `dmesg -c` read and cleared, making that backlog a finding).
 
         IPMI SEL: `sel clear` does NOT return the contents, and blindly clearing
         an erroring SEL would destroy unread evidence, so SEL is read first
@@ -453,10 +461,10 @@ class NodeSession:
 
         Redfish clear is driven from collect_redfish(clear=True).
         """
-        # dmesg: `dmesg -c` reads and clears in one step; failure means no clear.
-        self.collect_dmesg(record, "pre_dmesg_clear", clear=True)
+        # dmesg: `dmesg -C` wipes only; failure means no clear.
+        self.collect_dmesg(record, "pre_dmesg_clear", wipe_only=True)
         if not record['commands']['pre_dmesg_clear']['valid']:
-            self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg could not be read/cleared', severity='WARN')
+            self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg could not be cleared', severity='WARN')
         # IPMI SEL: read first; `sel clear` returns no contents, so a broken SEL
         # must be left intact rather than wiped blind.
         self.sel_command(record, "pre_sel_probe", "list", save_evidence=False)

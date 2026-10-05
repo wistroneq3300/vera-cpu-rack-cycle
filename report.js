@@ -11,8 +11,20 @@ for(const control of [search,severity,classification])control.addEventListener('
 function filterNodes(){const query=document.getElementById('node-search').value.toLowerCase(),health=document.getElementById('node-health').value;let shown=0;for(const a of document.querySelectorAll('.node-choice')){a.hidden=!a.textContent.toLowerCase().includes(query)||(health&&a.dataset.health!==health);if(!a.hidden)shown++;}document.getElementById('node-count').textContent=shown+' matching nodes';}
 for(const id of ['node-search','node-health'])document.getElementById(id).addEventListener('input',filterNodes);
 const consoleSearch=document.getElementById('console-search'),consoleLog=document.getElementById('console-log');
-if(consoleSearch)consoleSearch.addEventListener('input',()=>{const query=consoleSearch.value.toLowerCase();consoleLog.textContent=consoleLog.dataset.raw.split('\n').filter(line=>!query||line.toLowerCase().includes(query)).join('\n');});
-if(consoleLog)consoleLog.dataset.raw=consoleLog.textContent;
+function escHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function colorizeLine(line){
+  const ts=line.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}/);
+  let rest=line,head='';
+  if(ts){head=`<span class="cl-ts">${escHtml(ts[0])}</span>`;rest=line.slice(ts[0].length);}
+  const body=escHtml(rest)
+    .replace(/\b(FAIL)\b/g,'<span class="cl-fail">$1</span>')
+    .replace(/\b(WARN)\b/g,'<span class="cl-warn">$1</span>')
+    .replace(/\b(PASS|DONE|COMPLETE|SUCCEEDED)\b/g,'<span class="cl-pass">$1</span>');
+  return head+body;
+}
+function renderConsole(lines){consoleLog.innerHTML=lines.map(colorizeLine).join('\n');}
+if(consoleLog){consoleLog.dataset.raw=consoleLog.textContent;renderConsole(consoleLog.dataset.raw.split('\n'));}
+if(consoleSearch)consoleSearch.addEventListener('input',()=>{const query=consoleSearch.value.toLowerCase();renderConsole(consoleLog.dataset.raw.split('\n').filter(line=>!query||line.toLowerCase().includes(query)));});
 const downloadConsole=document.getElementById('download-console');
 if(downloadConsole)downloadConsole.addEventListener('click',()=>{const blob=new Blob([consoleLog.dataset.raw||consoleLog.textContent],{type:'text/plain'}),link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='console.log';link.click();URL.revokeObjectURL(link.href);});
 let printState;

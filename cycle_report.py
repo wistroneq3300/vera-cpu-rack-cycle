@@ -365,12 +365,22 @@ def _summary_groups(record):
             group = 'other'
         command = record.get('commands', {}).get(key, {})
         detail = _hardware_detail(record, key)
+        evidence = command.get('evidence', '')
+        if not evidence:
+            # These sub-checks have no command of their own but do have a
+            # retained artefact: hardware-script checks live in the phase's
+            # hardware.txt, dmesg observations in the phase's dmesg capture.
+            if key == 'dmesg':
+                evidence = (record.get('commands', {}).get('dmesg_clear', {}).get('evidence')
+                            or record.get('commands', {}).get('pre_dmesg_clear', {}).get('evidence', ''))
+            elif key in record.get('hardware_checks', {}):
+                evidence = record.get('commands', {}).get('hardware', {}).get('evidence', '')
         if key == 'hardware' and any('BF4' in str(item.get('code', '')).upper() and item.get('severity') == 'FAIL'
                                     for item in record.get('issues', [])):
             detail = 'Cause: BF4 missing; see BF4 validation for the measured source counts'
         groups[group].append(dict(key=key, label=_check_label(key), status=value,
                                   detail=detail,
-                                  evidence=command.get('evidence', ''), raw_key=key))
+                                  evidence=evidence, raw_key=key))
     pci_command = record.get('commands', {}).get('pci', {})
     pci = record.get('pci') or {}
     if pci_command or pci:

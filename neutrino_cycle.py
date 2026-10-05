@@ -117,24 +117,29 @@ def show_result(console, node, record):
         console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in visible))
     # BMC log services: one summary line each, never one line per event. Entries
     # are severity-tagged in the HTML; console stays compact to avoid flooding.
+    # Clean PASS summaries are suppressed; only anomalies are printed so the
+    # transcript stays compact.
     for stem, label in (('eventlog', 'EventLog'), ('redfish_sel', 'Redfish SEL')):
         meta = record.get(f'{stem}_meta')
         if not meta:
-            continue
-        if not meta.get('present'):
-            console(f'  {label}: not present on this BMC (merged layout)')
             continue
         if meta.get('status') != 'COLLECTED':
             console(f'  {label}: COLLECTION FAILED')
             continue
         counts = meta.get('counts', {})
         delta = meta.get('delta')
+        # Only Critical/Warning matter; a delta of merely OK entries is not a
+        # finding and stays silent.
+        if not counts.get('Critical') and not counts.get('Warning'):
+            continue
+        new_count = delta.get('new_count', 0) if delta and delta.get('status') == 'COMPARED' else 0
         line = f"  {label}: {meta.get('verdict')} · Critical:{counts.get('Critical', 0)} Warning:{counts.get('Warning', 0)} OK:{counts.get('OK', 0)}"
         if delta and delta.get('status') == 'COMPARED':
-            line += f" · new:{delta.get('new_count', 0)}"
+            line += f" · new:{new_count}"
         console(line)
-    if record.get('dmesg_delta'):
-        console('  New dmesg observations: ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_delta'].items()))
+    dmesg_delta = record.get('dmesg_delta') or {}
+    if any(value for value in dmesg_delta.values()):
+        console('  New dmesg observations: ' + ', '.join(f'{key}={value}' for key, value in dmesg_delta.items()))
     if any(record.get('dmesg_native_error_counts', {}).values()):
         console('  Native errors reported in captured messages (not lifetime counters): ' + ', '.join(f'{key}={value}' for key, value in record['dmesg_native_error_counts'].items()))
     groups = {}

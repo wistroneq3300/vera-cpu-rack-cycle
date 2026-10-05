@@ -81,7 +81,7 @@ class FakeTransport:
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')
         if cmd == '/usr/bin/powerctrl.sh power_status':
             return Command(0, 'Host: Running\nChassis Power: On')
-        if cmd in {value[0] for value in CAPTURES.values()} | {'dmesg -c', 'command -v mst'}:
+        if cmd in {value[0] for value in CAPTURES.values()} | {'dmesg -c', 'dmesg -C', 'command -v mst'}:
             return Command(0, 'available\n')
         if cmd.startswith('test -f ') or cmd.startswith('rm -f '):
             return Command(0, '')
@@ -476,7 +476,8 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(two['status'],'FAIL')
         self.assertEqual(self.session.node['completed'],2)
         self.assertEqual(sum(cmd=='sel clear' for _,_,cmd in self.fake.calls),1)
-        self.assertEqual(sum(cmd=='dmesg -c' for _,_,cmd in self.fake.calls),3)
+        self.assertEqual(sum(cmd=='dmesg -C' for _,_,cmd in self.fake.calls),1)
+        self.assertEqual(sum(cmd=='dmesg -c' for _,_,cmd in self.fake.calls),2)
         self.assertTrue((self.root/'tray1_n1'/'pre_pci.txt').exists())
         self.assertFalse((self.root/'tray1_n1'/'pre').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0002'/'sel.txt').exists())
@@ -490,7 +491,7 @@ class EngineTests(unittest.TestCase):
         self.session.precheck()
         self.assertTrue(self.session.node['blocked'])
         self.assertFalse(self.fake.uploaded)
-        self.assertFalse(any('apt-get' in cmd or cmd=='dmesg -c' for _,_,cmd in self.fake.calls))
+        self.assertFalse(any('apt-get' in cmd or cmd in {'dmesg -c', 'dmesg -C'} for _,_,cmd in self.fake.calls))
 
     def test_post_hostname_mismatch_prevents_another_cycle(self):
         self.ready()
@@ -587,7 +588,7 @@ class EngineTests(unittest.TestCase):
     def test_failed_dmesg_clear_still_attempts_sel_without_key_error(self):
         original=self.fake.ssh
         def ssh(t,role,cmd,timeout=60,sudo=False):
-            return Command(1,'permission denied') if cmd=='dmesg -c' else original(t,role,cmd,timeout,sudo)
+            return Command(1,'permission denied') if cmd=='dmesg -C' else original(t,role,cmd,timeout,sudo)
         self.fake.ssh=ssh
         self.session.precheck()
         # Clean-start clearing lives in PRE now: a failed dmesg clear must not
