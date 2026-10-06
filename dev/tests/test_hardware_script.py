@@ -9,9 +9,20 @@ from pathlib import Path
 BASE=Path(__file__).resolve().parents[2]
 SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
 
+# The producer keys the NIC check on these expected slots (see NIC_SLOTS in
+# neutrino_config.sh). The MST stub must emit exactly this set, otherwise every
+# slot is reported missing. Kept at module scope so test classes that borrow
+# HardwareTests.run_fixture still resolve it.
+NIC_SLOTS = ['0001:00:00.0', '0002:00:00.0', '0002:20:00.0', '0003:00:00.0',
+             '0003:80:00.0', '0004:00:00.0', '0004:40:00.0', '0004:80:00.0',
+             '0004:c0:00.0', '0005:00:00.0', '0006:00:00.0', '0009:00:00.0',
+             '000a:00:00.0', '000a:20:00.0', '000b:00:00.0', '000b:80:00.0',
+             '000c:00:00.0', '000c:40:00.0', '000c:80:00.0', '000c:c0:00.0',
+             '000d:00:00.0', '000e:00:00.0']
+
 @unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
 class HardwareTests(unittest.TestCase):
-    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90', mode=None):
+    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90', mode=None, missing_slot=None, degraded_slot=None):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             serials = ['CARD-A'] * functions if serials is None else serials
@@ -35,8 +46,9 @@ class HardwareTests(unittest.TestCase):
               'nvme':"printf '/dev/nvme0n1 disk0\\n/dev/nvme0n2 namespace2\\n/dev/nvme1n1 disk1\\n'",
               'lscpu':"printf '# CPU,Socket,Online\\n0,0,Y\\n1,1,Y\\n'",
               'cat':"printf 'MemTotal: 2000000000 kB\\n'",
-              'mst':f'''i=1; while [ "$i" -le 22 ]; do printf 'Vera(rev:0) /dev/mst/device %04x:01:00.0\\n' "$i"; i=$((i+1)); done
-                        echo '{bf4}(rev:0) /dev/mst/dpu 0000:02:00.0' ''',
+              'mst':''.join(
+                  ('echo NA /dev/mst/mt12184_pciconf0 {0}\n' if bdf == degraded_slot else 'echo Vera\\(rev:0\\) /dev/mst/device {0}\n').format(bdf)
+                  for bdf in NIC_SLOTS if bdf != missing_slot),
               'lspci':f'''case "$*" in
                     *-Dvv\\ -nn*) printf '%s\\n' '{verbose_inventory}';;
                     -Dvv) printf '%s\\n' '{verbose_inventory}';;
@@ -66,6 +78,32 @@ class HardwareTests(unittest.TestCase):
         result=self.run_fixture(dimms=17)
         self.assertEqual(result.returncode,1,result.stdout+result.stderr)
         self.assertIn('ISSUE|DIMM_COUNT',result.stdout)
+
+    def test_nic_slot_degraded_is_not_reported_as_missing(self):
+        # Real regression: an enumerated NIC whose MST DEVICE_TYPE flipped from
+        # Vera to NA (e.g. loop0036 slot 0002:00:00.0) keeps its PCI slot. It must
+        # be reported as present-but-degraded, never as a removed card, or the
+        # report tells the customer a card vanished while lspci still shows it.
+        result=self.run_fixture(degraded_slot='0002:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=DEGRADED|device_type=NA',result.stdout)
+        self.assertIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+
+    def test_nic_slot_missing_is_a_device_removal(self):
+        # A slot whose BDF is absent from the MST inventory is a real removal and
+        # keeps the original DEVICE_MISSING contract.
+        result=self.run_fixture(missing_slot='0003:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0003:00:00.0|state=MISSING',result.stdout)
+        self.assertIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+        self.assertIn('missing slot 0003:00:00.0',result.stdout)
+        self.assertNotIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+
+    def test_nic_all_slots_present_passes(self):
+        result=self.run_fixture()
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=PRESENT',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('state=DEGRADED',result.stdout)
 
     def test_bf3_never_counts_as_bf4(self):
         for model in ('BlueField-3','BlueField','ConnectX-9','DPU'):

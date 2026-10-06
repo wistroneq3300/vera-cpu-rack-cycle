@@ -477,6 +477,35 @@ def pci_issues(baseline, current):
                                snippet="\n".join(lines)))
     return found
 
+def nic_slot_issues(baseline, current):
+    """Compare the PRE NIC slot inventory against the current loop's.
+
+    ``baseline``/``current`` map a NIC slot BDF (the upstream root port that owns
+    the card) to its ``state`` string as emitted by the hardware script's
+    ``CHECK|NIC_SLOT|slot=<bdf>|state=<PRESENT|DEGRADED|MISSING>`` lines.
+
+    A slot that was healthy at PRE and is now absent is a real removal
+    (NIC_MISSING); a slot that flipped to a non-Vera device type is
+    present-but-degraded (NIC_DEGRADED). Both name the BDF, so a report can say
+    exactly which NIC dropped instead of only "one fewer card".
+    """
+    found = []
+    for bdf in sorted(set(baseline) | set(current)):
+        old, new = baseline.get(bdf), current.get(bdf)
+        was_present = old is not None and old != 'MISSING'
+        is_present = new is not None and new != 'MISSING'
+        if was_present and not is_present:
+            found.append(issue("NIC_MISSING", "NIC",
+                               f"PRE NIC at slot {bdf} is absent after the loop (missing slot {bdf})",
+                               snippet=f"PRE NIC slot {bdf} state={old}; POST absent"))
+            continue
+        if was_present and is_present and old != new:
+            found.append(issue("NIC_DEGRADED", "NIC",
+                               f"root port {bdf} -> downstream NIC changed state at PRE={old} -> POST={new} "
+                               f"(degraded slot {bdf})",
+                               snippet=f"PRE NIC slot {bdf} state={old}; POST state={new}"))
+    return found
+
 def _check_snippet(line):
     """Turn a ``CHECK|<component>|key=value|...`` line into a one-line pointer
     to what the hardware script measured. A missing device has no offending

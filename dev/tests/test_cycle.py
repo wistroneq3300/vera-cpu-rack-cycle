@@ -250,6 +250,33 @@ class PureTests(unittest.TestCase):
         self.assertIn('POST', item['snippet'])
         self.assertIn('10de:9999', item['snippet'])
 
+    def test_nic_slot_removed_after_loop_is_named(self):
+        # A NIC present at PRE and absent after the loop is a real removal, and
+        # must be reported by BDF, not merely as "one fewer card".
+        baseline = {'0002:00:00.0': 'PRESENT', '0003:00:00.0': 'PRESENT'}
+        current = {'0003:00:00.0': 'PRESENT'}
+        items = nic_slot_issues(baseline, current)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['code'], 'NIC_MISSING')
+        self.assertIn('0002:00:00.0', items[0]['detail'])
+
+    def test_nic_slot_degraded_after_loop_is_named(self):
+        # A NIC still enumerated but whose device type flipped (PRESENT -> the
+        # hardware script's DEGRADED state) is degraded, never a removal.
+        baseline = {'0002:00:00.0': 'PRESENT'}
+        current = {'0002:00:00.0': 'DEGRADED'}
+        items = nic_slot_issues(baseline, current)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['code'], 'NIC_DEGRADED')
+        self.assertIn('degraded slot 0002:00:00.0', items[0]['detail'])
+
+    def test_nic_slot_stable_inventory_has_no_issues(self):
+        inv = {'0002:00:00.0': 'PRESENT', '0003:00:00.0': 'PRESENT'}
+        self.assertFalse(nic_slot_issues(dict(inv), dict(inv)))
+        # A slot already degraded at PRE and unchanged after the loop is a
+        # pre-existing condition, not a new per-loop issue.
+        self.assertFalse(nic_slot_issues({'0002:00:00.0': 'DEGRADED'}, {'0002:00:00.0': 'DEGRADED'}))
+
     def test_dmesg_issue_points_at_line_number(self):
         text = 'first line\nAER: Uncorrected (Fatal) error\nanother\n'
         item = dmesg_issues(text)[0]

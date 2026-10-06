@@ -7,6 +7,32 @@ CPU_MIN=2
 DIMM_EXPECTED=16
 NVMe_MIN=2
 NIC_MIN=22
+# Expected NIC (Vera) PCI slots. 22 slots: 22 single-port NICs, each on its own
+# domain:bus:device.function. When a slot is absent from the MST inventory the
+# producer emits DEVICE_MISSING|NIC so the report can name which NIC dropped.
+NIC_SLOT_01=0001:00:00.0
+NIC_SLOT_02=0002:00:00.0
+NIC_SLOT_03=0002:20:00.0
+NIC_SLOT_04=0003:00:00.0
+NIC_SLOT_05=0003:80:00.0
+NIC_SLOT_06=0004:00:00.0
+NIC_SLOT_07=0004:40:00.0
+NIC_SLOT_08=0004:80:00.0
+NIC_SLOT_09=0004:c0:00.0
+NIC_SLOT_10=0005:00:00.0
+NIC_SLOT_11=0006:00:00.0
+NIC_SLOT_12=0009:00:00.0
+NIC_SLOT_13=000a:00:00.0
+NIC_SLOT_14=000a:20:00.0
+NIC_SLOT_15=000b:00:00.0
+NIC_SLOT_16=000b:80:00.0
+NIC_SLOT_17=000c:00:00.0
+NIC_SLOT_18=000c:40:00.0
+NIC_SLOT_19=000c:80:00.0
+NIC_SLOT_20=000c:c0:00.0
+NIC_SLOT_21=000d:00:00.0
+NIC_SLOT_22=000e:00:00.0
+NIC_SLOTS="$NIC_SLOT_01 $NIC_SLOT_02 $NIC_SLOT_03 $NIC_SLOT_04 $NIC_SLOT_05 $NIC_SLOT_06 $NIC_SLOT_07 $NIC_SLOT_08 $NIC_SLOT_09 $NIC_SLOT_10 $NIC_SLOT_11 $NIC_SLOT_12 $NIC_SLOT_13 $NIC_SLOT_14 $NIC_SLOT_15 $NIC_SLOT_16 $NIC_SLOT_17 $NIC_SLOT_18 $NIC_SLOT_19 $NIC_SLOT_20 $NIC_SLOT_21 $NIC_SLOT_22"
 BF4_EXPECTED=1
 PCIEFAB_MIN=20
 USB_MIN=1
@@ -110,7 +136,72 @@ nic_bf4_check() {
     if ((nic == 0)) && printf '%s\n' "$data" | grep -q 'MST PCI module is not loaded'; then
         fail MST_MODULE MST "MST kernel module is not loaded; Vera NIC count is unavailable (run: mst start)"
     fi
-    if "$mst_valid"; then minimum NIC "$nic" "$NIC_MIN"; fi
+    if "$mst_valid"; then
+        # The MST device table rows look like:
+        #   /dev/mst/mt12183_pciconf0    0001:00:00.0     PCI device 15b3:1023
+        #   NA                           0002:00:00.0     PCI device 15b3:1023
+        # The /dev/mst column is present only when the MST kernel module is
+        # loaded, so it cannot be used to count NICs. Key each expected slot on
+        # the <domain:bus:device.function> token, but classify it by the row's
+        # DEVICE_TYPE rather than by the device being absent:
+        #   PRESENT  - BDF appears on a Vera row (healthy NIC)
+        #   DEGRADED - BDF appears, but the row's type is not Vera (e.g. NA):
+        #              the card is still enumerated and holds the slot, yet its
+        #              firmware/driver did not bring it up as a Vera device.
+        #              This must NOT be reported as a missing card.
+        #   MISSING  - BDF does not appear on any row: the card is gone.
+        # Emitting these three states keeps the report from telling a customer a
+        # card "disappeared" when lspci still shows the slot.
+        local slot state dtype mstdev mstrow
+        missing_slots=""
+        degraded_slots=""
+        for slot in $NIC_SLOTS; do
+            state=$(printf '%s\n' "$data" | awk -v want="$(printf '%s' "$slot" | tr 'A-F' 'a-f')" '
+                {
+                    bdf=""; dev=""
+                    for (i = 1; i <= NF; i++)
+                        if ($i ~ /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$/) { bdf=tolower($i); break }
+                    if (bdf != want) next
+                    # Ignore the second alias row of the same card (e.g. *_pci_cr0)
+                    # so the reported device name is stable across loops.
+                    if ($1 == "NA" && $2 ~ /_pci_cr[0-9]+$/) next
+                    for (i = 1; i <= NF; i++) if ($i ~ /^\/dev\/mst\//) { dev=$i; break }
+                    if (tolower($1) ~ /^vera(\(|$)/) { print "PRESENT"; found=1; exit }
+                    row=$0; gsub(/\t/, " ", row); gsub(/  +/, " ", row); gsub(/^ | $/, "", row)
+                    print "DEGRADED|" $1 "|" dev "|" row; found=1; exit
+                }
+                END { if (!found) print "MISSING" }')
+            case "$state" in
+                PRESENT)
+                    printf 'CHECK|NIC_SLOT|slot=%s|state=PRESENT\n' "$slot"
+                    ;;
+                DEGRADED*)
+                    dtype=${state#DEGRADED|}; mstdev=${dtype#*|}; dtype=${dtype%%|*}; mstrow=${mstdev#*|}; mstdev=${mstdev%%|*}
+                    printf 'CHECK|NIC_SLOT|slot=%s|state=DEGRADED|device_type=%s|mst_device=%s\n' "$slot" "$dtype" "$mstdev"
+                    printf 'CHECK|NIC_MST_ROW|slot=%s|row=%s\n' "$slot" "$mstrow"
+                    degraded_slots="${degraded_slots:+$degraded_slots, }$slot"
+                    # The slot BDF is the root port (upstream PCI bridge), not the
+                    # card. Name the downstream NIC explicitly so the finding is
+                    # never mistaken for a missing first-level bridge.
+                    fail NIC_DEGRADED NIC "root port $slot -> downstream Vera NIC (MST device ${mstdev##*/}) degraded: DEVICE_TYPE='$dtype' (expected Vera); card present but not functional (degraded slot $slot). mst status row: $mstrow"
+                    ;;
+                *)
+                    printf 'CHECK|NIC_SLOT|slot=%s|state=MISSING\n' "$slot"
+                    missing_slots="${missing_slots:+$missing_slots, }$slot"
+                    fail DEVICE_MISSING NIC "Expected at least 1; detected 0 at slot $slot (missing slot $slot)"
+                    ;;
+            esac
+        done
+        # Only a genuinely absent slot (MISSING) is a device removal; a DEGRADED
+        # slot still counts toward the NIC tally so the count check does not
+        # double-report the same physical card as missing.
+        if [[ -n "$missing_slots" ]]; then
+            minimum NIC "$nic" "$NIC_MIN"
+        elif [[ -n "$degraded_slots" ]]; then
+            printf 'CHECK|NIC|actual=%s|minimum=%s\n' "$nic" "$NIC_MIN"
+            printf 'CHECK|NIC_DEGRADED|detected=%s|slots=%s\n' "$nic" "${degraded_slots// /}"
+        fi
+    fi
     # The PCI function count is not the physical card count. Require a shared
     # VPD board serial for every BF4 function; never guess from port count.
     if [[ "$PCI_VALID" != true ]]; then return; fi

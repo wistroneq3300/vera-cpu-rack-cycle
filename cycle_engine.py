@@ -19,6 +19,7 @@ from cycle_core import (
     issue_baseline,
     merge_pci_devices,
     missing_sensors,
+    nic_slot_issues,
     now,
     parse_pci,
     parse_pci_verbose,
@@ -383,11 +384,15 @@ class NodeSession:
                     self.node['blocked'].append('Hardware script execution incomplete')
             record['hardware_checks'] = {}
             record['hardware_check_details'] = {}
+            record['nic_slots'] = {}
             for line in config.output.splitlines():
                 if line.startswith('CHECK|'):
                     cells = line.split('|')
                     name = cells[1]
                     values = dict(c.split('=', 1) for c in cells[2:] if '=' in c)
+                    if name == 'NIC_SLOT' and 'slot' in values:
+                        record['nic_slots'][values['slot'].lower()] = values.get('state', 'PRESENT')
+                        continue
                     component = values.get('bdf', name)
                     state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
                     related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
@@ -396,6 +401,11 @@ class NodeSession:
                     key = f'{name}/{component}' if 'bdf' in values else name
                     record['hardware_checks'][key] = state
                     record['hardware_check_details'][key] = dict(name=name, values=values, raw=line, status=state)
+            # Compare the NIC slot inventory against the PRE baseline so a card
+            # that is present at PRE but absent (removed) or degraded (non-Vera
+            # device type) after a loop is named by BDF, not just counted.
+            if post and self.baseline and 'nic' in self.baseline:
+                record['issues'] += nic_slot_issues(self.baseline['nic'], record.get('nic_slots', {}))
         record['script_verified'] = self.script_verified
         sensor = self.command(record, "sensor", "oob", "sensor list")
         sensor_valid = record['commands']['sensor']['valid']
@@ -543,7 +553,8 @@ class NodeSession:
             # only the PCI baseline is required to keep cycle comparisons safe.
             if not record["pci"]:
                 self.node["blocked"].append("PRE PCI baseline is unavailable")
-            self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
+            self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]],
+                                 nic=dict(record.get("nic_slots", {})))
             self.pre_issue_keys = issue_baseline(record["issues"])
             self.expected_boot = record['identities']['os']['boot_id']
         except Exception as exc:
