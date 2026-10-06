@@ -80,6 +80,30 @@ class ExecutionTests(unittest.TestCase):
             self.assertEqual(record['status'], 'FAIL')
             self.assertTrue(self.session.node['active'])
 
+    def test_execution_gate_not_regressed_by_redfish_fix(self):
+        # Item 3-F guard: the Redfish session-cleanup fix must not weaken the
+        # hardware execution-complete gate. Complete RESULT|FAIL stays complete
+        # (health FAIL, completion true); an unfinished run stays incomplete.
+        self.session.precheck()
+        self.session.start()
+        complete = Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n')
+        with self.replace_hardware(complete):
+            record = self.session.one_loop(1)
+        self.assertTrue(record['hardware_execution_complete'])
+        self.assertEqual(record['status'], 'FAIL')
+        self.assertNotIn('HARDWARE_EXECUTION_INCOMPLETE', [i['code'] for i in record['issues']])
+        # A timed-out run on a fresh session is incomplete and deactivates.
+        session = fixtures.NodeSession(fixtures.target(), self.fake, self.root, 'test', b'script',
+                                       fixtures.digest(b'script'), self.options, [])
+        session.precheck()
+        session.start()
+        with self.replace_hardware(Command(124, 'timed out', 'RESPONSE_LOST')):
+            record = session.one_loop(1)
+        self.assertFalse(record['hardware_execution_complete'])
+        self.assertFalse(record['post_complete'])
+        self.assertFalse(record['valid_cycle'])
+        self.assertIn('HARDWARE_EXECUTION_INCOMPLETE', [i['code'] for i in record['issues']])
+
     def test_two_nodes_only_execution_failure_stops(self):
         targets = [fixtures.target(), fixtures.target('n2', offset=2)]
         self.options.loops = 2

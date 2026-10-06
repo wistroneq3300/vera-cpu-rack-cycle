@@ -386,9 +386,19 @@ class NodeSession:
                     if name == 'NIC_SLOT' and 'slot' in values:
                         record['nic_slots'][values['slot'].lower()] = values.get('state', 'PRESENT')
                         continue
+                    # Raw per-slot evidence, not a health validation: the mst row
+                    # and a non-NIC device (GPU) on a NIC position must not be
+                    # badged PASS/FAIL as a hardware check. Their content stays
+                    # in the hardware.txt evidence and the NIC slot inventory.
+                    if name in {'NIC_MST_ROW', 'NIC_NON_CARD'}:
+                        continue
                     component = values.get('bdf', name)
                     state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
-                    related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
+                    # NIC_DEGRADED is a validation whose finding component is
+                    # 'NIC'; without this mapping it defaults to PASS while its
+                    # own NIC finding is FAIL.
+                    related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4',
+                               'NIC_DEGRADED': 'NIC', 'NIC_MISSING': 'NIC'}.get(name, component)
                     if any(i['component'] in {component, related} for i in findings):
                         state = 'FAIL'
                     key = f'{name}/{component}' if 'bdf' in values else name
@@ -592,15 +602,18 @@ class NodeSession:
     # may not expose a separate SEL service, so nothing here is hard-coded:
     # we discover the System id and its LogServices, then fetch whatever exists.
 
-    def _redfish_discover(self):
+    def _redfish_discover(self, token):
         """Return dict(system_id, services={name: odata_id}, token, listing_valid, reason).
 
         A failed or unreadable discovery is NOT the same as an empty service
         list: ``listing_valid`` stays false and callers must not conclude that
         any particular service is absent. Only a successfully read, structurally
         valid LogServices collection lets us say a service is NOT PRESENT.
+
+        The caller owns the session: ``token`` is the already-issued X-Auth-Token
+        and is reused for every request below (never a second login), so the
+        caller can guarantee its release even if any of these steps raise.
         """
-        token = self._redfish_token()
         systems = self.transport.redfish_get(self.target, "/redfish/v1/Systems", token)
         if systems.code or not systems.output:
             raise RuntimeError("Redfish /Systems unavailable")
@@ -637,31 +650,43 @@ class NodeSession:
         never turn a valid collection into a FAIL and must never re-trigger any
         power/cycle action. The worst case is a WARN finding so an operator can
         see the leak instead of it silently exhausting the BMC session table.
+
+        A transport-level failure (HTTP 500, timeout, lost response) is returned
+        as a non-zero ``Command`` rather than raised, so the return value is
+        inspected too: any unconfirmed release is a WARN, never a silent
+        success.
         """
         if not token:
             return
         try:
-            self.transport.redfish_logout(self.target, token)
+            result = self.transport.redfish_logout(self.target, token)
+            released = result is None or not getattr(result, 'code', 1)
+            reason = None if released else f"state={getattr(result, 'state', 'UNKNOWN')}, exit={getattr(result, 'code', '?')}"
         except Exception as exc:
-            if record is not None:
-                self.add(record, 'REDFISH_LOGOUT_FAILED', 'redfish',
-                         f'Redfish session logout failed; session may remain open on the BMC: {exc}',
-                         severity='WARN')
+            released, reason = False, str(exc)
+        if released:
+            return
+        if record is not None:
+            self.add(record, 'REDFISH_LOGOUT_FAILED', 'redfish',
+                     f'Redfish session logout not confirmed; session may remain open on the BMC: {reason}',
+                     severity='WARN')
 
     @contextmanager
     def _redfish_session(self, record=None):
         """Discover a session and guarantee logout, whatever the caller does.
 
-        Yields the discovery dict (``token`` used for subsequent ``redfish_get``
-        calls). ``finally`` releases the session so repeated PRE/LOOP/POST
-        collections on a long, multi-node, multi-loop campaign cannot leak one
-        session per collection and exhaust the BMC session table.
+        The login happens *before* the ``try`` so its token can be released in
+        ``finally`` even when discovery itself raises: the previous shape logged
+        in inside ``_redfish_discover`` and only entered the ``try`` afterwards,
+        so a /Systems failure leaked one BMC session per collection. When login
+        itself fails there is no session to release and no fabricated logout.
         """
-        disc = self._redfish_discover()
+        token = self._redfish_token()
         try:
+            disc = self._redfish_discover(token)
             yield disc
         finally:
-            self._redfish_logout(disc.get('token'), record=record)
+            self._redfish_logout(token, record=record)
 
     @staticmethod
     def _redfish_json(text):

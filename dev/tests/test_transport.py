@@ -189,7 +189,7 @@ class TransportTests(unittest.TestCase):
                      'Location: /redfish/v1/SessionService/Sessions/42\r\n'
                      f'{Transport._HTTP_MARKER if hasattr(Transport,"_HTTP_MARKER") else "__VERA_HTTP_STATUS__:"}201')
                 return MagicMock(returncode=0,stdout=out,stderr='')
-            return MagicMock(returncode=0,stdout='__VERA_HTTP_STATUS__:200',stderr='')
+            return MagicMock(returncode=0,stdout='\n__VERA_HTTP_STATUS__:200',stderr='')
         with tempfile.TemporaryDirectory() as temp:
             transport=Transport({'bmc':'pw'},Path(temp))
             with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'), \
@@ -205,6 +205,58 @@ class TransportTests(unittest.TestCase):
             self.assertTrue(any('Sessions/42' in part for part in delete[0]))
             # The session map is drained so a second logout is a no-op.
             self.assertNotIn('TOK123',transport._redfish_sessions)
+
+    def _login_with(self, transport, target, delete_marker, bmc='192.0.2.1'):
+        """Log in against a patched curl and return the issued token."""
+        def fake_run(argv,**kwargs):
+            if '-X' in argv and 'POST' in argv:
+                out=('HTTP/1.1 201 Created\r\nX-Auth-Token: TOK123\r\n'
+                     'Location: /redfish/v1/SessionService/Sessions/42\r\n'
+                     '__VERA_HTTP_STATUS__:201')
+                return MagicMock(returncode=0,stdout=out,stderr='')
+            return MagicMock(returncode=0,stdout=delete_marker,stderr='')
+        with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'), \
+             patch('cycle_transport.subprocess.run',side_effect=fake_run):
+            return transport.redfish_login(Target('tray','n1',bmc,'192.0.2.2'))
+
+    def test_unconfirmed_logout_keeps_session_tracking(self):
+        # P2 regression: a logout that returns a non-zero Command (HTTP 500)
+        # must NOT be treated as a released session. The tracking entry stays so
+        # the leak is visible and can be retried, and the caller sees a failure.
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'bmc':'pw'},Path(temp))
+            token=self._login_with(transport,None,'\n__VERA_HTTP_STATUS__:500')
+            with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'), \
+                 patch('cycle_transport.subprocess.run',return_value=MagicMock(returncode=0,stdout='\n__VERA_HTTP_STATUS__:500',stderr='')):
+                result=transport.redfish_logout(Target('tray','n1','192.0.2.1','192.0.2.2'),token)
+            self.assertNotEqual(result.code,0)
+            self.assertIn(token,transport._redfish_sessions)
+
+    def test_logout_refuses_cross_host_session(self):
+        # P2: a session path issued by one BMC must never be deleted against a
+        # different BMC (our token must not be sent to another host).
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'bmc':'pw'},Path(temp))
+            token=self._login_with(transport,None,'\n__VERA_HTTP_STATUS__:200',bmc='192.0.2.1')
+            calls=[]
+            def fake_run(argv,**kwargs):
+                calls.append(argv)
+                return MagicMock(returncode=0,stdout='\n__VERA_HTTP_STATUS__:200',stderr='')
+            with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'), \
+                 patch('cycle_transport.subprocess.run',side_effect=fake_run):
+                result=transport.redfish_logout(Target('tray','n2','192.0.2.9','192.0.2.10'),token)
+            self.assertNotEqual(result.code,0)
+            self.assertEqual(calls,[],'no DELETE may be issued to a foreign BMC')
+            self.assertIn(token,transport._redfish_sessions)
+
+    def test_logout_without_recorded_location_is_not_confirmed(self):
+        # P2: without a usable session Location we cannot confirm the release;
+        # the transport returns None (nothing to release) rather than claiming
+        # success on behalf of a session it never tracked.
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'bmc':'pw'},Path(temp))
+            with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'):
+                self.assertIsNone(transport.redfish_logout(Target('tray','n1','192.0.2.1','192.0.2.2'),'NOPE'))
 
 if __name__=='__main__':
     unittest.main()
