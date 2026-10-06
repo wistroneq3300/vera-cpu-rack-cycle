@@ -388,10 +388,9 @@ class PureTests(unittest.TestCase):
             self.assertFalse(inventory_blocks(load_inventory(path)))
         shipped=load_inventory(BASE/'cycle_inventory_neutrino.csv')
         self.assertTrue(shipped)
-        # n0 is a placeholder for hardware that is not provisioned yet, so it
-        # stays blocked until its hostnames are filled in; every other row runs.
+        # All four rows are provisioned now (n0 included), so every node runs.
         blocked=inventory_blocks(shipped)
-        self.assertEqual(sorted(t.node for t in shipped if t.key not in blocked),['n1','n2','n3'])
+        self.assertEqual(sorted(t.node for t in shipped if t.key not in blocked),['n0','n1','n2','n3'])
 
 class EngineTests(unittest.TestCase):
     def setUp(self):
