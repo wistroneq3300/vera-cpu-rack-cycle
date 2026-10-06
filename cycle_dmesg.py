@@ -45,7 +45,8 @@ def _event(family, subtype, block, source=''):
     locators = sorted(set(v.lower() for v in BDF.findall(raw)))
     locators += sorted(set(re.findall(r'\b(?:DIMM\S*|nvme\d+(?:n\d+)?|port[ :]+\d+|Xid[^\n]*?:\s*\d+)\b', raw, re.I)))
     # Preserve device/subtype numbers. Remove only printk timestamps, event
-    # sequence tags and native severity (severity growth is WORSENED).
+    # sequence tags and native severity (so the same event with a different
+    # native severity still shares a signature).
     signature = '\n'.join(_message(line) for _, line in block if HW.search(line)) if family == 'APEI' else _message(raw)
     signature = re.sub(r'\{\d+\}', '', signature)
     signature = re.sub(r'\b(?:fatal|uncorrected|uncorrectable|corrected|correctable|recoverable|info|unknown)\b', '<severity>', signature, flags=re.I)

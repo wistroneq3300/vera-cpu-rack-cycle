@@ -752,13 +752,17 @@ class SeverityTransitionTests(RedfishSessionCase):
         self.session.finish(record)
         return record
 
-    def test_warning_to_critical_is_worsened(self):
+    def test_warning_to_critical_is_new_with_transition(self):
+        # The event identity (Id + message) is unchanged, but no failing form
+        # existed in PRE, so the escalation is NEW and keeps the transition.
         pre = self._collect_phase("Warning", "same event", 5)
         baseline = issue_baseline(pre['issues'])
         loop = self._collect_phase("Critical", "same event", 5, phase='LOOP')
         classify_against_pre(loop['issues'], baseline)
         crit = next(i for i in loop['issues'] if i['code'] == 'REDFISH_CRITICAL')
-        self.assertEqual(crit['classification'], 'WORSENED')
+        self.assertEqual(crit['classification'], 'NEW')
+        self.assertTrue(crit.get('severity_changed'))
+        self.assertEqual(crit.get('previous_severity'), 'WARN')
         self.assertEqual(loop['status'], 'FAIL')
 
     def test_critical_to_critical_is_known(self):

@@ -117,8 +117,6 @@ def show_result(console, node, record):
         console('  Checks: ' + ' | '.join(f'{name} {state}' for name, state in record['check_summary'].items() if name in visible))
     # BMC log services: one summary line each, never one line per event. Entries
     # are severity-tagged in the HTML; console stays compact to avoid flooding.
-    # Clean PASS summaries are suppressed; only anomalies are printed so the
-    # transcript stays compact.
     for stem, label in (('eventlog', 'EventLog'), ('redfish_sel', 'Redfish SEL')):
         meta = record.get(f'{stem}_meta')
         if not meta:
@@ -128,14 +126,19 @@ def show_result(console, node, record):
             continue
         counts = meta.get('counts', {})
         delta = meta.get('delta')
-        # Only Critical/Warning matter; a delta of merely OK entries is not a
-        # finding and stays silent.
-        if not counts.get('Critical') and not counts.get('Warning'):
-            continue
+        # One summary line per service. The per-entry detail is intentionally
+        # omitted here (the full log lives in the HTML report and evidence
+        # files); this keeps the transcript from being flooded by a long-lived
+        # critical event that persists across many loops.
+        #   Critical/Warning/OK  -> totals in the *current accumulated* snapshot
+        #   new                  -> records added between this loop's before-cycle
+        #                           and POST snapshots
+        #   total                -> Critical + Warning + OK in that snapshot
+        total = counts.get('Critical', 0) + counts.get('Warning', 0) + counts.get('OK', 0)
         new_count = delta.get('new_count', 0) if delta and delta.get('status') == 'COMPARED' else 0
-        line = f"  {label}: {meta.get('verdict')} · Critical:{counts.get('Critical', 0)} Warning:{counts.get('Warning', 0)} OK:{counts.get('OK', 0)}"
-        if delta and delta.get('status') == 'COMPARED':
-            line += f" · new:{new_count}"
+        line = (f"  {label}: {meta.get('verdict')} · Critical:{counts.get('Critical', 0)}"
+                f" Warning:{counts.get('Warning', 0)} OK:{counts.get('OK', 0)}"
+                f" · new:{new_count} · total:{total}")
         console(line)
     dmesg_delta = record.get('dmesg_delta') or {}
     if any(value for value in dmesg_delta.values()):
@@ -151,6 +154,12 @@ def show_result(console, node, record):
         if known_count:
             console(f"  Previously observed in PRE: {known_count} finding(s); see PRE and HTML for details")
     for (severity, _code, component, detail), count in groups.items():
+        # Redfish EventLog/SEL entries are summarised by the one-line totals
+        # above; printing each entry floods the transcript when a long-lived
+        # event persists across loops. Their full detail stays in the HTML
+        # report and the EventLog/SEL evidence files.
+        if component in {'eventlog', 'redfish_sel'}:
+            continue
         if record['phase'] != 'PRE' and all(item.get('classification') == 'KNOWN' for item in record['issues']
                                             if (item['severity'], item['code'], item['component'], item['detail']) == (severity, _code, component, detail)):
             continue

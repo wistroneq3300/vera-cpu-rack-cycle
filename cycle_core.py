@@ -153,8 +153,9 @@ def classify(items, project, rules):
 def issue_key(item):
     # ``identity`` lets a family whose issue *code* changes with severity (e.g. a
     # Redfish event going Warning -> Critical) still compare as the same event,
-    # so it classifies WORSENED instead of NEW. Families without an identity keep
-    # the original code+component(+fingerprint) key.
+    # so a severity escalation is recognised as the same finding rather than a
+    # second unrelated one. Families without an identity keep the original
+    # code+component(+fingerprint) key.
     if item.get('identity'):
         return ('identity', item['component'], item['identity'])
     return (item['code'], item['component'], item['fingerprint']) if item.get('fingerprint') else (item['code'], item['component'])
@@ -175,18 +176,48 @@ def issue_baseline(items):
 
 
 def classify_against_pre(items, pre_keys):
-    """PRE comparison describes observations, never cycle causation."""
+    """Classify each finding as KNOWN (seen before) or NEW (first seen now).
+
+    Only two classifications exist; the previous WORSENED label was removed
+    because occurrence-count churn (sensor confirmations, retries) made it
+    fire on findings whose content had not actually changed. A finding already
+    present as FAIL stays KNOWN even if its count grows.
+
+    Two baselines are honoured:
+
+    * Redfish event findings carry a per-loop delta marker (``per_loop_new``).
+      Their classification reflects whether the event appeared in *this loop's*
+      before-cycle -> POST delta, so a long-lived critical event is reported
+      every loop but only classifies NEW on the loop that introduced it.
+    * Every other family compares against the PRE baseline.
+
+    A severity escalation (WARN -> FAIL) is NEW because no FAIL form existed
+    before; the transition is preserved as metadata rather than hidden.
+    """
     counts = issue_baseline(items)
     for item in items:
         key = issue_key(item)
-        item["classification"] = "KNOWN" if key in pre_keys else "NEW"
-        item["known_reason"] = "Present in PRE baseline" if key in pre_keys else ""
-        if isinstance(pre_keys, dict) and key in pre_keys:
-            old, current = pre_keys[key], counts[key]
-            if (current['count'] > old['count'] or current['native_rank'] > old.get('native_rank', 0)
-                    or current['native_error_count'] > old.get('native_error_count', 0)
-                    or (current['severity'] == 'FAIL' and old['severity'] != 'FAIL')):
-                item.update(classification='WORSENED', known_reason='Count or severity increased relative to PRE')
+        escalated = (isinstance(pre_keys, dict) and key in pre_keys
+                     and counts[key]['severity'] == 'FAIL'
+                     and pre_keys[key]['severity'] != 'FAIL')
+        per_loop = item.get('per_loop_new')
+        if escalated:
+            # A finding that was only WARN before and is FAIL now is a new
+            # failure: no failing form existed at baseline. The transition is
+            # recorded rather than collapsing it into a bare KNOWN.
+            item['classification'] = 'NEW'
+            item['known_reason'] = 'Escalated from a lower severity seen in PRE'
+            item['severity_changed'] = True
+            item['previous_severity'] = pre_keys[key]['severity']
+            item['current_severity'] = 'FAIL'
+        elif per_loop is None:
+            known = key in pre_keys
+            item["classification"] = "KNOWN" if known else "NEW"
+            item["known_reason"] = "Present in PRE baseline" if known else ""
+        else:
+            item["classification"] = "NEW" if per_loop else "KNOWN"
+            item["known_reason"] = ("" if per_loop
+                                    else "Introduced in an earlier loop of this campaign")
     return items
 
 def parse_sensors(text):
@@ -300,7 +331,27 @@ def compare_sensors(baseline, initial, confirmation=None):
         gone = "\n".join(_snippet(r) for r in baseline_by_name.get(name, []))
         items.append(issue("SENSOR_MISSING", name,
                            f"Missing {count} baseline row(s) in confirmation", snippet=gone))
-    return items
+    return dedup_phase(items)
+
+def dedup_phase(items):
+    """Collapse identical findings observed more than once in one phase.
+
+    A sensor read is taken twice per phase (initial, then a confirmation
+    reread); both reads surface the same duplicate/malformed rows, so the same
+    finding would otherwise be appended twice. Identity is code + component +
+    detail: findings that differ in any of those (e.g. a reread that turns a
+    "missing" into a "recovered", or an escalated severity) are genuinely
+    different observations and are all retained.
+    """
+    seen = set()
+    result = []
+    for item in items:
+        key = (item['code'], item['component'], item['detail'])
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(item)
+    return result
 
 def parse_pci(text):
     rows = {}
@@ -710,12 +761,25 @@ def redfish_verdict(entries):
 def redfish_delta(previous, current):
     """Return entries present in ``current`` but not ``previous``.
 
-    Comparison uses Id + Message + Severity so a reused Id with new content is
-    still reported. Timestamps are deliberately excluded: RTC-less BMCs (e.g.
-    2000-01-03) make time-based diffing unreliable.
+    Event identity is Id + Message, deliberately excluding severity so a reused
+    Id whose message is unchanged is recognised as the same event even after a
+    severity change (WARN -> Critical). Timestamps are excluded from the primary
+    key because RTC-less BMCs (e.g. 2000-01-03) make time-based diffing
+    unreliable.
+
+    When the BMC's Id space wraps or resets, a fresh event can reuse an Id that
+    still exists in the previous snapshot with an identical message. To avoid
+    silently dropping that genuine new event, the comparison falls back to the
+    timestamp for entries whose Id+Message already matched: a different
+    ``created`` value then counts as new. This is a fail-safe only; it never
+    turns the whole historical log into "new".
     """
+    # Severity is intentionally excluded: an event that escalated WARN -> Critical
+    # keeps the same identity. The timestamp is included so a genuine
+    # re-occurrence that reuses an Id+Message (BMC Id wrap/reset) is still seen
+    # as new, while the historical entry with the same timestamp is not.
     def key(entry):
-        return (entry.get("id", ""), entry.get("message", ""), entry.get("severity", ""))
+        return (entry.get("id", ""), entry.get("message", ""), entry.get("created", ""))
     old = Counter(key(e) for e in previous)
     result = []
     for entry in current:
@@ -726,6 +790,31 @@ def redfish_delta(previous, current):
             result.append(entry)
     return result
 
+def _redfish_delta_ids(record):
+    """Ids introduced this record's before->POST delta, or None if unavailable.
+
+    Prefers the explicit top-level marker written at capture time; falls back to
+    the per-service meta so records captured before the marker existed still
+    classify Redfish findings against their loop delta. ``None`` means no
+    comparable delta, so the caller keeps the PRE baseline.
+    """
+    marker = record.get('eventlog_delta_ids')
+    if marker is not None:
+        return {str(i) for i in marker}
+    ids = set()
+    seen_meta = False
+    for stem in ('eventlog_meta', 'sel_delta_meta'):
+        meta = record.get(stem)
+        if not meta:
+            continue
+        seen_meta = True
+        delta = meta.get('delta') or {}
+        if delta.get('status') == 'UNAVAILABLE':
+            return None
+        for entry in delta.get('new_entries', []):
+            ids.add(str(entry.get('id', '')))
+    return ids if seen_meta else None
+
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:
@@ -733,19 +822,34 @@ def aggregate_issues(campaign):
         pre_keys = issue_baseline(node['pre']['issues'])
         for record in [node["pre"], *([node['start']] if node.get('start') else []), *node["loops"],
                        dict(phase='RECOVERY', issues=node.get('recovery_issues', []))]:
+            delta_ids = _redfish_delta_ids(record)
             classified = classify_against_pre([i.copy() for i in record['issues']], pre_keys)
             for item in classified:
+                # Redfish findings classify against this loop's before->POST
+                # delta, not the PRE baseline, so a long-lived event is NEW only
+                # on the loop that introduced it. An UNAVAILABLE delta leaves the
+                # marker absent, so the PRE baseline still applies.
+                if delta_ids is not None and item.get('identity'):
+                    event_id = item['identity'].split('|')[1] if '|' in item['identity'] else ''
+                    item['per_loop_new'] = event_id in delta_ids
+                    item['classification'] = 'NEW' if item['per_loop_new'] else 'KNOWN'
+                    item['known_reason'] = ('' if item['per_loop_new']
+                                            else 'Introduced in an earlier loop of this campaign')
                 key = (node["key"], *issue_key(item))
                 entry = merged.setdefault(key, {**item, "node": node["key"], "occurrences": []})
                 if item["severity"] == "FAIL":
                     entry["severity"] = "FAIL"
-                if entry.get('classification') != 'WORSENED':
+                # NEW wins over KNOWN when the same finding is observed across
+                # phases, so the group surfaces where it was first introduced.
+                if entry.get('classification') != 'NEW':
                     entry['classification'] = item['classification']
                     entry['known_reason'] = item['known_reason']
-                    if item['classification'] == 'WORSENED':
-                        entry['detail'] = item['detail']
-                        entry['native_severity'] = item.get('native_severity')
+                if item.get('severity_changed'):
+                    entry['severity_changed'] = True
+                    entry['previous_severity'] = item.get('previous_severity')
+                    entry['current_severity'] = item.get('current_severity')
                 entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"],
+                                                  classification=item.get("classification", ""),
                                                   evidence=item.get("evidence", ""),
                                                   snippet=item.get("snippet", "")))
     return list(merged.values())

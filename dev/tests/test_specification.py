@@ -65,7 +65,7 @@ class SpecificationTests(unittest.TestCase):
             "PRE ↔ POST Comparison", "Evidence", "Issue Code", "Notes",
         ):
             self.assertIn(label, page)
-        for value in ("PASS", "WARN", "FAIL", "KNOWN", "NEW", "WORSENED", "COMPLETE", "INCOMPLETE"):
+        for value in ("PASS", "WARN", "FAIL", "KNOWN", "NEW", "COMPLETE", "INCOMPLETE"):
             self.assertIn(value, page)
 
     def test_specification_stays_project_independent_and_formal(self):

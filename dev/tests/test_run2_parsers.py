@@ -50,7 +50,9 @@ class ParserTests(unittest.TestCase):
         pre, post = dmesg_issues(line.format(1)), dmesg_issues(line.format(5))
         self.assertEqual(pre[0]['fingerprint'], post[0]['fingerprint'])
         classify_against_pre(post, issue_baseline(pre))
-        self.assertEqual(post[0]['classification'], 'WORSENED')
+        # A rising corrected-error count is not a new failure: the finding was
+        # already present at the same severity, so it stays KNOWN.
+        self.assertEqual(post[0]['classification'], 'KNOWN')
         self.assertEqual(post[0]['native_error_count'], 5)
         self.assertEqual(post[0]['occurrence_count'], 1)
         self.assertNotEqual(post[0]['fingerprint'], dmesg_issues(line.format(5).replace('DIMM1', 'DIMM2'))[0]['fingerprint'])
