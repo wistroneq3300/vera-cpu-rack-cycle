@@ -200,7 +200,7 @@ class ReportSemanticsTests(unittest.TestCase):
                               issue('D', 'dmesg', 'warn 3', 'WARN'), issue('E', 'dmesg', 'warn 4', 'WARN')])
         for item in record['issues']:
             item['classification'] = 'KNOWN'
-        self.assertEqual(_finding_summary(record), '1 FAIL · 4 WARN · 5 KNOWN / 0 NEW / 0 WORSENED')
+        self.assertEqual(_finding_summary(record), '1 FAIL · 4 WARN · 5 KNOWN / 0 NEW')
         page = record_html(record, 0)
         self.assertIn('1 FAIL', page)
         self.assertIn('4 WARN', page)

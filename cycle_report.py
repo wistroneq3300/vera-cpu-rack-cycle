@@ -44,7 +44,7 @@ def status(campaign):
     return {"health": health(items), "completion": campaign["state"],
             "unique_issues": len(items), "known": sum(i["classification"] == "KNOWN" for i in items),
             "new": sum(i["classification"] == "NEW" for i in items),
-            "worsened": sum(i["classification"] == "WORSENED" for i in items),
+            "escalated": sum(bool(i.get("severity_changed")) for i in items),
             "attempted_node_loops": sum(n.get("attempts", len(n["loops"])) for n in campaign["nodes"]),
             "valid_node_cycles": sum(n.get("valid_cycles", 0) for n in campaign["nodes"]),
             "boot_confirmed_node_loops": sum(n.get("boot_confirmed", 0) for n in campaign["nodes"]),
@@ -62,9 +62,15 @@ def _record_evidence(record, path):
     return evidence_link(path)
 
 
+def _norm_class(value):
+    # Legacy data may carry the removed 'WORSENED' classification; normalize it
+    # to KNOWN so rendered output never shows a defunct badge.
+    return 'KNOWN' if value == 'WORSENED' else value
+
+
 def _issue_counts(record):
     severity = Counter(i.get('severity', 'UNKNOWN') for i in record.get('issues', []))
-    classification = Counter(i.get('classification', 'NEW') for i in record.get('issues', [])
+    classification = Counter(_norm_class(i.get('classification', 'NEW')) for i in record.get('issues', [])
                              if record.get('phase') != 'PRE')
     return severity, classification
 
@@ -75,7 +81,7 @@ def _finding_summary(record):
     if record.get('phase') == 'PRE':
         parts.append(f'{len(record.get("issues", []))} PRE baseline finding(s)')
     else:
-        parts.append(' / '.join(f'{classification.get(k, 0)} {k}' for k in ('KNOWN', 'NEW', 'WORSENED')))
+        parts.append(' / '.join(f'{classification.get(k, 0)} {k}' for k in ('KNOWN', 'NEW')))
     return ' · '.join(parts)
 
 
@@ -84,7 +90,7 @@ def _finding_html(record):
         return '<p class="empty">No issues recorded.</p>'
     rows = []
     for item in record['issues']:
-        classification = 'PRE-EXISTING' if record.get('phase') == 'PRE' else item.get('classification', 'NEW')
+        classification = 'PRE-EXISTING' if record.get('phase') == 'PRE' else _norm_class(item.get('classification', 'NEW'))
         snippet = ''
         if item.get('snippet'):
             raw = f'<pre class="snippet">{esc(item["snippet"])}</pre>'
@@ -709,10 +715,10 @@ def render_html(campaign, console_log=''):
         times = [r['duration_seconds'] for r in node['loops'] if r.get('post_complete') and r.get('duration_seconds') is not None]
         notice = f'<p class="notice">{esc("; ".join(node["blocked"]) or node["stop_reason"])}</p>' if node['blocked'] or node['stop_reason'] else ''
         panels.append(f'''<article class="node-panel" id="node-{i}" aria-labelledby="heading-node-{i}"><h2 id="heading-node-{i}">{esc(node['key'])} {badge(health_value)}</h2>{notice}{facts([('BMC', node['target']['bmc_ip']), ('OS', node['target']['os_ip']), ('Node elapsed (PRE to last POST)', duration(elapsed(node['pre']['started'], last.get('finished')))), ('Average completed loop', duration(sum(times) / len(times) if times else None))])}<h3>PRE and cycle history</h3><p class="muted">POST uses the original PRE baseline. PRE-EXISTING findings become KNOWN when repeated.</p>{records}</article>''')
-    outcome = f'''<div class="sheet"><div class="outcome"><div><h2>Campaign outcome</h2><p>{esc(campaign.get('stop_reason') or 'Campaign is in progress.')}</p></div><div class="outcome-badges"><div><span class="label">Execution</span>{badge(result['completion'])}</div><div><span class="label">Health</span>{badge(result['health'])}</div></div></div>{facts([('Cycle / channel', f"{campaign['cycle_mode']} / {campaign['channel']}"), ('Requested limits', f"{campaign['limits']['loops'] or 'No'} loop limit / {campaign['limits']['hours'] or 'No'} hour limit"), ('Campaign elapsed', duration(elapsed(campaign['started'], campaign.get('finished') or now()))), ('POST completed', result['completed_node_loops']), ('Attempts', result['attempted_node_loops']), ('Boot confirmed', result['boot_confirmed_node_loops']), ('Valid cycles', result['valid_node_cycles']), ('Worsened groups', result['worsened']), ('Selected / approved nodes', f"{len(nodes)} / {sum(not n['blocked'] for n in nodes)}"), ('PRE-existing issue groups', result['known']), ('New issue groups during cycling', result['new'])])}</div>'''
+    outcome = f'''<div class="sheet"><div class="outcome"><div><h2>Campaign outcome</h2><p>{esc(campaign.get('stop_reason') or 'Campaign is in progress.')}</p></div><div class="outcome-badges"><div><span class="label">Execution</span>{badge(result['completion'])}</div><div><span class="label">Health</span>{badge(result['health'])}</div></div></div>{facts([('Cycle / channel', f"{campaign['cycle_mode']} / {campaign['channel']}"), ('Requested limits', f"{campaign['limits']['loops'] or 'No'} loop limit / {campaign['limits']['hours'] or 'No'} hour limit"), ('Campaign elapsed', duration(elapsed(campaign['started'], campaign.get('finished') or now()))), ('POST completed', result['completed_node_loops']), ('Attempts', result['attempted_node_loops']), ('Boot confirmed', result['boot_confirmed_node_loops']), ('Valid cycles', result['valid_node_cycles']), ('Escalated findings (WARN→FAIL)', result['escalated']), ('Selected / approved nodes', f"{len(nodes)} / {sum(not n['blocked'] for n in nodes)}"), ('PRE-existing issue groups', result['known']), ('New issue groups during cycling', result['new'])])}</div>'''
     overview = f'''<section role="tabpanel" id="overview" aria-labelledby="tab-overview">{outcome}<div class="sheet"><h2>Target results</h2><p class="muted">All selected nodes. Filters in other views do not change this overview.</p><div class="tablewrap"><table id="target-results"><thead><tr><th>Target / OS address</th><th>Health</th><th>Execution</th><th>Completed loops</th><th>Findings</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div></div><div class="sheet"><h2>Problems to review</h2><p>FAIL first, then WARN. Repeated findings are grouped within each node; KNOWN still affects health.</p>{issue_cards(items, indices)}</div></section>'''
     node_panel = f'''<section role="tabpanel" id="nodes" aria-labelledby="tab-nodes"><div class="sheet node-browser"><aside><h2>Find a node</h2><label for="node-search">Node name</label><input id="node-search" type="search" placeholder="Search nodes"><label for="node-health">Health</label><select id="node-health"><option value="">All nodes</option><option>FAIL</option><option>WARN</option><option>PASS</option></select><p id="node-count" aria-live="polite">{len(nodes)} nodes</p><nav class="node-list" aria-label="Select a node">{''.join(choices)}</nav></aside><div class="node-content">{''.join(panels)}</div></div></section>'''
-    issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option><option>WORSENED</option></select></label></div><p id="issue-count" aria-live="polite">{len(items)} matching issues</p>{issue_cards(items, indices)}<p id="no-matches" hidden>No matching issues. Clear the filters to show all findings.</p></div></section>'''
+    issues_panel = f'''<section role="tabpanel" id="issues" aria-labelledby="tab-issues"><div class="sheet"><h2>Issue review</h2><div class="filterbar"><label>Search node, component or finding<input id="issue-search" type="search" placeholder="Search issues"></label><label>Severity<select id="severity-filter"><option value="">All severities</option><option>FAIL</option><option>WARN</option></select></label><label>Classification<select id="class-filter"><option value="">Known and new</option><option>KNOWN</option><option>NEW</option></select></label></div><p id="issue-count" aria-live="polite">{len(items)} matching issues</p>{issue_cards(items, indices)}<p id="no-matches" hidden>No matching issues. Clear the filters to show all findings.</p></div></section>'''
     console_panel = f'''<details class="console-panel"><summary>Console log <span class="muted">{len(console_log.splitlines()) if console_log else 0} lines</span></summary><div class="console-tools"><label for="console-search">Search console log<input id="console-search" type="search" placeholder="Search console output"></label><button id="download-console" type="button">Download console.log</button></div><pre id="console-log">{esc(console_log) if console_log else 'Console log is not available for this report.'}</pre></details>'''
     overview = overview.replace('</section>', console_panel + '</section>', 1)
     css = (ASSETS / 'report.css').read_text(encoding='utf-8')
@@ -763,7 +769,7 @@ def _write_reports(root, campaign):
         lines += node_lines
     atomic_write(root / "cycle_summary.txt", '\n'.join(lines) + '\n')
     atomic_write(root / "CYCLE_REVIEW_REPORT.md", '# Cycle review\n\n' + '\n\n'.join(lines) + '\n\nSee CYCLE_REVIEW_REPORT.html for expandable evidence and issue recurrence.\n')
-    for classification in ('KNOWN', 'NEW', 'WORSENED'):
+    for classification in ('KNOWN', 'NEW'):
         markdown = [f"# {classification.title()} issues", "", "Classification does not change severity.", ""]
         for item in result['issues']:
             if item['classification'] != classification:

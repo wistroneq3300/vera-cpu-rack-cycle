@@ -61,11 +61,11 @@ class EventTests(unittest.TestCase):
 
     def test_real_parser_classification_console_and_aggregation(self):
         pre = dmesg_issues(apei('corrected'))
-        for text, expected in [(apei('fatal'), 'WORSENED'), (apei('recoverable'), 'WORSENED'), (apei('corrected')*3, 'WORSENED'),
+        for text, expected in [(apei('fatal'), 'NEW'), (apei('recoverable'), 'KNOWN'), (apei('corrected')*3, 'KNOWN'),
                                (apei('corrected', bdf='0000:02:00.0'), 'NEW'),
                                ('Kernel panic - not syncing', 'NEW'), (apei('corrected'), 'KNOWN')]:
             items = classify_against_pre(dmesg_issues(text), issue_baseline(pre))
-            self.assertTrue(all(i['classification'] == expected for i in items))
+            self.assertTrue(all(i['classification'] == expected for i in items), (text, expected, [(i['classification']) for i in items]))
         post = classify_against_pre(dmesg_issues('Kernel panic - not syncing'), issue_baseline(pre))
         record = dict(phase='LOOP 1', status='FAIL', issues=post)
         output = []

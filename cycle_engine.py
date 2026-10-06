@@ -928,10 +928,10 @@ class NodeSession:
     def _redfish_severity_issues(self, record, name, stem, entries, evidence):
         """Emit one FAIL/WARN issue per distinct Critical/Warning entry.
 
-        Event identity (Id), the vendor message and the evidence file are kept
-        so the finding is traceable and classifies as KNOWN/NEW/WORSENED
-        against the PRE baseline like every other issue. collect_redfish runs
-        more than once per record (PRE clean-state, then capture), so an
+        Event identity (Id + message, severity excluded), the vendor message and
+        the evidence file are kept so the finding is traceable and classifies as
+        KNOWN/NEW against the loop's before-cycle -> POST delta. collect_redfish
+        runs more than once per record (PRE clean-state, then capture), so an
         already-recorded finding is not added again.
         """
         existing = {(i['code'], i['component'], i['detail']) for i in record['issues']}
@@ -949,9 +949,10 @@ class NodeSession:
                      snippet=f"{entry.get('id','')} | {entry.get('severity','')} | {entry.get('created','')} | {entry.get('message','')}")
             # Comparison identity is the event (source + Id + message) and must
             # NOT include severity, so the same event going Warning -> Critical
-            # classifies as WORSENED rather than NEW. ``identity`` drives
-            # issue_key; the issue code stays as the current severity so the
-            # report and recovery journal keep their existing shape.
+            # is recognised as the same finding (reported as an escalation, not
+            # a second unrelated issue). ``identity`` drives issue_key; the issue
+            # code stays as the current severity so the report and recovery
+            # journal keep their existing shape.
             record['issues'][-1]['identity'] = f"{name}|{entry.get('id','')}|{entry.get('message','')}"
 
     def _write_redfish_evidence(self, record, stem, name, entries_path, fetched, verdict, counts, history=False):
@@ -1057,6 +1058,14 @@ class NodeSession:
             new = redfish_delta(before.get(key, []), current)
             meta['delta'] = dict(status='COMPARED', new_count=len(new), new_entries=new,
                                  reason='Before-cycle and POST snapshots compared by content')
+            # Record the ids introduced this loop so findings can classify
+            # against the per-loop delta rather than the (cleared) PRE baseline.
+            # Only COMPARED deltas feed classification; an UNAVAILABLE delta
+            # leaves the marker unset so nothing is mislabelled NEW. A sorted
+            # list keeps the record JSON-serialisable.
+            ids = {str(e.get('id', '')) for e in new}
+            merged_ids = set(record.get('eventlog_delta_ids', [])) | ids
+            record['eventlog_delta_ids'] = sorted(merged_ids)
             if new:
                 path = self.folder(record) / f"{stem}_delta.txt"
                 atomic_write(path, "\n".join(
