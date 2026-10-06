@@ -39,6 +39,13 @@ class Transport:
         self.credentials = {role: "" if password is None else password
                             for role, password in credentials.items()}
         self.known_hosts = Path(known_hosts)
+        # Map X-Auth-Token -> session resource path so a session can be deleted
+        # on logout. Populated by redfish_login, drained by redfish_logout.
+        self._redfish_sessions = {}
+        # Map X-Auth-Token -> BMC IP that issued it. A session path is only ever
+        # deleted against the BMC that created it, so a stale/forged token can
+        # never make this transport send a request to another host.
+        self._redfish_session_bmc = {}
 
     def _connect(self, target, role, timeout):
         # Report rebuilding and CLI help do not require Paramiko to be installed.
@@ -266,7 +273,40 @@ class Transport:
         match = re.search(r'^x-auth-token:\s*(\S+)', headers, re.I | re.M)
         if not match:
             raise RuntimeError("redfish login returned no X-Auth-Token")
+        location = re.search(r'^location:\s*(/redfish/v1/SessionService/Sessions/[^\s]+)', headers, re.I | re.M)
+        if location:
+            # Only accept a session path that lives under this BMC's Redfish
+            # session tree: a Location from any other host must not be replayed
+            # here with our token.
+            path = location.group(1)
+            if re.match(r'^/redfish/v1/SessionService/Sessions/[^/]+$', path):
+                self._redfish_sessions[match.group(1)] = path
+                self._redfish_session_bmc[match.group(1)] = target.bmc_ip
         return match.group(1)
+
+    def redfish_logout(self, target, token, timeout=10):
+        """Delete the Redfish session created by redfish_login.
+
+        Returns the DELETE Command, or None when the token has no recorded
+        session path (nothing to release). A non-zero Command means the release
+        was NOT confirmed (HTTP error, timeout, lost response); the caller must
+        surface that as a WARN rather than a silent success. Session tracking is
+        only dropped once the release is confirmed, so an unconfirmed logout is
+        still reported on a later attempt and a leaked session is never hidden.
+        """
+        path = self._redfish_sessions.get(token)
+        if not path:
+            return None
+        # Never send our token to a BMC other than the one that issued it.
+        owner = self._redfish_session_bmc.get(token)
+        if owner and owner != target.bmc_ip:
+            return Command(1, f'refusing cross-host logout: session belongs to {owner}', 'REJECTED')
+        result = self._redfish(["-X", "DELETE", "-H", f"X-Auth-Token: {token}",
+                                f"https://{target.bmc_ip}{path}"], timeout)
+        if result is not None and not getattr(result, 'code', 1):
+            self._redfish_sessions.pop(token, None)
+            self._redfish_session_bmc.pop(token, None)
+        return result
 
     def redfish_get(self, target, path, token, timeout=30):
         url = f"https://{target.bmc_ip}{path}"

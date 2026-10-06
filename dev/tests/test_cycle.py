@@ -142,6 +142,10 @@ class FakeTransport:
         self.calls.append((target.key, 'redfish-clear', path))
         return Command(0, 'OK')
 
+    def redfish_logout(self, target, token, timeout=10):
+        self.calls.append((target.key, 'redfish-logout', token))
+        return Command(0, 'OK')
+
 class PureTests(unittest.TestCase):
     def test_truncated_sensor_row_cannot_disappear_from_pre(self):
         rows=parse_sensors(SENSORS+'Temp_CPU2 | 90 | degrees C\n')

@@ -57,6 +57,32 @@ class FakeRedfish(base.FakeTransport):
         self.routes = {}
         self.requests = {}
         self.logservices_pages = None
+        # Session lifecycle bookkeeping. ``live_sessions`` models the BMC's
+        # session table: login adds a token, a *confirmed* logout removes it.
+        # An unconfirmed logout (non-zero code / raise) must leave it behind so
+        # tests can prove the leak is visible rather than silently swallowed.
+        self.logins = 0
+        self.logins_fail = False
+        self.logout_result = None      # Command to return, or None for the default OK
+        self.logout_raises = None      # exception instance to raise instead
+        self.live_sessions = set()
+
+    def redfish_login(self, target, timeout=20):
+        if self.logins_fail:
+            raise RuntimeError('redfish login failed (fake)')
+        self.logins += 1
+        token = f'FAKETOKEN{self.logins}'
+        self.live_sessions.add(token)
+        return token
+
+    def redfish_logout(self, target, token, timeout=10):
+        self.calls.append((target.key, 'redfish-logout', token))
+        if self.logout_raises is not None:
+            raise self.logout_raises
+        if self.logout_result is not None:
+            return self.logout_result
+        self.live_sessions.discard(token)
+        return Command(0, 'OK')
 
     def redfish_get(self, target, path, token, timeout=30):
         self.calls.append((target.key, 'redfish', path))
@@ -750,6 +776,142 @@ class SeverityTransitionTests(RedfishSessionCase):
         classify_against_pre(loop['issues'], baseline)
         crit = next(i for i in loop['issues'] if i['code'] == 'REDFISH_CRITICAL')
         self.assertEqual(crit['classification'], 'NEW')
+
+
+class RedfishSessionLifecycleTests(RedfishSessionCase):
+    """A login that succeeds must always be paired with a logout attempt, even
+    when discovery fails *after* the token was issued.
+
+    ``_redfish_discover`` logs in first and only then reads /Systems. Until the
+    fix, any exception raised between login and the ``try`` in
+    ``_redfish_session`` escaped without a logout, leaking one BMC session per
+    failed discovery on a long, multi-node, multi-loop campaign.
+    """
+
+    def logouts(self):
+        return [c for c in self.fake.calls if c[1] == 'redfish-logout']
+
+    def enter_session(self, record=None):
+        """Enter the real context manager: the seam under test. Entering must
+        log in; leaving (normally or via an exception) must release the session."""
+        return self.session._redfish_session(record if record is not None else self.session.node['pre'])
+
+    def test_systems_http_500_still_attempts_logout(self):
+        # (A) login succeeds, /Systems returns HTTP 500 -> discovery raises, yet
+        #     the session that was just opened must still be released.
+        self.fake.systems = Command(500, 'server error', 'HTTP_ERROR', http_status=500)
+        with self.assertRaises(RuntimeError):
+            with self.enter_session():
+                pass
+        self.assertEqual(self.fake.logins, 1)
+        self.assertEqual(len(self.logouts()), 1, 'a successful login must be logged out exactly once')
+
+    def test_systems_malformed_json_still_attempts_logout(self):
+        # (B) login succeeds, /Systems body is malformed.
+        self.fake.systems = Command(0, '{"Members": [')
+        with self.assertRaises(RuntimeError):
+            with self.enter_session():
+                pass
+        self.assertEqual(self.fake.logins, 1)
+        self.assertEqual(len(self.logouts()), 1)
+
+    def test_discovery_exception_still_runs_cleanup(self):
+        # (C) An exception raised inside the caller's collection (after the
+        #     token was issued) must still trigger cleanup.
+        with self.assertRaises(ValueError):
+            with self.enter_session():
+                raise ValueError('entry collection blew up')
+        self.assertEqual(self.fake.logins, 1)
+        self.assertEqual(len(self.logouts()), 1)
+
+    def test_logservices_incomplete_still_releases_session(self):
+        # (C/D) A non-raising incomplete discovery (LogServices page failure)
+        #       still has to release the session it opened.
+        self.fake.logservices_pages = [Command(500, 'boom', 'HTTP_ERROR', http_status=500)]
+        with self.enter_session():
+            pass
+        self.assertEqual(self.fake.logins, 1)
+        self.assertEqual(len(self.logouts()), 1)
+
+    def test_repeated_collections_do_not_accumulate_sessions(self):
+        # (D) A fake BMC's unreleased-session table must not grow across
+        #     repeated collections: every login is matched by a logout.
+        for _ in range(3):
+            self.session.collect_redfish(self.session.node['pre'])
+        for _ in range(3):
+            self.session._redfish_before_snapshot(self.session.node['pre'])
+        self.assertEqual(len(self.logouts()), self.fake.logins)
+        self.assertEqual(self.fake.live_sessions, set(), 'no session may remain open on the BMC')
+
+    def test_login_failure_does_not_fake_logout(self):
+        # (E) When login itself fails there is no session to release; a logout
+        #     attempt against a non-existent token would be a fabricated event.
+        self.fake.logins_fail = True
+        with self.assertRaises(RuntimeError):
+            with self.enter_session():
+                pass
+        self.assertEqual(self.fake.logins, 0)
+        self.assertEqual(self.logouts(), [])
+
+    def test_cleanup_failure_does_not_mask_discovery_exception(self):
+        # (C/E) If logout also fails while discovery is raising, the original
+        #       discovery exception must win (cleanup never masks the cause).
+        self.fake.systems = Command(500, 'server error', 'HTTP_ERROR', http_status=500)
+        self.fake.logout_raises = RuntimeError('logout transport exploded')
+        with self.assertRaises(RuntimeError) as ctx:
+            with self.enter_session():
+                pass
+        self.assertIn('Systems unavailable', str(ctx.exception))
+
+
+class LogoutCommandTests(RedfishSessionCase):
+    """Logout failures that are *returned* as a non-zero Command (not raised)
+    must be surfaced as a WARN, must not downgrade a valid collection, and must
+    never re-trigger a power/cycle action.
+    """
+
+    def logout_codes(self, record):
+        return [i for i in record['issues'] if i['code'] == 'REDFISH_LOGOUT_FAILED']
+
+    def test_http_500_logout_command_is_warn(self):
+        # (A) transport returns Command(code=500) instead of raising.
+        self.fake.logout_result = Command(500, 'server error', 'HTTP_ERROR', http_status=500)
+        record = self.collect()
+        warn = self.logout_codes(record)
+        self.assertEqual(len(warn), 1)
+        self.assertEqual(warn[0]['severity'], 'WARN')
+        # A WARN for an unconfirmed release is allowed, but the valid collection
+        # must NOT be turned into a FAIL.
+        self.assertNotEqual(record['status'], 'FAIL')
+        self.assertNotIn('REDFISH_COLLECTION_FAILED', [i['code'] for i in record['issues']])
+
+    def test_timeout_logout_keeps_collection_and_original_issue(self):
+        # (B) RESPONSE_LOST / timeout: keep the collection result and any
+        #     original problem untouched.
+        self.fake.logout_result = Command(124, 'timeout', 'RESPONSE_LOST')
+        record = self.collect()
+        self.assertEqual(len(self.logout_codes(record)), 1)
+        self.assertNotIn('REDFISH_COLLECTION_FAILED', [i['code'] for i in record['issues']])
+
+    def test_logout_raise_does_not_override_original_exception(self):
+        # (C) A raising logout must not mask a discovery/collection failure.
+        self.fake.systems = Command(500, 'server error', 'HTTP_ERROR', http_status=500)
+        self.fake.logout_raises = RuntimeError('logout exploded')
+        with self.assertRaises(RuntimeError) as ctx:
+            with self.session._redfish_session(self.session.node['pre']):
+                pass
+        self.assertIn('Systems unavailable', str(ctx.exception))
+
+    def test_logout_failure_does_not_trigger_power_action(self):
+        # (D) A failed logout must not re-send any power/cycle command.
+        actions = []
+        self.fake.on_action = lambda: actions.append(1)
+        self.fake.logout_result = Command(500, 'server error', 'HTTP_ERROR', http_status=500)
+        self.session.precheck()
+        self.session.start()
+        record = self.session.one_loop(1)
+        self.assertEqual(len(actions), 1, 'exactly the loop\'s own cycle action may occur')
+        self.assertGreaterEqual(len(self.logout_codes(record)), 1)
 
 
 class HttpGateTests(unittest.TestCase):
