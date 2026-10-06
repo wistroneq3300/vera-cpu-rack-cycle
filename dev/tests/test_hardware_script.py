@@ -11,7 +11,7 @@ SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
 
 @unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
 class HardwareTests(unittest.TestCase):
-    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90'):
+    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90', mode=None):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             serials = ['CARD-A'] * functions if serials is None else serials
@@ -52,7 +52,8 @@ class HardwareTests(unittest.TestCase):
                 file.write_text('#!/usr/bin/env sh\n'+content+'\n',encoding='utf-8',newline='\n')
                 file.chmod(0o755)
             env={**os.environ,'MEMORY_MIN_RATIO':ratio,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
-            result=subprocess.run([SHELL,str(BASE/f'{project}_config.sh')],env=env,capture_output=True,text=True,encoding='utf-8',timeout=45,check=False)
+            argv=[SHELL,str(BASE/f'{project}_config.sh')]+([mode] if mode else [])
+            result=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8',timeout=45,check=False)
             return result
 
     def test_populated_16_pass_and_namespace_dedup(self):
@@ -131,6 +132,33 @@ class HardwareTests(unittest.TestCase):
                     result = self.run_fixture(project=project, overrides=overrides)
                     self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                     self.assertIn('ISSUE|' + code, result.stdout)
+
+    def test_lspci_collection_failure_fails_the_run(self):
+        # P1-1: a failed lspci run must surface a structured COLLECTION_FAILED
+        # issue and exit nonzero in every mode that depends on PCI data, instead
+        # of silently skipping PCI checks and still reporting RESULT|PASS.
+        def broken_lspci(_stub):
+            return "echo 'lspci: cannot open /proc/bus/pci' >&2\nexit 3"
+        for project in ('neutrino', 'naboo'):
+            for mode in ('all', '-B'):
+                with self.subTest(project=project, mode=mode):
+                    result = self.run_fixture(project=project, mode=mode,
+                                              overrides={'lspci': broken_lspci})
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn('ISSUE|COLLECTION_FAILED|', result.stdout)
+                    self.assertNotIn('RESULT|PASS', result.stdout)
+                    self.assertIn('RESULT|FAIL', result.stdout)
+
+    def test_lspci_collection_failure_keeps_independent_checks_running(self):
+        # P1-1 D/F: PCI collection failing must not stop checks that do not need
+        # PCI data; CPU/DIMM/NVMe still execute and report their evidence.
+        def broken_lspci(_stub):
+            return "echo 'lspci: cannot open /proc/bus/pci' >&2\nexit 3"
+        result = self.run_fixture(mode='all', overrides={'lspci': broken_lspci})
+        self.assertIn('CHECK|DIMM|', result.stdout)
+        self.assertIn('CHECK|NVMe|', result.stdout)
+        self.assertIn('CHECK|CPU_ONLINE|', result.stdout)
+        self.assertIn('ISSUE|COLLECTION_FAILED|PCI-inventory', result.stdout)
 
     def test_memory_ratio_boundary_and_invalid_config(self):
         # Sixteen 128 GiB modules = 2147483648 KiB; 50% is exact.

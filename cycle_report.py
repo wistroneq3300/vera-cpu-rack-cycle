@@ -442,9 +442,14 @@ def _render_redfish(record):
         meta = record.get(f'{stem}_meta')
         if not meta:
             continue
-        if not meta.get('present'):
+        if meta.get('present') is False:
             blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Not present on this BMC: '
                           f'{esc(meta.get("reason", "merged into EventLog"))}</p></div>')
+            continue
+        if meta.get('present') is None:
+            # Discovery failed: we do not know whether this service exists.
+            blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Service status {badge("UNAVAILABLE")} · '
+                          f'Discovery failed, cannot confirm presence · {esc(meta.get("reason", ""))}</p></div>')
             continue
         if meta.get('status') != 'COLLECTED':
             ev = _record_evidence(record, meta.get('evidence'))
@@ -656,7 +661,7 @@ def render_html(campaign, console_log=''):
     logo = _wistron_logo()
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>{esc(campaign['run_id'])} | Cycle review</title><style>{css}</style></head><body>
     <a class="skip" href="#main">Skip to report</a>{'<div class="sample">SYNTHETIC DEMONSTRATION — no hardware was operated</div>' if campaign.get('synthetic') else ''}
-    <div class="brandbar"><div class="brand-lockup">{logo}<span class="brand-caption">System validation</span></div><span>Engineering / Cycle review</span></div><header><button id="print-report" class="print-button">Print report</button><h1>Cycle review</h1><div class="runline"><code>{esc(campaign['run_id'])}</code><span class="muted">Started {esc(campaign['started'])}</span></div><nav class="tabs" role="tablist" aria-label="Campaign views">{tab_html}</nav></header>
+    <div class="brandbar"><div class="brand-lockup">{logo}<span class="brand-caption">System validation</span></div><span>Engineering / Cycle review</span></div><header><a class="spec-link" href="CYCLE_VALIDATION_SPECIFICATION.html">Validation Specification<br><span>驗證規範</span></a><button id="print-report" class="print-button">Print report</button><h1>Cycle review</h1><div class="runline"><code>{esc(campaign['run_id'])}</code><span class="muted">Started {esc(campaign['started'])}</span></div><nav class="tabs" role="tablist" aria-label="Campaign views">{tab_html}</nav></header>
     <main id="main">{overview}{node_panel}{issues_panel}</main><footer><p>Generated {esc(now())}. Offline report. Keep this HTML with its evidence folders to use log links.</p><p>Hardware script SHA-256: <code>{esc(campaign['script_sha256'])}</code></p></footer><script>{js}</script></body></html>'''
 
 def write_reports(root, campaign):
@@ -716,6 +721,10 @@ def _write_reports(root, campaign):
     except OSError:
         console_log = ''
     atomic_write(root / "CYCLE_REVIEW_REPORT.html", render_html(campaign, console_log))
+    # The specification is generic and self-contained, but ships beside every
+    # campaign report so the two formal documents can use relative links.
+    from cycle_specification import write_specification
+    write_specification(root)
 
 def rebuild(root, runtime_root=None):
     # Read, ownership check, merge and publication share one writer lock.

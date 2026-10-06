@@ -43,6 +43,10 @@ pci_capture() {
     PCI=$(printf '%s\n' "$PCI_VERBOSE" | grep -E '^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ')
     printf '\n[Evidence] PCI-inventory\n%s\n' "$PCI"
     printf '\n[Evidence] PCIe-links\n%s\n' "$PCI_VERBOSE"
+    # A failed lspci run must not leave the dependent PCI checks silently
+    # skipped while the run still reports PASS: record a structured failure so
+    # the missing inventory is visible and the script exits nonzero.
+    if ((rc != 0)); then fail COLLECTION_FAILED PCI-inventory "lspci exited $rc"; fi
     return "$rc"
 }
 cpu_check() {

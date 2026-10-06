@@ -24,14 +24,34 @@ from cycle_core import (
     parse_pci_verbose,
     parse_sensors,
     pci_issues,
+    redfish_collection,
     redfish_delta,
     redfish_entries,
+    redfish_member_kind,
+    redfish_page_next_link,
     redfish_verdict,
     sel_delta,
     sensor_issues,
     write_json,
 )
 from cycle_transport import Command, IdentityUnsafe
+
+# Redfish members arrive with vendor casing (Id/Severity/Created/Message) and
+# are normalised to lowercase once; read either spelling so no evidence line is
+# blanked when a raw entry reaches a writer through a failure path.
+_REDFISH_FIELDS = {'id': ('id', 'Id'), 'severity': ('severity', 'Severity'),
+                   'created': ('created', 'Created'), 'message': ('message', 'Message'),
+                   'severity_key': ('severity_key', 'Severity')}
+
+
+def _entry_field(entry, field):
+    if not isinstance(entry, dict):
+        return ""
+    for key in _REDFISH_FIELDS.get(field, (field,)):
+        if key in entry and entry[key] is not None:
+            return entry[key]
+    return ""
+
 
 PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
             "ipmitool": "ipmitool", "lsusb": "usbutils", "ip": "iproute2"}
@@ -119,14 +139,17 @@ class NodeSession:
         record['check_summary'] = {name: ('PASS' if command.get('valid') else 'FAIL')
                                    for name, command in record['commands'].items()}
         record['check_summary'].update(record.get('hardware_checks', {}))
-        # Redfish logs report their own worst-severity verdict; a service that is
-        # simply absent (merged BMC build) stays PASS rather than a failure.
+        # Redfish logs report their own worst-severity verdict. A service that is
+        # confirmed absent (merged BMC build) stays PASS; one we could not
+        # discover or could not collect fully is UNAVAILABLE, never PASS.
         for stem in ('eventlog', 'redfish_sel'):
             meta = record.get(f'{stem}_meta')
             if not meta:
                 continue
-            if not meta.get('present'):
+            if meta.get('present') is False:
                 record['check_summary'][stem] = 'PASS'
+            elif not (meta.get('valid') and meta.get('complete')):
+                record['check_summary'][stem] = 'UNAVAILABLE'
             elif meta.get('verdict'):
                 record['check_summary'][stem] = meta['verdict']
         for item in record['issues']:
@@ -151,8 +174,8 @@ class NodeSession:
         self.persist(record)
         return record
 
-    def add(self, record, code, component, detail, severity="FAIL", evidence=""):
-        record["issues"].append(issue(code, component, detail, severity, evidence))
+    def add(self, record, code, component, detail, severity="FAIL", evidence="", snippet=""):
+        record["issues"].append(issue(code, component, detail, severity, evidence, snippet))
 
     def wait_sensor_retry(self):
         delay = getattr(self.options, 'sensor_retry_delay', SENSOR_RETRY_DELAY)
@@ -301,7 +324,15 @@ class NodeSession:
     def capture(self, record, post=False):
         self.hardware_execution_complete = False
         record['hardware_execution_complete'] = False
-        self.collect_dmesg(record, 'dmesg', evidence_stem='dmesg_clear')
+        # In a LOOP the non-clear read is superseded by the later ``dmesg -c``
+        # read (same buffer, retained as dmesg_clear.txt), so it cites that file.
+        # In PRE there is no later clear read, so this read must retain its own
+        # evidence - otherwise a PRE dmesg finding would link to a file that is
+        # never written.
+        if post:
+            self.collect_dmesg(record, 'dmesg', evidence_stem='dmesg_clear')
+        else:
+            self.collect_dmesg(record, 'dmesg', save_evidence=True)
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
                 continue
@@ -480,9 +511,12 @@ class NodeSession:
             self.sel_command(record, "pre_sel_clear", "clear", save_evidence=False)
         else:
             self.add(record, 'CLEAR_SKIPPED', 'sel', 'PRE SEL read failed; original was not cleared', severity='WARN')
-        # Redfish EventLog/SEL: collect_redfish(clear=True) fetches then clears.
+        # Redfish EventLog/SEL: collect_redfish(clear=True, history=True) reads
+        # the pre-existing backlog then clears it. The backlog is clean-start
+        # history, so it is kept for diagnosis only and never enters the PRE
+        # baseline findings; a failed read/clear still surfaces.
         try:
-            self.collect_redfish(record, clear=True)
+            self.collect_redfish(record, clear=True, history=True)
         except Exception as exc:
             self.add(record, 'CLEAR_SKIPPED', 'eventlog',
                      f'Redfish logs could not be read/cleared before PRE: {exc}', severity='WARN')
@@ -555,28 +589,39 @@ class NodeSession:
     # we discover the System id and its LogServices, then fetch whatever exists.
 
     def _redfish_discover(self):
-        """Return dict(system_id, services={name: odata_id}) or raise.
+        """Return dict(system_id, services={name: odata_id}, token, listing_valid, reason).
 
-        Discovery runs against the BMC endpoint directly (same transport host),
-        so its failure is a real collection failure, not a missing log.
+        A failed or unreadable discovery is NOT the same as an empty service
+        list: ``listing_valid`` stays false and callers must not conclude that
+        any particular service is absent. Only a successfully read, structurally
+        valid LogServices collection lets us say a service is NOT PRESENT.
         """
         token = self._redfish_token()
         systems = self.transport.redfish_get(self.target, "/redfish/v1/Systems", token)
         if systems.code or not systems.output:
             raise RuntimeError("Redfish /Systems unavailable")
         payload = self._redfish_json(systems.output)
-        members = payload.get("Members") or []
-        if not members:
-            raise RuntimeError("Redfish /Systems returned no members")
-        system_id = str(members[0].get("@odata.id", "")).rstrip("/").split("/")[-1]
-        services = self.transport.redfish_get(self.target, f"/redfish/v1/Systems/{system_id}/LogServices", token)
-        listing = self._redfish_json(services.output) if services.code == 0 else {}
+        members, valid, reason = redfish_collection(payload)
+        if not valid or not members:
+            raise RuntimeError(reason or "Redfish /Systems returned no members")
+        first = members[0] if isinstance(members[0], dict) else {}
+        system_id = str(first.get("@odata.id", "")).rstrip("/").split("/")[-1]
+        if not system_id:
+            raise RuntimeError("Redfish /Systems member has no @odata.id")
+        listing_path = f"/redfish/v1/Systems/{system_id}/LogServices"
+        # LogServices can itself be paginated; a nextLink on page 1 must be
+        # followed, otherwise a service that only appears on page 2 would be
+        # wrongly reported as NOT PRESENT.
+        collected = self._redfish_fetch_collection(listing_path, token, expect='reference')
+        if not (collected['valid'] and collected['complete']):
+            return dict(system_id=system_id, services={}, token=token, listing_valid=False,
+                        reason=f"LogServices listing incomplete: {collected.get('reason', '')}")
         mapping = {}
-        for item in listing.get("Members", []) or []:
-            path = str(item.get("@odata.id", ""))
+        for entry in collected['entries']:
+            path = str(entry.get('path') or entry.get('odata_id') or '')
             if path:
                 mapping[path.rstrip("/").split("/")[-1]] = path
-        return dict(system_id=system_id, services=mapping, token=token)
+        return dict(system_id=system_id, services=mapping, token=token, listing_valid=True, reason="")
 
     def _redfish_token(self):
         return self.transport.redfish_login(self.target)
@@ -586,80 +631,286 @@ class NodeSession:
         import json as _json
         start = text.find("{")
         if start < 0:
-            return {}
+            return None
         try:
             return _json.loads(text[start:])
         except ValueError:
-            return {}
+            return None
+
+    # Bound pagination so an anomalous BMC nextLink cannot loop forever.
+    REDFISH_MAX_PAGES = 20
+
+    def _redfish_fetch_collection(self, path, token, expect='entry'):
+        """Fetch a (possibly paginated) Redfish collection.
+
+        Follows ``Members@odata.nextLink`` until the collection is complete.
+        Returns dict(entries, valid, complete, reason, pages). A page-1 success
+        with a failing page 2 is INCOMPLETE, never a complete PASS; the entries
+        already gathered are retained for evidence.
+
+        ``expect`` selects how members are interpreted:
+
+          * ``'entry'``  - log entries. Expanded objects are normalised; bare
+            ``@odata.id`` references are fetched and normalised. Entries are
+            normalised on *every* return path - including failure paths - so the
+            evidence writer always sees id/severity/message instead of raw vendor
+            keys and never renders a blank line for an event it did receive.
+
+          * ``'reference'`` - a service listing whose members are ``@odata.id``
+            links (the LogServices case). The links are kept as ``path`` values,
+            not fetched, so the caller can address the service directly.
+        """
+        entries = []
+        seen = set()
+        pages = 0
+        current = path
+        while current and current not in seen:
+            if pages >= self.REDFISH_MAX_PAGES:
+                return dict(entries=entries, valid=True, complete=False,
+                            reason=f"pagination exceeded {self.REDFISH_MAX_PAGES} pages", pages=pages)
+            seen.add(current)
+            pages += 1
+            result = self.transport.redfish_get(self.target, current, token)
+            if result.code:
+                return dict(entries=entries, valid=False, complete=False,
+                            reason=f"collection page failed: HTTP {getattr(result, 'http_status', 0) or result.code} ({result.state})",
+                            pages=pages, failed_path=current)
+            payload = self._redfish_json(result.output)
+            members, valid, reason = redfish_collection(payload)
+            if not valid:
+                return dict(entries=entries, valid=False, complete=False,
+                            reason=f"collection page unreadable: {reason}", pages=pages, failed_path=current)
+            resolved, bad = self._redfish_resolve_members(members, token, expect)
+            if bad:
+                # A member we cannot interpret is not "zero events".
+                return dict(entries=entries, valid=False, complete=False,
+                            reason=f"collection page has unusable member: {bad}", pages=pages, failed_path=current)
+            entries.extend(resolved)
+            link = redfish_page_next_link(payload)
+            if not link:
+                return dict(entries=entries, valid=True, complete=True,
+                            reason="", pages=pages)
+            # A relative nextLink (e.g. "/redfish/v1/...") is used verbatim; an
+            # absolute URL is reduced to its path so the request still goes to
+            # the same BMC endpoint over the authenticated session.
+            current = self._redfish_link_path(link)
+        if current in seen:
+            return dict(entries=entries, valid=True, complete=False,
+                        reason="pagination loop detected (repeated nextLink)", pages=pages)
+        return dict(entries=entries, valid=True, complete=True, reason="", pages=pages)
+
+    def _redfish_resolve_members(self, members, token, expect='entry'):
+        """Normalise members according to ``expect``.
+
+        Returns ``(entries, problem)``. ``problem`` is a message when a member is
+        neither an expanded entry nor a resolvable reference - the caller must
+        treat that collection as unreadable rather than as zero events.
+        """
+        entries = []
+        for index, member in enumerate(members):
+            kind = redfish_member_kind(member)
+            if kind == "entry":
+                entry = self._redfish_normalise_entry(member)
+                if expect == 'reference':
+                    # An expanded service object: keep its own address.
+                    entry['path'] = str(member.get("@odata.id", "") or "")
+                entries.append(entry)
+                continue
+            if kind == "reference":
+                ref = str(member.get("@odata.id", "") or "").strip()
+                if expect == 'reference':
+                    entries.append(dict(path=ref))
+                    continue
+                result = self.transport.redfish_get(self.target, self._redfish_link_path(ref), token)
+                if result.code:
+                    return entries, f"reference {ref} could not be fetched (HTTP {getattr(result, 'http_status', 0) or result.code})"
+                target = self._redfish_json(result.output)
+                if not isinstance(target, dict):
+                    return entries, f"reference {ref} is unreadable"
+                entries.append(self._redfish_normalise_entry(target))
+                continue
+            return entries, f"Members[{index}] has no Id/Severity/Message and no @odata.id"
+        return entries, ""
+
+    @staticmethod
+    def _redfish_link_path(link):
+        link = link.strip()
+        if link.startswith("http://") or link.startswith("https://"):
+            from urllib.parse import urlsplit
+            split = urlsplit(link)
+            return split.path + (("?" + split.query) if split.query else "")
+        return link
+
+    @staticmethod
+    def _redfish_normalise_entry(item):
+        """Normalise one validated member object to the lowercase entry schema."""
+        severity = str(item.get("Severity", "") or "")
+        return dict(
+            id=str(item.get("Id", "") or ""),
+            severity=severity,
+            severity_key=severity.strip().lower(),
+            created=str(item.get("Created", "") or ""),
+            message=str(item.get("Message", "") or ""),
+            resolved=bool(item.get("Resolved", False)),
+        )
 
     def _redfish_stem(self, name):
         return 'eventlog' if name == 'EventLog' else 'redfish_sel'
 
-    def collect_redfish(self, record, clear=False):
+    def collect_redfish(self, record, clear=False, history=False):
         """Fetch EventLog and (if present) SEL for this node.
 
         Called once per phase. On ``clear`` the same entries are fetched first
         (already handled by callers storing evidence) and then each service is
-        cleared. A service that does not exist is recorded as NOT PRESENT, not
-        a failure. Entries feed a PASS/WARN/FAIL verdict by worst severity.
+        cleared. Three states are kept distinct:
+
+          * a service confirmed absent (valid listing, no such member) is
+            NOT PRESENT / PASS  - the merged-BMC layout, not a failure;
+          * a service whose discovery or collection failed is UNAVAILABLE /
+            FAIL - "we do not know", never "we confirmed there is nothing";
+          * a service collected successfully with severity Critical/Warning
+            contributes a canonical FAIL/WARN issue so the record status and
+            campaign health reflect it (not just the Redfish sub-verdict).
+
+        ``history=True`` is the pre-PRE clean-state read: the entries fetched
+        here are the pre-existing backlog that is about to be cleared, so they
+        are evidence of the clean-up step only. They must NOT enter the PRE
+        baseline's issue list or health (clean-start policy), and their
+        evidence goes to a separate file so the later post-clear capture of
+        ``pre_eventlog.txt`` cannot overwrite it. Collection/clear failures
+        still surface - only the *historical event findings* are suppressed.
         """
         disc = self._redfish_discover()
         record['redfish_system_id'] = disc['system_id']
         record['redfish_services'] = sorted(disc['services'])
-        found = []
+        if history:
+            record['redfish_preclear'] = {}
         for name in ('EventLog', 'SEL'):
             path = disc['services'].get(name)
             stem = self._redfish_stem(name)
             if not path:
-                # Vendor build without this service. Not a failure; note it so
-                # the report can explain a merged/split layout.
-                record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
-                                            "code": 0, "state": "NOT_PRESENT", "evidence": "",
-                                            "valid": True, "output_excerpt": ""}
-                record[f'{stem}_meta'] = dict(phase='COLLECT', status='NOT PRESENT', present=False,
-                                              verdict='PASS', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
-                                              entries=[], reason=f'No {name} log service on this BMC')
+                if disc['listing_valid']:
+                    # Confirmed absent on a readable listing: not a failure.
+                    record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
+                                                "code": 0, "state": "NOT_PRESENT", "evidence": "",
+                                                "valid": True, "output_excerpt": ""}
+                    record[f'{stem}_meta'] = dict(phase='COLLECT', status='NOT PRESENT', present=False,
+                                                  verdict='PASS', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
+                                                  entries=[], complete=True, valid=True,
+                                                  reason=f'No {name} log service on this BMC')
+                else:
+                    # Discovery failed: we cannot tell whether the service exists.
+                    record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
+                                                "code": 1, "state": "UNAVAILABLE", "evidence": "",
+                                                "valid": False, "output_excerpt": disc.get('reason', '')}
+                    record[f'{stem}_meta'] = dict(phase='COLLECT', status='UNAVAILABLE', present=None,
+                                                  verdict='FAIL', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
+                                                  entries=[], complete=False, valid=False,
+                                                  reason=disc.get('reason') or 'Redfish LogServices discovery failed')
+                    self.add(record, 'REDFISH_UNAVAILABLE', stem,
+                             f'Redfish {name} service could not be discovered; see reason',
+                             snippet=disc.get('reason', ''))
+                record[f'{stem}_entries'] = []
                 continue
             entries_path = path + "/Entries"
-            result = self.transport.redfish_get(self.target, entries_path, disc['token'])
-            body = result.output if result.code == 0 else ""
-            entries = redfish_entries(self._redfish_json(body)) if not result.code else []
-            valid = result.code == 0 and body.strip().startswith("{") and "Members" in body
-            verdict, counts = redfish_verdict(entries) if valid else ("FAIL", {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0})
-            evidence = self._write_redfish_evidence(record, stem, name, result, entries, valid, verdict, counts)
+            fetched = self._redfish_fetch_collection(entries_path, disc['token'])
+            entries = fetched['entries']
+            valid = fetched['valid']
+            complete = fetched['complete']
+            verdict, counts = redfish_verdict(entries) if (valid and complete) else (
+                "FAIL", {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0})
+            evidence = self._write_redfish_evidence(record, stem, name, entries_path, fetched, verdict, counts,
+                                                    history=history)
             record['commands'][stem] = {"command": f"redfish {name} ({entries_path})", "role": "oob",
-                                        "code": result.code, "state": result.state, "evidence": evidence,
-                                        "valid": valid, "output_excerpt": "" if valid else result.output[-2000:]}
-            record[f'{stem}_meta'] = dict(phase='COLLECT', status='COLLECTED' if valid else 'FAILED',
+                                        "code": 0 if (valid and complete) else 1,
+                                        "state": 'COLLECTED' if (valid and complete) else 'UNAVAILABLE',
+                                        "evidence": evidence, "valid": valid and complete,
+                                        "output_excerpt": "" if (valid and complete) else fetched.get('reason', '')}
+            record[f'{stem}_meta'] = dict(phase='COLLECT', status='COLLECTED' if (valid and complete) else 'FAILED',
                                           present=True, verdict=verdict, counts=counts, evidence=evidence,
-                                          entries=entries, path=entries_path,
-                                          reason='' if valid else 'Redfish collection failed or returned unrecognized output')
+                                          entries=entries, path=entries_path, complete=complete, valid=valid,
+                                          reason='' if (valid and complete) else fetched.get('reason', 'Redfish collection incomplete'))
             record[f'{stem}_entries'] = entries
-            if not valid:
+            if history:
+                # Record the pre-clear backlog as diagnostic metadata only; it is
+                # not a PRE finding (it is about to be cleared).
+                record['redfish_preclear'][stem] = dict(
+                    status=record[f'{stem}_meta']['status'], counts=counts, evidence=evidence,
+                    entry_count=len(entries), valid=valid, complete=complete)
+            if not (valid and complete):
                 self.add(record, 'REDFISH_COLLECTION_FAILED', stem,
-                         f'Redfish {name} collection failed; see evidence', evidence=evidence)
-                if record['issues']:
-                    record['issues'][-1]['snippet'] = result.output[-2000:]
-            found.append(name)
-            if clear and valid:
+                         f'Redfish {name} collection failed or incomplete; see evidence',
+                         evidence=evidence, snippet=fetched.get('reason', ''))
+            elif not history:
+                # Propagate severity into the canonical issue model so record
+                # status and campaign health cannot stay PASS behind a failing
+                # EventLog/SEL sub-verdict. Pre-clear history is excluded.
+                self._redfish_severity_issues(record, name, stem, entries, evidence)
+            if clear and valid and complete:
                 self._redfish_clear_service(record, name, path, disc['token'], stem)
+        if history:
+            # The clear-state read is diagnosis only; it must not define the
+            # baseline meta/verdict. Restore the pre-clear keys so the later
+            # post-clear capture() populates the real PRE baseline.
+            for name in ('EventLog', 'SEL'):
+                stem = self._redfish_stem(name)
+                record.pop(f'{stem}_meta', None)
+                record.pop(f'{stem}_entries', None)
         self.persist(record)
 
-    def _write_redfish_evidence(self, record, stem, name, result, entries, valid, verdict, counts):
+    def _redfish_severity_issues(self, record, name, stem, entries, evidence):
+        """Emit one FAIL/WARN issue per distinct Critical/Warning entry.
+
+        Event identity (Id), the vendor message and the evidence file are kept
+        so the finding is traceable and classifies as KNOWN/NEW/WORSENED
+        against the PRE baseline like every other issue. collect_redfish runs
+        more than once per record (PRE clean-state, then capture), so an
+        already-recorded finding is not added again.
+        """
+        existing = {(i['code'], i['component'], i['detail']) for i in record['issues']}
+        for entry in entries:
+            severity = str(entry.get('severity_key', ''))
+            if severity not in ('critical', 'warning'):
+                continue
+            code = 'REDFISH_CRITICAL' if severity == 'critical' else 'REDFISH_WARNING'
+            level = 'FAIL' if severity == 'critical' else 'WARN'
+            detail = f"Redfish {name}: {entry.get('id','')} {entry.get('message','')}".strip()
+            if (code, stem, detail) in existing:
+                continue
+            existing.add((code, stem, detail))
+            self.add(record, code, stem, detail, severity=level, evidence=evidence,
+                     snippet=f"{entry.get('id','')} | {entry.get('severity','')} | {entry.get('created','')} | {entry.get('message','')}")
+            # Comparison identity is the event (source + Id + message) and must
+            # NOT include severity, so the same event going Warning -> Critical
+            # classifies as WORSENED rather than NEW. ``identity`` drives
+            # issue_key; the issue code stays as the current severity so the
+            # report and recovery journal keep their existing shape.
+            record['issues'][-1]['identity'] = f"{name}|{entry.get('id','')}|{entry.get('message','')}"
+
+    def _write_redfish_evidence(self, record, stem, name, entries_path, fetched, verdict, counts, history=False):
         # Plain-text transcript (header + one line per entry), not JSON: keep a
         # .txt suffix so the file is served as text/plain rather than parsed as
         # application/json by the browser's JSON viewer.
-        path = self.folder(record) / (f"pre_{stem}.txt" if record['phase'] == 'PRE' else f"{stem}.txt")
+        if record['phase'] == 'PRE':
+            suffix = f"pre_{stem}_preclear.txt" if history else f"pre_{stem}.txt"
+        else:
+            suffix = f"{stem}.txt" if not history else f"{stem}_preclear.txt"
+        path = self.folder(record) / suffix
+        # Entries are already normalised to the lowercase schema by
+        # _redfish_fetch_collection; read both spellings so a raw entry that
+        # slipped through a failure path still renders its Id/Severity/Message.
+        entries = fetched.get('entries', [])
         lines = [f"UTC+8: {now()}", f"Role: oob", f"Source: Redfish {name}",
-                 f"Exit: {result.code}", f"State: {result.state}",
+                 f"Path: {entries_path}", f"Pages: {fetched.get('pages', 0)}",
+                 f"Valid: {fetched.get('valid', False)}", f"Complete: {fetched.get('complete', False)}",
                  f"Entries: {len(entries)}", f"Verdict: {verdict}",
                  f"Counts: Critical={counts['Critical']} Warning={counts['Warning']} OK={counts['OK']}",
+                 f"Reason: {fetched.get('reason', '')}",
                  ""]
         for entry in entries:
-            lines.append(f"{entry.get('id','')} | {entry.get('severity','')} | {entry.get('created','')} | {entry.get('message','')}")
-        if not valid:
-            lines.append("[raw output]")
-            lines.append(result.output[-4000:])
+            lines.append(" | ".join(str(_entry_field(entry, field)) for field in ('id', 'severity', 'created', 'message')))
+        if not (fetched.get('valid') and fetched.get('complete')):
+            lines.append("[incomplete or unreadable collection; reason above]")
         atomic_write(path, "\n".join(lines) + "\n")
         rel = path.relative_to(self.root).as_posix()
         record['evidence'].append(rel)
@@ -677,41 +928,65 @@ class NodeSession:
     def _redfish_before_snapshot(self, record):
         """Capture the pre-cycle EventLog/SEL entries for delta comparison.
 
-        Stored on the LOOP record (not as a separate command) since it is a
-        lightweight read; failure leaves the field absent and the delta is
-        reported as unavailable rather than silently empty.
+        Each service records its own validity/completeness. A failed read is
+        marked UNAVAILABLE with ``valid=False`` rather than left as an empty
+        snapshot, so the later delta can never mistake "we failed to read" for
+        "read fine, no entries".
         """
         try:
             disc = self._redfish_discover()
         except Exception as exc:
-            record['redfish_before'] = dict(available=False, reason=str(exc), eventlog=[], sel=[])
-            record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE', status='UNAVAILABLE', reason=str(exc))
+            record['redfish_before'] = dict(available=False, reason=str(exc), eventlog=[], sel=[],
+                                            eventlog_valid=False, sel_valid=False)
+            record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE', status='UNAVAILABLE', reason=str(exc),
+                                                 eventlog_valid=False, sel_valid=False)
             self.persist(record)
             return
-        snapshot = {"available": True, "eventlog": [], "sel": []}
+        snapshot = {"available": True, "eventlog": [], "sel": [],
+                    "eventlog_valid": False, "sel_valid": False}
         for name, key in (('EventLog', 'eventlog'), ('SEL', 'sel')):
             path = disc['services'].get(name)
             if not path:
+                # Only a confirmed-absent service (valid discovery) is "not
+                # applicable"; a service we could not discover stays invalid.
+                snapshot[key + '_valid'] = bool(disc['listing_valid'])
                 continue
-            result = self.transport.redfish_get(self.target, path + "/Entries", disc['token'])
-            if result.code == 0:
-                snapshot[key] = redfish_entries(self._redfish_json(result.output))
+            fetched = self._redfish_fetch_collection(path + "/Entries", disc['token'])
+            snapshot[key] = fetched['entries']
+            snapshot[key + '_valid'] = bool(fetched['valid'] and fetched['complete'])
         record['redfish_before'] = snapshot
-        record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE', status='COLLECTED', available=True,
-                                             eventlog_count=len(snapshot['eventlog']), sel_count=len(snapshot['sel']))
+        record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE',
+                                             status='COLLECTED' if (snapshot['eventlog_valid'] or snapshot['sel_valid']) else 'UNAVAILABLE',
+                                             available=True,
+                                             eventlog_count=len(snapshot['eventlog']), sel_count=len(snapshot['sel']),
+                                             eventlog_valid=snapshot['eventlog_valid'], sel_valid=snapshot['sel_valid'])
         self.persist(record)
 
     def _redfish_loop_delta(self, record):
-        """Compare POST entries with the before-cycle snapshot for each service."""
+        """Compare POST entries with the before-cycle snapshot for each service.
+
+        COMPARED is only meaningful when BOTH the before-cycle and the POST
+        collection are valid and complete for that service; otherwise the delta
+        is UNAVAILABLE with a new_count of ``None`` (never 0, which would read as
+        "compared successfully and found nothing new").
+        """
         before = record.get('redfish_before') or {}
         for name, stem, key in (('EventLog', 'eventlog', 'eventlog'), ('SEL', 'redfish_sel', 'sel')):
             meta = record.get(f'{stem}_meta')
             if not meta:
                 continue
             current = record.get(f'{stem}_entries') or []
-            if not before.get('available') or not meta.get('present'):
+            if meta.get('present') is False:
                 meta['delta'] = dict(status='UNAVAILABLE', new_count=None, new_entries=[],
-                                     reason=meta.get('reason') or 'Before-cycle snapshot unavailable')
+                                     reason='Service not present on this BMC')
+                continue
+            before_valid = bool(before.get('available') and before.get(key + '_valid'))
+            post_valid = bool(meta.get('valid') and meta.get('complete'))
+            if not before_valid or not post_valid:
+                reason = ('Before snapshot unavailable or incomplete' if not before_valid
+                          else 'POST snapshot unavailable or incomplete')
+                meta['delta'] = dict(status='UNAVAILABLE', new_count=None, new_entries=[],
+                                     reason=reason)
                 continue
             new = redfish_delta(before.get(key, []), current)
             meta['delta'] = dict(status='COMPARED', new_count=len(new), new_entries=new,

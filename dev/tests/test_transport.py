@@ -1,6 +1,7 @@
 """Transport failure behavior without connecting to an endpoint."""
 import tempfile
 import os
+import stat
 import threading
 import time
 import unittest
@@ -8,6 +9,84 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from cycle_core import Target
 from cycle_transport import Transport
+
+
+def _fake_curl(directory, status, body='{"Members": []}', exit_code=0):
+    """Write a curl stub that always prints ``body`` and ``status`` then exits.
+
+    curl with -s and no -f exits 0 even for a 4xx/5xx response, so the stub
+    mirrors that: the HTTP status is only visible through the ``-w`` marker.
+    """
+    path = Path(directory) / 'curl'
+    script = (
+        "#!/usr/bin/env sh\n"
+        "cat <<'VERA_BODY'\n"
+        f"{body}\n"
+        "VERA_BODY\n"
+        f"printf '\\n__VERA_HTTP_STATUS__:{status}'\n"
+        f"exit {exit_code}\n"
+    )
+    path.write_text(script, encoding='utf-8')
+    path.chmod(path.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+    return directory
+
+
+class RedfishHTTPStatusTests(unittest.TestCase):
+    """P1-3: a completed HTTP exchange with a 4xx/5xx status is a failure."""
+
+    def _run(self, status, body='{"Members": []}', exit_code=0):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = _fake_curl(temp, status, body, exit_code)
+            transport = Transport({}, Path(temp) / 'known')
+            old = os.environ['PATH']
+            os.environ['PATH'] = directory + os.pathsep + old
+            try:
+                result = transport._redfish(['https://bmc/redfish/v1/Systems'], 5)
+            finally:
+                os.environ['PATH'] = old
+            return result
+
+    def test_http_200_is_success(self):
+        result = self._run(200)
+        self.assertEqual(result.code, 0)
+        self.assertEqual(result.http_status, 200)
+
+    def test_http_204_clear_is_success(self):
+        result = self._run(204, body='')
+        self.assertEqual(result.code, 0)
+        self.assertEqual(result.http_status, 204)
+
+    def test_http_4xx_5xx_are_failures(self):
+        for status in (400, 401, 404, 409, 500, 503):
+            with self.subTest(status=status):
+                result = self._run(status)
+                self.assertNotEqual(result.code, 0)
+                self.assertEqual(result.state, 'HTTP_ERROR')
+                self.assertEqual(result.http_status, status)
+                self.assertGreaterEqual(result.code, 400)
+
+    def test_http_error_body_is_not_treated_as_success(self):
+        # A 500 with a JSON-looking body must still be a failure.
+        result = self._run(500, body='{"Members": [{"Id": "1"}]}')
+        self.assertNotEqual(result.code, 0)
+        self.assertEqual(result.http_status, 500)
+
+    def test_timeout_is_a_failure(self):
+        with tempfile.TemporaryDirectory() as temp:
+            transport = Transport({}, Path(temp) / 'known')
+            def timeout(*args, **kwargs):
+                raise subprocess_timeout()
+            from cycle_transport import subprocess as tp_subprocess
+            with patch.object(tp_subprocess, 'run', side_effect=timeout):
+                result = transport._redfish(['https://bmc/redfish/v1/Systems'], 5)
+            self.assertEqual(result.code, 124)
+            self.assertEqual(result.state, 'RESPONSE_LOST')
+
+
+def subprocess_timeout():
+    import subprocess
+    return subprocess.TimeoutExpired('curl', 5)
+
 
 class TransportTests(unittest.TestCase):
     def test_none_password_can_use_passwordless_sudo(self):

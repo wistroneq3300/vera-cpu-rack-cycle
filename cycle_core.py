@@ -151,6 +151,12 @@ def classify(items, project, rules):
     return items
 
 def issue_key(item):
+    # ``identity`` lets a family whose issue *code* changes with severity (e.g. a
+    # Redfish event going Warning -> Critical) still compare as the same event,
+    # so it classifies WORSENED instead of NEW. Families without an identity keep
+    # the original code+component(+fingerprint) key.
+    if item.get('identity'):
+        return ('identity', item['component'], item['identity'])
     return (item['code'], item['component'], item['fingerprint']) if item.get('fingerprint') else (item['code'], item['component'])
 
 
@@ -559,10 +565,8 @@ def redfish_entries(payload):
     the fields needed for comparison and display. Vendor id/severity/message are
     kept verbatim; missing pieces become empty strings rather than guesses.
     """
-    if not isinstance(payload, dict):
-        return []
-    members = payload.get("Members")
-    if not isinstance(members, list):
+    members, valid, _ = redfish_collection(payload)
+    if not valid:
         return []
     entries = []
     for item in members:
@@ -578,6 +582,64 @@ def redfish_entries(payload):
             resolved=bool(item.get("Resolved", False)),
         ))
     return entries
+
+def redfish_collection(payload):
+    """Validate a decoded Redfish collection payload and extract its members.
+
+    Returns ``(entry_source, valid, reason)``. ``entry_source`` is the raw
+    ``Members`` list when the payload is a well-formed collection, else an empty
+    list. A payload that merely *contains* the word "Members" (a truncated
+    ``{"Members"`` or ``{"Members": "not-an-array"}``) is NOT a valid empty
+    collection: it is unreadable, and callers must surface it rather than let it
+    look like "collected successfully and found zero entries".
+
+    Member validity is enforced too: every member must be a JSON object. A list
+    like ``[null, 7]`` is a corrupt collection, not "successfully collected,
+    zero entries", so it is rejected here instead of being silently filtered
+    down to an empty (and therefore PASS-looking) result downstream.
+    """
+    if not isinstance(payload, dict):
+        return [], False, "Redfish payload is not a JSON object"
+    if "Members" not in payload:
+        return [], False, "Redfish payload has no Members collection"
+    members = payload.get("Members")
+    if not isinstance(members, list):
+        return [], False, "Redfish Members is not a list"
+    for index, member in enumerate(members):
+        if not isinstance(member, dict):
+            return [], False, f"Redfish Members[{index}] is not an object (got {type(member).__name__})"
+    return members, True, ""
+
+
+def redfish_member_kind(member):
+    """Classify an already-validated Redfish member object.
+
+    Returns ``"reference"`` for a bare ``@odata.id`` link that still needs to be
+    fetched, ``"entry"`` for an expanded object carrying log fields, or
+    ``"unusable"`` for an object with neither (which must not be counted as a
+    silent zero-event).
+    """
+    if not isinstance(member, dict):
+        return "unusable"
+    has_ref = bool(str(member.get("@odata.id", "") or "").strip())
+    has_fields = any(key in member for key in ("Id", "Severity", "Message", "Created", "EntryType"))
+    if has_fields:
+        return "entry"
+    if has_ref:
+        return "reference"
+    return "unusable"
+
+
+def redfish_page_next_link(payload):
+    """Return the odata nextLink of a Redfish collection, if any."""
+    if not isinstance(payload, dict):
+        return ""
+    for key in ("Members@odata.nextLink", "@odata.nextLink"):
+        value = payload.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
 
 def redfish_verdict(entries):
     """Return (verdict, counts) for a list of parsed Redfish entries.
