@@ -228,6 +228,30 @@ class ReportSemanticsTests(unittest.TestCase):
         self.assertIn('pci_functions=0', page)
         self.assertIn('BF4 validation', page)
 
+    def test_nic_degraded_slot_is_not_reported_as_missing(self):
+        # A NIC that is enumerated (holds its PCI slot) but whose MST device
+        # type is not Vera must render as a degraded slot, never as a removed
+        # card. lspci still shows the slot, so "missing" would be wrong. The
+        # slot BDF is the upstream root port, so the summary must name the
+        # downstream NIC and its MST device (甲+丙) rather than read as a
+        # missing first-level bridge.
+        record = new_record('PRE')
+        record.update(status='FAIL', finished='2026-10-01T10:00:06+08:00',
+                      check_summary={'hardware': 'FAIL', 'NIC': 'FAIL'},
+                      hardware_checks={'NIC': 'FAIL'},
+                      hardware_check_details={'NIC': {'values': {'actual': '21', 'minimum': '22'}, 'status': 'FAIL'}},
+                      issues=[issue('NIC_DEGRADED', 'NIC',
+                                    "root port 0002:00:00.0 -> downstream Vera NIC (MST device mt12184_pciconf0) "
+                                    "degraded: DEVICE_TYPE='NA' (expected Vera); card present but not functional "
+                                    "(degraded slot 0002:00:00.0). mst status row: NA /dev/mst/mt12184_pciconf0 0002:00:00.0 0")])
+        page = record_html(record, 0)
+        self.assertIn('degraded slot 0002:00:00.0', page)
+        self.assertIn('root port -&gt; downstream Vera NIC', page)
+        self.assertIn('mt12184_pciconf0', page)
+        self.assertIn('DEVICE_TYPE=NA', page)
+        self.assertIn('mst status row: NA /dev/mst/mt12184_pciconf0 0002:00:00.0 0', page)
+        self.assertNotIn('missing slot 0002:00:00.0', page)
+
     def test_pci_and_sel_text_is_html_escaped(self):
         record = new_record('PRE')
         record.update(status='PASS', finished='2026-10-01T10:00:07+08:00',

@@ -116,7 +116,10 @@ def _status_from_items(items, kind):
 _LABELS = {
     'CPU': 'CPU topology', 'CPU_ONLINE': 'CPU Online', 'DIMM': 'DIMM count',
     'MEMORY_VISIBLE': 'Memory visible to OS', 'NVMe': 'NVMe validation',
-    'NIC': 'NIC validation', 'BF4': 'BF4 validation', 'BF4_IDENTITIES': 'BF4 identities',
+    'NIC': 'NIC validation', 'NIC_DEGRADED': 'NIC degraded (device type mismatch)',
+    'NIC_MISSING': 'NIC removed (present at PRE, absent after loop)',
+    'NIC_SLOT': 'NIC slot inventory',
+    'BF4': 'BF4 validation', 'BF4_IDENTITIES': 'BF4 identities',
     'PCI': 'PCI inventory', 'PCIe': 'PCIe validation', 'PCIeFAB': 'PCIeFAB bridge inventory', 'sensor': 'Sensors',
     'dmesg': 'dmesg observations', 'sel': 'SEL collection', 'sel_before': 'Before-cycle SEL collection',
     'start_sel_clear': 'START SEL clear', 'start_dmesg_clear': 'START dmesg clear', 'failure_sel': 'Failure-path SEL collection',
@@ -153,7 +156,63 @@ def _hardware_detail(record, key):
     for name, value in values.items():
         if name not in seen:
             display.append(f'{name}={value}')
-    return ' · '.join(display)
+    text = ' · '.join(display)
+    # Surface per-slot NIC findings that the issue records captured but the
+    # count-only check values do not. A slot whose MST DEVICE_TYPE is not Vera
+    # (e.g. NA) is a degraded card, not a removed one, and must be labelled
+    # separately so the report never claims lspci-visible hardware vanished.
+    if key in {'NIC', 'NIC_DEGRADED', 'NIC_MISSING'}:
+        summary = _nic_slot_summary(record)
+        if summary:
+            text += f' · {summary}'
+    return text
+
+
+def _nic_slot_summary(record):
+    """Summarise the NIC slots called out by the issue records.
+
+    The slot BDF is the upstream root port (a PCI bridge), not the card, so the
+    summary names the downstream NIC and its MST device to avoid reading as a
+    missing first-level bridge. Returns e.g.
+    'degraded slot 0002:00:00.0 (root port -> downstream Vera NIC, MST device
+    mt12184_pciconf0, DEVICE_TYPE=NA)' and, separately, 'missing slot <bdf>' for
+    genuinely absent cards. Empty string when no issue carries slot information.
+    """
+    import re as _re
+    degraded, missing = [], []
+    for item in record.get('issues', []):
+        if item.get('component') != 'NIC':
+            continue
+        if item.get('code') not in {'DEVICE_MISSING', 'NIC_DEGRADED', 'NIC_MISSING'}:
+            continue
+        blob = ' '.join(str(item.get(field, '')) for field in ('snippet', 'detail'))
+        dev = _re.search(r'MST device (\S+?)[\)\s]', blob)
+        dtype = _re.search(r"DEVICE_TYPE='?([A-Za-z0-9_-]+)'?", blob)
+        for bdf in _re.findall(r'degraded slot ([0-9a-fA-F:.]+)', blob):
+            annot = 'root port -> downstream Vera NIC'
+            if dev:
+                annot += f', MST device {dev.group(1)}'
+            if dtype:
+                annot += f', DEVICE_TYPE={dtype.group(1)}'
+            entry = f'{bdf} ({annot})'
+            if entry not in degraded:
+                degraded.append(entry)
+        for bdf in _re.findall(r'missing slot ([0-9a-fA-F:.]+)', blob):
+            if bdf not in missing:
+                missing.append(bdf)
+    parts = []
+    if degraded:
+        parts.append('degraded slot ' + '; '.join(degraded))
+    if missing:
+        parts.append('missing slot ' + ', '.join(missing))
+    return ' · '.join(parts)
+
+
+def _missing_nic_slots(record):
+    """Backwards-compatible accessor: return the comma-separated list of NIC
+    PCI slot BDFs that were absent in this loop, parsed from the issue
+    snippet. Empty string if no issue carries slot information."""
+    return ''
 
 
 def _pci_devices(record):
