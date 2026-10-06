@@ -21,6 +21,10 @@ class Command:
     output: str
     state: str = "RETURNED"
     duration: float = 0.0
+    # HTTP status for Redfish calls; 0 means "not applicable / not observed".
+    # A non-2xx/3xx status is surfaced through ``code`` so callers that only
+    # look at the exit code still treat a rejected request as a failure.
+    http_status: int = 0
 
     def data(self):
         return asdict(self)
@@ -183,19 +187,46 @@ class Transport:
     # private 0600 config file (curl --config), never argv or evidence, matching
     # the ipmitool -E policy used for IPMI.
 
+    # curl reports the HTTP status through a trailing write-out marker so a 4xx/5xx
+    # response is distinguishable from a transport success. curl itself exits 0
+    # for any completed HTTP exchange (with -s and no -f), so the process code
+    # alone cannot tell "HTTP 200" from "HTTP 500"; only the marker can.
+    _HTTP_MARKER = "\n__VERA_HTTP_STATUS__:"
+
     def _redfish(self, args, timeout):
         start = time.monotonic()
         if not shutil.which("curl"):
             return Command(127, "curl is unavailable on the orchestrator", "NOT_ISSUED")
+        argv = ["curl", "-sk", "-m", str(int(timeout)),
+                "-w", self._HTTP_MARKER + "%{http_code}", *args]
         try:
-            result = subprocess.run(["curl", "-sk", "-m", str(int(timeout)), *args],
-                                    capture_output=True, text=True, timeout=timeout + 5, check=False)
-            return Command(result.returncode, result.stdout + result.stderr, duration=time.monotonic() - start)
+            result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout + 5, check=False)
         except subprocess.TimeoutExpired as exc:
             data = (exc.stdout or b"") + (exc.stderr or b"")
             return Command(124, data.decode(errors="replace") if isinstance(data, bytes) else data, "RESPONSE_LOST", time.monotonic() - start)
         except OSError as exc:
             return Command(127, str(exc), "NOT_ISSUED", time.monotonic() - start)
+        raw = result.stdout + result.stderr
+        body, _, status_text = raw.rpartition(self._HTTP_MARKER)
+        if not status_text:
+            # No marker: curl never completed the request (connection refused, DNS,
+            # TLS failure). Keep curl's own exit code/state.
+            return Command(result.returncode, raw, duration=time.monotonic() - start)
+        parts = status_text.strip().split()
+        try:
+            http_status = int(parts[0]) if parts else 0
+        except ValueError:
+            http_status = 0
+        if result.returncode != 0:
+            # curl-level failure (e.g. timeout) even though a status was printed.
+            return Command(result.returncode, body, duration=time.monotonic() - start)
+        if http_status == 0:
+            return Command(0, body, "HTTP_ERROR", time.monotonic() - start, http_status)
+        if http_status >= 400:
+            # Surface HTTP failure through the exit code so exit-code-only callers
+            # (and the engine's validity gate) cannot mistake it for success.
+            return Command(http_status, body, "HTTP_ERROR", time.monotonic() - start, http_status)
+        return Command(0, body, duration=time.monotonic() - start, http_status=http_status)
 
     def redfish_login(self, target, timeout=20):
         """Return an X-Auth-Token string, raising on any login failure.

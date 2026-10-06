@@ -442,9 +442,14 @@ def _render_redfish(record):
         meta = record.get(f'{stem}_meta')
         if not meta:
             continue
-        if not meta.get('present'):
+        if meta.get('present') is False:
             blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Not present on this BMC: '
                           f'{esc(meta.get("reason", "merged into EventLog"))}</p></div>')
+            continue
+        if meta.get('present') is None:
+            # Discovery failed: we do not know whether this service exists.
+            blocks.append(f'<div class="sel-panel"><h3>{label}</h3><p>Service status {badge("UNAVAILABLE")} · '
+                          f'Discovery failed, cannot confirm presence · {esc(meta.get("reason", ""))}</p></div>')
             continue
         if meta.get('status') != 'COLLECTED':
             ev = _record_evidence(record, meta.get('evidence'))

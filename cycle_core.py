@@ -559,10 +559,8 @@ def redfish_entries(payload):
     the fields needed for comparison and display. Vendor id/severity/message are
     kept verbatim; missing pieces become empty strings rather than guesses.
     """
-    if not isinstance(payload, dict):
-        return []
-    members = payload.get("Members")
-    if not isinstance(members, list):
+    members, valid, _ = redfish_collection(payload)
+    if not valid:
         return []
     entries = []
     for item in members:
@@ -578,6 +576,37 @@ def redfish_entries(payload):
             resolved=bool(item.get("Resolved", False)),
         ))
     return entries
+
+def redfish_collection(payload):
+    """Validate a decoded Redfish collection payload and extract its members.
+
+    Returns ``(entry_source, valid, reason)``. ``entry_source`` is the raw
+    ``Members`` list when the payload is a well-formed collection, else an empty
+    list. A payload that merely *contains* the word "Members" (a truncated
+    ``{"Members"`` or ``{"Members": "not-an-array"}``) is NOT a valid empty
+    collection: it is unreadable, and callers must surface it rather than let it
+    look like "collected successfully and found zero entries".
+    """
+    if not isinstance(payload, dict):
+        return [], False, "Redfish payload is not a JSON object"
+    if "Members" not in payload:
+        return [], False, "Redfish payload has no Members collection"
+    members = payload.get("Members")
+    if not isinstance(members, list):
+        return [], False, "Redfish Members is not a list"
+    return members, True, ""
+
+
+def redfish_page_next_link(payload):
+    """Return the odata nextLink of a Redfish collection, if any."""
+    if not isinstance(payload, dict):
+        return ""
+    for key in ("Members@odata.nextLink", "@odata.nextLink"):
+        value = payload.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
 
 def redfish_verdict(entries):
     """Return (verdict, counts) for a list of parsed Redfish entries.
