@@ -176,5 +176,35 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(result.code,1)
         self.assertIn('RESULT|FAIL',result.output)
 
+    def test_redfish_logout_issues_delete_for_recorded_session(self):
+        # P1-1 regression at the transport seam: redfish_login must remember the
+        # session Location so redfish_logout can DELETE that exact path with the
+        # token, releasing the BMC session.
+        calls=[]
+        def fake_run(argv,**kwargs):
+            calls.append(argv)
+            if '-X' in argv and 'POST' in argv:
+                out=('HTTP/1.1 201 Created\r\n'
+                     'X-Auth-Token: TOK123\r\n'
+                     'Location: /redfish/v1/SessionService/Sessions/42\r\n'
+                     f'{Transport._HTTP_MARKER if hasattr(Transport,"_HTTP_MARKER") else "__VERA_HTTP_STATUS__:"}201')
+                return MagicMock(returncode=0,stdout=out,stderr='')
+            return MagicMock(returncode=0,stdout='__VERA_HTTP_STATUS__:200',stderr='')
+        with tempfile.TemporaryDirectory() as temp:
+            transport=Transport({'bmc':'pw'},Path(temp))
+            with patch('cycle_transport.shutil.which',return_value='/usr/bin/curl'), \
+                 patch('cycle_transport.subprocess.run',side_effect=fake_run):
+                token=transport.redfish_login(Target('tray','n1','192.0.2.1','192.0.2.2'))
+                self.assertEqual(token,'TOK123')
+                self.assertEqual(transport._redfish_sessions.get('TOK123'),
+                                 '/redfish/v1/SessionService/Sessions/42')
+                transport.redfish_logout(Target('tray','n1','192.0.2.1','192.0.2.2'),token)
+            # The logout actually issued a DELETE to the session resource.
+            delete=[a for a in calls if '-X' in a and 'DELETE' in a]
+            self.assertEqual(len(delete),1)
+            self.assertTrue(any('Sessions/42' in part for part in delete[0]))
+            # The session map is drained so a second logout is a no-op.
+            self.assertNotIn('TOK123',transport._redfish_sessions)
+
 if __name__=='__main__':
     unittest.main()

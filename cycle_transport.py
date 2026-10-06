@@ -39,6 +39,9 @@ class Transport:
         self.credentials = {role: "" if password is None else password
                             for role, password in credentials.items()}
         self.known_hosts = Path(known_hosts)
+        # Map X-Auth-Token -> session resource path so a session can be deleted
+        # on logout. Populated by redfish_login, drained by redfish_logout.
+        self._redfish_sessions = {}
 
     def _connect(self, target, role, timeout):
         # Report rebuilding and CLI help do not require Paramiko to be installed.
@@ -266,7 +269,23 @@ class Transport:
         match = re.search(r'^x-auth-token:\s*(\S+)', headers, re.I | re.M)
         if not match:
             raise RuntimeError("redfish login returned no X-Auth-Token")
+        location = re.search(r'^location:\s*(/redfish/v1/SessionService/Sessions/[^\s]+)', headers, re.I | re.M)
+        if location:
+            self._redfish_sessions[match.group(1)] = location.group(1)
         return match.group(1)
+
+    def redfish_logout(self, target, token, timeout=10):
+        """Delete the Redfish session created by redfish_login.
+
+        Returns the DELETE Command, or None when the token has no recorded
+        session path (nothing to release). Callers treat a raised/erroring
+        logout as a WARN, never as a collection failure.
+        """
+        path = self._redfish_sessions.pop(token, None)
+        if not path:
+            return None
+        return self._redfish(["-X", "DELETE", "-H", f"X-Auth-Token: {token}",
+                              f"https://{target.bmc_ip}{path}"], timeout)
 
     def redfish_get(self, target, path, token, timeout=30):
         url = f"https://{target.bmc_ip}{path}"

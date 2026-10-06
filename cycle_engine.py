@@ -1,6 +1,7 @@
 """Campaign node execution, with immutable PRE and durable evidence."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime
 import re
 import shlex
@@ -629,6 +630,39 @@ class NodeSession:
     def _redfish_token(self):
         return self.transport.redfish_login(self.target)
 
+    def _redfish_logout(self, token, record=None):
+        """Release a Redfish session, downgrading logout failure to evidence.
+
+        A logout that fails (or a BMC that does not expose a DELETE path) must
+        never turn a valid collection into a FAIL and must never re-trigger any
+        power/cycle action. The worst case is a WARN finding so an operator can
+        see the leak instead of it silently exhausting the BMC session table.
+        """
+        if not token:
+            return
+        try:
+            self.transport.redfish_logout(self.target, token)
+        except Exception as exc:
+            if record is not None:
+                self.add(record, 'REDFISH_LOGOUT_FAILED', 'redfish',
+                         f'Redfish session logout failed; session may remain open on the BMC: {exc}',
+                         severity='WARN')
+
+    @contextmanager
+    def _redfish_session(self, record=None):
+        """Discover a session and guarantee logout, whatever the caller does.
+
+        Yields the discovery dict (``token`` used for subsequent ``redfish_get``
+        calls). ``finally`` releases the session so repeated PRE/LOOP/POST
+        collections on a long, multi-node, multi-loop campaign cannot leak one
+        session per collection and exhaust the BMC session table.
+        """
+        disc = self._redfish_discover()
+        try:
+            yield disc
+        finally:
+            self._redfish_logout(disc.get('token'), record=record)
+
     @staticmethod
     def _redfish_json(text):
         import json as _json
@@ -783,83 +817,83 @@ class NodeSession:
         ``pre_eventlog.txt`` cannot overwrite it. Collection/clear failures
         still surface - only the *historical event findings* are suppressed.
         """
-        disc = self._redfish_discover()
-        record['redfish_system_id'] = disc['system_id']
-        record['redfish_services'] = sorted(disc['services'])
-        if history:
-            record['redfish_preclear'] = {}
-        for name in ('EventLog', 'SEL'):
-            path = disc['services'].get(name)
-            stem = self._redfish_stem(name)
-            if not path:
-                if disc['listing_valid']:
-                    # Confirmed absent on a readable listing: not a failure.
-                    record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
-                                                "code": 0, "state": "NOT_PRESENT", "evidence": "",
-                                                "valid": True, "output_excerpt": ""}
-                    record[f'{stem}_meta'] = dict(phase='COLLECT', status='NOT PRESENT', present=False,
-                                                  verdict='PASS', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
-                                                  entries=[], complete=True, valid=True,
-                                                  reason=f'No {name} log service on this BMC')
-                else:
-                    # Discovery failed: we cannot tell whether the service exists.
-                    record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
-                                                "code": 1, "state": "UNAVAILABLE", "evidence": "",
-                                                "valid": False, "output_excerpt": disc.get('reason', '')}
-                    record[f'{stem}_meta'] = dict(phase='COLLECT', status='UNAVAILABLE', present=None,
-                                                  verdict='FAIL', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
-                                                  entries=[], complete=False, valid=False,
-                                                  reason=disc.get('reason') or 'Redfish LogServices discovery failed')
-                    self.add(record, 'REDFISH_UNAVAILABLE', stem,
-                             f'Redfish {name} service could not be discovered; see reason',
-                             snippet=disc.get('reason', ''))
-                record[f'{stem}_entries'] = []
-                continue
-            entries_path = path + "/Entries"
-            fetched = self._redfish_fetch_collection(entries_path, disc['token'])
-            entries = fetched['entries']
-            valid = fetched['valid']
-            complete = fetched['complete']
-            verdict, counts = redfish_verdict(entries) if (valid and complete) else (
-                "FAIL", {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0})
-            evidence = self._write_redfish_evidence(record, stem, name, entries_path, fetched, verdict, counts,
-                                                    history=history)
-            record['commands'][stem] = {"command": f"redfish {name} ({entries_path})", "role": "oob",
-                                        "code": 0 if (valid and complete) else 1,
-                                        "state": 'COLLECTED' if (valid and complete) else 'UNAVAILABLE',
-                                        "evidence": evidence, "valid": valid and complete,
-                                        "output_excerpt": "" if (valid and complete) else fetched.get('reason', '')}
-            record[f'{stem}_meta'] = dict(phase='COLLECT', status='COLLECTED' if (valid and complete) else 'FAILED',
-                                          present=True, verdict=verdict, counts=counts, evidence=evidence,
-                                          entries=entries, path=entries_path, complete=complete, valid=valid,
-                                          reason='' if (valid and complete) else fetched.get('reason', 'Redfish collection incomplete'))
-            record[f'{stem}_entries'] = entries
+        with self._redfish_session(record) as disc:
+            record['redfish_system_id'] = disc['system_id']
+            record['redfish_services'] = sorted(disc['services'])
             if history:
-                # Record the pre-clear backlog as diagnostic metadata only; it is
-                # not a PRE finding (it is about to be cleared).
-                record['redfish_preclear'][stem] = dict(
-                    status=record[f'{stem}_meta']['status'], counts=counts, evidence=evidence,
-                    entry_count=len(entries), valid=valid, complete=complete)
-            if not (valid and complete):
-                self.add(record, 'REDFISH_COLLECTION_FAILED', stem,
-                         f'Redfish {name} collection failed or incomplete; see evidence',
-                         evidence=evidence, snippet=fetched.get('reason', ''))
-            elif not history:
-                # Propagate severity into the canonical issue model so record
-                # status and campaign health cannot stay PASS behind a failing
-                # EventLog/SEL sub-verdict. Pre-clear history is excluded.
-                self._redfish_severity_issues(record, name, stem, entries, evidence)
-            if clear and valid and complete:
-                self._redfish_clear_service(record, name, path, disc['token'], stem)
-        if history:
-            # The clear-state read is diagnosis only; it must not define the
-            # baseline meta/verdict. Restore the pre-clear keys so the later
-            # post-clear capture() populates the real PRE baseline.
+                record['redfish_preclear'] = {}
             for name in ('EventLog', 'SEL'):
+                path = disc['services'].get(name)
                 stem = self._redfish_stem(name)
-                record.pop(f'{stem}_meta', None)
-                record.pop(f'{stem}_entries', None)
-        self.persist(record)
+                if not path:
+                    if disc['listing_valid']:
+                        # Confirmed absent on a readable listing: not a failure.
+                        record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
+                                                    "code": 0, "state": "NOT_PRESENT", "evidence": "",
+                                                    "valid": True, "output_excerpt": ""}
+                        record[f'{stem}_meta'] = dict(phase='COLLECT', status='NOT PRESENT', present=False,
+                                                      verdict='PASS', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
+                                                      entries=[], complete=True, valid=True,
+                                                      reason=f'No {name} log service on this BMC')
+                    else:
+                        # Discovery failed: we cannot tell whether the service exists.
+                        record['commands'][stem] = {"command": f"redfish {name}", "role": "oob",
+                                                    "code": 1, "state": "UNAVAILABLE", "evidence": "",
+                                                    "valid": False, "output_excerpt": disc.get('reason', '')}
+                        record[f'{stem}_meta'] = dict(phase='COLLECT', status='UNAVAILABLE', present=None,
+                                                      verdict='FAIL', counts={"Critical": 0, "Warning": 0, "OK": 0, "Other": 0},
+                                                      entries=[], complete=False, valid=False,
+                                                      reason=disc.get('reason') or 'Redfish LogServices discovery failed')
+                        self.add(record, 'REDFISH_UNAVAILABLE', stem,
+                                 f'Redfish {name} service could not be discovered; see reason',
+                                 snippet=disc.get('reason', ''))
+                    record[f'{stem}_entries'] = []
+                    continue
+                entries_path = path + "/Entries"
+                fetched = self._redfish_fetch_collection(entries_path, disc['token'])
+                entries = fetched['entries']
+                valid = fetched['valid']
+                complete = fetched['complete']
+                verdict, counts = redfish_verdict(entries) if (valid and complete) else (
+                    "FAIL", {"Critical": 0, "Warning": 0, "OK": 0, "Other": 0})
+                evidence = self._write_redfish_evidence(record, stem, name, entries_path, fetched, verdict, counts,
+                                                        history=history)
+                record['commands'][stem] = {"command": f"redfish {name} ({entries_path})", "role": "oob",
+                                            "code": 0 if (valid and complete) else 1,
+                                            "state": 'COLLECTED' if (valid and complete) else 'UNAVAILABLE',
+                                            "evidence": evidence, "valid": valid and complete,
+                                            "output_excerpt": "" if (valid and complete) else fetched.get('reason', '')}
+                record[f'{stem}_meta'] = dict(phase='COLLECT', status='COLLECTED' if (valid and complete) else 'FAILED',
+                                              present=True, verdict=verdict, counts=counts, evidence=evidence,
+                                              entries=entries, path=entries_path, complete=complete, valid=valid,
+                                              reason='' if (valid and complete) else fetched.get('reason', 'Redfish collection incomplete'))
+                record[f'{stem}_entries'] = entries
+                if history:
+                    # Record the pre-clear backlog as diagnostic metadata only; it is
+                    # not a PRE finding (it is about to be cleared).
+                    record['redfish_preclear'][stem] = dict(
+                        status=record[f'{stem}_meta']['status'], counts=counts, evidence=evidence,
+                        entry_count=len(entries), valid=valid, complete=complete)
+                if not (valid and complete):
+                    self.add(record, 'REDFISH_COLLECTION_FAILED', stem,
+                             f'Redfish {name} collection failed or incomplete; see evidence',
+                             evidence=evidence, snippet=fetched.get('reason', ''))
+                elif not history:
+                    # Propagate severity into the canonical issue model so record
+                    # status and campaign health cannot stay PASS behind a failing
+                    # EventLog/SEL sub-verdict. Pre-clear history is excluded.
+                    self._redfish_severity_issues(record, name, stem, entries, evidence)
+                if clear and valid and complete:
+                    self._redfish_clear_service(record, name, path, disc['token'], stem)
+            if history:
+                # The clear-state read is diagnosis only; it must not define the
+                # baseline meta/verdict. Restore the pre-clear keys so the later
+                # post-clear capture() populates the real PRE baseline.
+                for name in ('EventLog', 'SEL'):
+                    stem = self._redfish_stem(name)
+                    record.pop(f'{stem}_meta', None)
+                    record.pop(f'{stem}_entries', None)
+            self.persist(record)
 
     def _redfish_severity_issues(self, record, name, stem, entries, evidence):
         """Emit one FAIL/WARN issue per distinct Critical/Warning entry.
@@ -937,7 +971,19 @@ class NodeSession:
         "read fine, no entries".
         """
         try:
-            disc = self._redfish_discover()
+            with self._redfish_session(record) as disc:
+                snapshot = {"available": True, "eventlog": [], "sel": [],
+                            "eventlog_valid": False, "sel_valid": False}
+                for name, key in (('EventLog', 'eventlog'), ('SEL', 'sel')):
+                    path = disc['services'].get(name)
+                    if not path:
+                        # Only a confirmed-absent service (valid discovery) is "not
+                        # applicable"; a service we could not discover stays invalid.
+                        snapshot[key + '_valid'] = bool(disc['listing_valid'])
+                        continue
+                    fetched = self._redfish_fetch_collection(path + "/Entries", disc['token'])
+                    snapshot[key] = fetched['entries']
+                    snapshot[key + '_valid'] = bool(fetched['valid'] and fetched['complete'])
         except Exception as exc:
             record['redfish_before'] = dict(available=False, reason=str(exc), eventlog=[], sel=[],
                                             eventlog_valid=False, sel_valid=False)
@@ -945,18 +991,6 @@ class NodeSession:
                                                  eventlog_valid=False, sel_valid=False)
             self.persist(record)
             return
-        snapshot = {"available": True, "eventlog": [], "sel": [],
-                    "eventlog_valid": False, "sel_valid": False}
-        for name, key in (('EventLog', 'eventlog'), ('SEL', 'sel')):
-            path = disc['services'].get(name)
-            if not path:
-                # Only a confirmed-absent service (valid discovery) is "not
-                # applicable"; a service we could not discover stays invalid.
-                snapshot[key + '_valid'] = bool(disc['listing_valid'])
-                continue
-            fetched = self._redfish_fetch_collection(path + "/Entries", disc['token'])
-            snapshot[key] = fetched['entries']
-            snapshot[key + '_valid'] = bool(fetched['valid'] and fetched['complete'])
         record['redfish_before'] = snapshot
         record['redfish_before_meta'] = dict(phase='BEFORE_CYCLE',
                                              status='COLLECTED' if (snapshot['eventlog_valid'] or snapshot['sel_valid']) else 'UNAVAILABLE',
