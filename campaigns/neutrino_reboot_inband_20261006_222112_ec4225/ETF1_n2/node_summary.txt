@@ -1,0 +1,17 @@
+Target: ETF1_n2
+Completed loops: 10
+Attempts: 10; boot confirmed: 10; valid cycles: 10
+Blocked: No
+Stop reason: 
+PRE: FAIL (5 findings)
+START: PASS (0 findings)
+LOOP 1: FAIL (6 findings)
+LOOP 2: FAIL (8 findings)
+LOOP 3: FAIL (8 findings)
+LOOP 4: FAIL (8 findings)
+LOOP 5: FAIL (8 findings)
+LOOP 6: FAIL (8 findings)
+LOOP 7: FAIL (8 findings)
+LOOP 8: FAIL (8 findings)
+LOOP 9: FAIL (8 findings)
+LOOP 10: FAIL (8 findings)

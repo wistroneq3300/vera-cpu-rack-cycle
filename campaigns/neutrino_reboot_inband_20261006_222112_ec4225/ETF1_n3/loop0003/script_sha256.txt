@@ -1,0 +1,8 @@
+UTC+8: 2026-10-06T22:35:24+08:00
+Role: os
+Command: sha256sum /var/tmp/vera-neutrino_reboot_inband_20261006_222112_ec4225-ETF1_n3-e9af813bc1b3.sh
+Exit: 0
+State: RETURNED
+Duration: 1.20s
+
+e9af813bc1b3e890f7bb583372997947aa673c90c6d7fba99efb322d5b244058  /var/tmp/vera-neutrino_reboot_inband_20261006_222112_ec4225-ETF1_n3-e9af813bc1b3.sh

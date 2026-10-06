@@ -1,0 +1,31 @@
+183 | OK | The resource has been removed successfully.
+184 | OK | The resource has been removed successfully.
+185 | OK | The resource `Host0` has powered off.
+186 | OK | The resource `Host0` has powered on.
+187 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+188 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+189 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+190 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+191 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+192 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+193 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+194 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+195 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+196 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+197 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+198 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+199 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+200 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+201 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+202 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+203 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+204 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+205 | OK | A platform error occurred.
+206 | OK | A platform error occurred.
+207 | OK | The resource has been created successfully.
+208 | OK | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+209 | OK | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+210 | OK | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+211 | OK | The resource has been removed successfully.
+212 | OK | The resource has been created successfully.
+213 | OK | The resource has been created successfully.

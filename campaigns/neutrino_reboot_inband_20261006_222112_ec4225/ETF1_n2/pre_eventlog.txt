@@ -1,0 +1,13 @@
+UTC+8: 2026-10-06T22:21:55+08:00
+Role: oob
+Source: Redfish EventLog
+Path: /redfish/v1/Systems/System_0/LogServices/EventLog/Entries
+Pages: 1
+Valid: True
+Complete: True
+Entries: 1
+Verdict: PASS
+Counts: Critical=0 Warning=0 OK=1
+Reason: 
+
+1 | OK | 2000-01-07T16:47:36.677+00:00 | xyz.openbmc_project.Logging.Cleared

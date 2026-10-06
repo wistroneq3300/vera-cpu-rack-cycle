@@ -1,0 +1,31 @@
+177 | OK | The resource has been removed successfully.
+178 | OK | The resource has been removed successfully.
+179 | OK | The resource `Host0` has powered off.
+180 | OK | The resource `Host0` has powered on.
+181 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+182 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+183 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+184 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+185 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+186 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+187 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+188 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+189 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+190 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+191 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+192 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+193 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+194 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+195 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+196 | OK | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+197 | OK | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+198 | OK | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+199 | OK | A platform error occurred.
+200 | OK | A platform error occurred.
+201 | Critical | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+202 | Critical | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+203 | Critical | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+204 | Critical | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+205 | Critical | Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+206 | OK | The resource has been created successfully.
+207 | OK | The resource has been created successfully.

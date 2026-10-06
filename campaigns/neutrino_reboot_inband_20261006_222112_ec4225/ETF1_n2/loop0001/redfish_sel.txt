@@ -1,0 +1,12 @@
+UTC+8: 2026-10-06T22:26:17+08:00
+Role: oob
+Source: Redfish SEL
+Path: /redfish/v1/Systems/System_0/LogServices/SEL/Entries
+Pages: 1
+Valid: True
+Complete: True
+Entries: 0
+Verdict: PASS
+Counts: Critical=0 Warning=0 OK=0
+Reason: 
+

@@ -1,0 +1,12 @@
+UTC+8: 2026-10-06T23:01:56+08:00
+Role: os
+Command: lsblk
+Exit: 0
+State: RETURNED
+Duration: 1.19s
+
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+nvme0n1     259:0    0  3.5T  0 disk 
+nvme1n1     259:1    0  3.5T  0 disk 
+|-nvme1n1p1 259:2    0  512M  0 part /boot/efi
+`-nvme1n1p2 259:3    0  3.5T  0 part /

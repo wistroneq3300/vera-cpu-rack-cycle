@@ -1,0 +1,61 @@
+{
+  "phase": "START",
+  "started": "2026-10-06T22:22:44+08:00",
+  "finished": "2026-10-06T22:22:47+08:00",
+  "status": "PASS",
+  "issues": [],
+  "evidence": [
+    "ETF1_n0/start/bmc_identity.txt",
+    "ETF1_n0/start/os_identity.txt"
+  ],
+  "commands": {
+    "bmc_identity": {
+      "command": "printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id",
+      "role": "bmc",
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "ETF1_n0/start/bmc_identity.txt",
+      "valid": true,
+      "output_excerpt": ""
+    },
+    "os_identity": {
+      "command": "printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id",
+      "role": "os",
+      "code": 0,
+      "state": "RETURNED",
+      "evidence": "ETF1_n0/start/os_identity.txt",
+      "valid": true,
+      "output_excerpt": ""
+    }
+  },
+  "identities": {
+    "bmc": {
+      "hostname": "vc-256-bmc-n0",
+      "boot_id": "4d92e3ff-a42f-41ec-8026-d4ee59321420"
+    },
+    "os": {
+      "hostname": "neutrino-n0",
+      "boot_id": "246e9522-7c7c-4adc-a327-32a7bbaa26da"
+    }
+  },
+  "pci": {},
+  "pci_devices": {},
+  "sensors": [],
+  "action": [],
+  "recovery": {},
+  "sel_evidence_schema": 1,
+  "revision": 3,
+  "duration_seconds": 3.0,
+  "check_summary": {
+    "bmc_identity": "PASS",
+    "os_identity": "PASS"
+  },
+  "dmesg_delta": {
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "dmesg_native_error_counts": {
+    "WARN": 0,
+    "FAIL": 0
+  }
+}

@@ -1,0 +1,11 @@
+UTC+8: 2026-10-06T22:30:33+08:00
+Role: os
+Command: nvme list
+Exit: 0
+State: RETURNED
+Duration: 1.19s
+
+Node                  Generic               SN                   Model                                    Namespace  Usage                      Format           FW Rev  
+--------------------- --------------------- -------------------- ---------------------------------------- ---------- -------------------------- ---------------- --------
+/dev/nvme0n1          /dev/ng0n1            3226BJF8Q4338I020S02 HFS3T8GFPGX229N                          0x1         67.97  GB /   3.84  TB      4 KiB +  0 B   71092A50
+/dev/nvme1n1          /dev/ng1n1            3226BJF8Q4338I020S1E HFS3T8GFPGX229N                          0x1          0.00   B /   3.84  TB      4 KiB +  0 B   71092A50

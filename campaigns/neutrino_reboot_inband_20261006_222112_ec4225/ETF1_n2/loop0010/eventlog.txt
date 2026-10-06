@@ -1,0 +1,164 @@
+UTC+8: 2026-10-06T23:06:35+08:00
+Role: oob
+Source: Redfish EventLog
+Path: /redfish/v1/Systems/System_0/LogServices/EventLog/Entries
+Pages: 1
+Valid: True
+Complete: True
+Entries: 152
+Verdict: FAIL
+Counts: Critical=2 Warning=0 OK=150
+Reason: 
+
+33 | Critical | 2000-01-07T16:54:06+00:00 | The drive located in 'NVMe E1.S Slot 1' was removed.
+34 | Critical | 2000-01-07T16:54:06+00:00 | The drive located in 'NVMe E1.S Slot 0' was removed.
+157 | OK | 2000-01-07T17:12:33.471+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+158 | OK | 2000-01-07T17:12:33.511+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+159 | OK | 2000-01-07T17:12:33.547+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+160 | OK | 2000-01-07T17:12:33.561+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+161 | OK | 2000-01-07T17:12:33.571+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+162 | OK | 2000-01-07T17:12:39.003+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+163 | OK | 2000-01-07T17:12:39.078+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+164 | OK | 2000-01-07T17:12:39.134+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+165 | OK | 2000-01-07T17:12:39.192+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+166 | OK | 2000-01-07T17:12:39.247+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+167 | OK | 2000-01-07T17:12:39.292+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+168 | OK | 2000-01-07T17:12:39.330+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+169 | OK | 2000-01-07T17:12:39.378+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+170 | OK | 2000-01-07T17:12:39.403+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+171 | OK | 2000-01-07T17:12:39.420+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+172 | OK | 2000-01-07T17:12:39.433+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+173 | OK | 2000-01-07T17:12:39.460+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+174 | OK | 2000-01-07T17:12:51+00:00 | A platform error occurred.
+175 | OK | 2000-01-07T17:12:51+00:00 | A platform error occurred.
+176 | OK | 2000-01-07T17:13:36+00:00 | The resource has been created successfully.
+177 | OK | 2000-01-07T17:13:55+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+178 | OK | 2000-01-07T17:13:55+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+179 | OK | 2000-01-07T17:13:55+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+180 | OK | 2000-01-07T17:13:58+00:00 | The resource has been removed successfully.
+181 | OK | 2000-01-07T17:14:21+00:00 | The resource has been created successfully.
+182 | OK | 2000-01-07T17:14:22+00:00 | The resource has been created successfully.
+183 | OK | 2000-01-07T17:17:15+00:00 | The resource has been removed successfully.
+184 | OK | 2000-01-07T17:17:15+00:00 | The resource has been removed successfully.
+185 | OK | 2000-01-07T17:17:17+00:00 | The resource `Host0` has powered off.
+186 | OK | 2000-01-07T17:17:18+00:00 | The resource `Host0` has powered on.
+187 | OK | 2000-01-07T17:17:19.006+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+188 | OK | 2000-01-07T17:17:19.073+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+189 | OK | 2000-01-07T17:17:19.104+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+190 | OK | 2000-01-07T17:17:19.147+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+191 | OK | 2000-01-07T17:17:19.164+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+192 | OK | 2000-01-07T17:17:19.176+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+193 | OK | 2000-01-07T17:17:24.437+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+194 | OK | 2000-01-07T17:17:24.481+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+195 | OK | 2000-01-07T17:17:24.505+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+196 | OK | 2000-01-07T17:17:24.530+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+197 | OK | 2000-01-07T17:17:24.538+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+198 | OK | 2000-01-07T17:17:24.548+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+199 | OK | 2000-01-07T17:17:24.570+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+200 | OK | 2000-01-07T17:17:24.579+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+201 | OK | 2000-01-07T17:17:24.593+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+202 | OK | 2000-01-07T17:17:24.610+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+203 | OK | 2000-01-07T17:17:24.622+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+204 | OK | 2000-01-07T17:17:24.639+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+205 | OK | 2000-01-07T17:17:32+00:00 | A platform error occurred.
+206 | OK | 2000-01-07T17:17:32+00:00 | A platform error occurred.
+207 | OK | 2000-01-07T17:18:22+00:00 | The resource has been created successfully.
+208 | OK | 2000-01-07T17:18:40+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+209 | OK | 2000-01-07T17:18:40+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+210 | OK | 2000-01-07T17:18:40+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+211 | OK | 2000-01-07T17:18:42+00:00 | The resource has been removed successfully.
+212 | OK | 2000-01-07T17:19:06+00:00 | The resource has been created successfully.
+213 | OK | 2000-01-07T17:19:06+00:00 | The resource has been created successfully.
+214 | OK | 2000-01-07T17:21:05+00:00 | The resource has been removed successfully.
+215 | OK | 2000-01-07T17:21:05+00:00 | The resource has been removed successfully.
+216 | OK | 2000-01-07T17:21:07+00:00 | The resource `Host0` has powered off.
+217 | OK | 2000-01-07T17:21:08+00:00 | The resource `Host0` has powered on.
+218 | OK | 2000-01-07T17:21:08.754+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+219 | OK | 2000-01-07T17:21:08.861+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+220 | OK | 2000-01-07T17:21:08.879+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+221 | OK | 2000-01-07T17:21:08.918+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+222 | OK | 2000-01-07T17:21:08.929+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+223 | OK | 2000-01-07T17:21:08.951+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+224 | OK | 2000-01-07T17:21:14.103+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+225 | OK | 2000-01-07T17:21:14.160+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+226 | OK | 2000-01-07T17:21:14.179+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+227 | OK | 2000-01-07T17:21:14.203+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+228 | OK | 2000-01-07T17:21:14.216+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+229 | OK | 2000-01-07T17:21:14.228+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+230 | OK | 2000-01-07T17:21:14.249+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+231 | OK | 2000-01-07T17:21:14.259+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+232 | OK | 2000-01-07T17:21:14.282+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+233 | OK | 2000-01-07T17:21:14.301+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+234 | OK | 2000-01-07T17:21:14.310+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+235 | OK | 2000-01-07T17:21:14.323+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+236 | OK | 2000-01-07T17:21:26+00:00 | A platform error occurred.
+237 | OK | 2000-01-07T17:21:26+00:00 | A platform error occurred.
+238 | OK | 2000-01-07T17:22:12+00:00 | The resource has been created successfully.
+239 | OK | 2000-01-07T17:22:31+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+240 | OK | 2000-01-07T17:22:31+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+241 | OK | 2000-01-07T17:22:31+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+242 | OK | 2000-01-07T17:22:33+00:00 | The resource has been removed successfully.
+243 | OK | 2000-01-07T17:22:56+00:00 | The resource has been created successfully.
+244 | OK | 2000-01-07T17:22:56+00:00 | The resource has been created successfully.
+245 | OK | 2000-01-07T17:25:25+00:00 | The resource has been removed successfully.
+246 | OK | 2000-01-07T17:25:25+00:00 | The resource has been removed successfully.
+247 | OK | 2000-01-07T17:25:26+00:00 | The resource `Host0` has powered off.
+248 | OK | 2000-01-07T17:25:27+00:00 | The resource `Host0` has powered on.
+249 | OK | 2000-01-07T17:25:28.477+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+250 | OK | 2000-01-07T17:25:28.520+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+251 | OK | 2000-01-07T17:25:28.553+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+252 | OK | 2000-01-07T17:25:28.606+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+253 | OK | 2000-01-07T17:25:28.617+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+254 | OK | 2000-01-07T17:25:28.631+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+255 | OK | 2000-01-07T17:25:33.802+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+256 | OK | 2000-01-07T17:25:33.833+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+257 | OK | 2000-01-07T17:25:33.853+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+258 | OK | 2000-01-07T17:25:33.868+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+259 | OK | 2000-01-07T17:25:33.881+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+260 | OK | 2000-01-07T17:25:33.892+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+261 | OK | 2000-01-07T17:25:33.918+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+262 | OK | 2000-01-07T17:25:33.928+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+263 | OK | 2000-01-07T17:25:33.939+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+264 | OK | 2000-01-07T17:25:33.956+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+265 | OK | 2000-01-07T17:25:33.969+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+266 | OK | 2000-01-07T17:25:33.979+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+267 | OK | 2000-01-07T17:25:45+00:00 | A platform error occurred.
+268 | OK | 2000-01-07T17:25:45+00:00 | A platform error occurred.
+269 | OK | 2000-01-07T17:26:32+00:00 | The resource has been created successfully.
+270 | OK | 2000-01-07T17:26:49+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+271 | OK | 2000-01-07T17:26:49+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+272 | OK | 2000-01-07T17:26:49+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+273 | OK | 2000-01-07T17:26:52+00:00 | The resource has been removed successfully.
+274 | OK | 2000-01-07T17:27:16+00:00 | The resource has been created successfully.
+275 | OK | 2000-01-07T17:27:16+00:00 | The resource has been created successfully.
+276 | OK | 2000-01-07T17:29:45+00:00 | The resource has been removed successfully.
+277 | OK | 2000-01-07T17:29:45+00:00 | The resource has been removed successfully.
+278 | OK | 2000-01-07T17:29:47+00:00 | The resource `Host0` has powered off.
+279 | OK | 2000-01-07T17:29:48+00:00 | The resource `Host0` has powered on.
+280 | OK | 2000-01-07T17:29:48.736+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+281 | OK | 2000-01-07T17:29:48.803+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+282 | OK | 2000-01-07T17:29:48.839+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+283 | OK | 2000-01-07T17:29:48.883+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+284 | OK | 2000-01-07T17:29:48.896+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+285 | OK | 2000-01-07T17:29:48.908+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+286 | OK | 2000-01-07T17:29:54.092+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+287 | OK | 2000-01-07T17:29:54.180+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+288 | OK | 2000-01-07T17:29:54.237+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+289 | OK | 2000-01-07T17:29:54.259+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+290 | OK | 2000-01-07T17:29:54.273+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+291 | OK | 2000-01-07T17:29:54.282+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+292 | OK | 2000-01-07T17:29:54.306+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+293 | OK | 2000-01-07T17:29:54.318+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+294 | OK | 2000-01-07T17:29:54.328+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+295 | OK | 2000-01-07T17:29:54.381+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+296 | OK | 2000-01-07T17:29:54.395+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+297 | OK | 2000-01-07T17:29:54.456+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+298 | OK | 2000-01-07T17:30:03+00:00 | A platform error occurred.
+299 | OK | 2000-01-07T17:30:03+00:00 | A platform error occurred.
+300 | OK | 2000-01-07T17:30:53+00:00 | The resource has been created successfully.
+301 | OK | 2000-01-07T17:31:10+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+302 | OK | 2000-01-07T17:31:10+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+303 | OK | 2000-01-07T17:31:10+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+304 | OK | 2000-01-07T17:31:12+00:00 | The resource has been removed successfully.
+305 | OK | 2000-01-07T17:31:34+00:00 | The resource has been created successfully.
+306 | OK | 2000-01-07T17:31:34+00:00 | The resource has been created successfully.

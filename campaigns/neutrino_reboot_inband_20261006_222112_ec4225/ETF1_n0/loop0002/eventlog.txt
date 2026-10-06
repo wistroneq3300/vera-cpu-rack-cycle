@@ -1,0 +1,65 @@
+UTC+8: 2026-10-06T22:32:10+08:00
+Role: oob
+Source: Redfish EventLog
+Path: /redfish/v1/Systems/System_0/LogServices/EventLog/Entries
+Pages: 1
+Valid: True
+Complete: True
+Entries: 53
+Verdict: FAIL
+Counts: Critical=4 Warning=0 OK=49
+Reason: 
+
+1 | OK | 2026-10-06T14:21:29.107+00:00 | xyz.openbmc_project.Logging.Cleared
+2 | OK | 2026-10-06T14:23:06+00:00 | The resource has been removed successfully.
+3 | OK | 2026-10-06T14:23:06+00:00 | The resource has been removed successfully.
+4 | OK | 2026-10-06T14:23:07+00:00 | The resource `Host0` has powered off.
+5 | OK | 2026-10-06T14:23:08+00:00 | The resource `Host0` has powered on.
+6 | OK | 2026-10-06T14:23:09.476+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C001).
+7 | OK | 2026-10-06T14:23:09.575+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C003).
+8 | OK | 2026-10-06T14:23:09.680+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason SYS_RESET_N (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C003).
+9 | OK | 2026-10-06T14:23:09.874+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+10 | OK | 2026-10-06T14:23:09.893+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+11 | OK | 2026-10-06T14:23:09.920+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+12 | OK | 2026-10-06T14:23:14.736+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C001).
+13 | OK | 2026-10-06T14:23:14.764+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C003).
+14 | OK | 2026-10-06T14:23:14.773+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason SYS_RESET_N (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C003).
+15 | OK | 2026-10-06T14:23:14.793+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+16 | OK | 2026-10-06T14:23:14.800+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+17 | OK | 2026-10-06T14:23:14.811+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+18 | OK | 2026-10-06T14:23:26+00:00 | A platform error occurred.
+19 | OK | 2026-10-06T14:23:26+00:00 | A platform error occurred.
+20 | OK | 2026-10-06T14:24:24+00:00 | The resource has been created successfully.
+21 | OK | 2026-10-06T14:24:44+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+22 | OK | 2026-10-06T14:24:44+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+23 | OK | 2026-10-06T14:24:44+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+24 | OK | 2026-10-06T14:24:47+00:00 | The resource has been removed successfully.
+25 | OK | 2026-10-06T14:25:18+00:00 | The resource has been created successfully.
+26 | OK | 2026-10-06T14:25:18+00:00 | The resource has been created successfully.
+27 | OK | 2026-10-06T14:27:56+00:00 | The resource has been removed successfully.
+28 | OK | 2026-10-06T14:27:56+00:00 | The resource has been removed successfully.
+29 | OK | 2026-10-06T14:27:57+00:00 | The resource `Host0` has powered off.
+30 | OK | 2026-10-06T14:27:58+00:00 | The resource `Host0` has powered on.
+31 | OK | 2026-10-06T14:27:59.327+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+32 | OK | 2026-10-06T14:27:59.357+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+33 | OK | 2026-10-06T14:27:59.387+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+34 | OK | 2026-10-06T14:27:59.428+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+35 | OK | 2026-10-06T14:27:59.439+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+36 | OK | 2026-10-06T14:27:59.453+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+37 | OK | 2026-10-06T14:28:04.995+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C001).
+38 | OK | 2026-10-06T14:28:05.059+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C003).
+39 | OK | 2026-10-06T14:28:05.073+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason SYS_RESET_N (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C003).
+40 | OK | 2026-10-06T14:28:05.134+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+41 | OK | 2026-10-06T14:28:05.154+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+42 | OK | 2026-10-06T14:28:05.171+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+43 | OK | 2026-10-06T14:28:05.210+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+44 | OK | 2026-10-06T14:28:05.223+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+45 | OK | 2026-10-06T14:28:05.241+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+46 | OK | 2026-10-06T14:28:13+00:00 | A platform error occurred.
+47 | OK | 2026-10-06T14:28:13+00:00 | A platform error occurred.
+48 | Critical | 2026-10-06T14:29:26.126+00:00 | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+49 | Critical | 2026-10-06T14:29:27.638+00:00 | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+50 | Critical | 2026-10-06T14:29:27.666+00:00 | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+51 | Critical | 2026-10-06T14:29:27.686+00:00 | Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+52 | OK | 2026-10-06T14:29:57+00:00 | The resource has been created successfully.
+53 | OK | 2026-10-06T14:29:58+00:00 | The resource has been created successfully.

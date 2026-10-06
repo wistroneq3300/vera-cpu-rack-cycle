@@ -1,0 +1,38 @@
+UTC+8: 2026-10-06T22:26:10+08:00
+Role: oob
+Source: Redfish EventLog
+Path: /redfish/v1/Systems/System_0/LogServices/EventLog/Entries
+Pages: 1
+Valid: True
+Complete: True
+Entries: 26
+Verdict: PASS
+Counts: Critical=0 Warning=0 OK=26
+Reason: 
+
+1 | OK | 2000-01-07T16:47:56.314+00:00 | xyz.openbmc_project.Logging.Cleared
+2 | OK | 2000-01-07T16:49:37+00:00 | The resource has been removed successfully.
+3 | OK | 2000-01-07T16:49:37+00:00 | The resource has been removed successfully.
+4 | OK | 2000-01-07T16:49:39+00:00 | The resource `Host0` has powered off.
+5 | OK | 2000-01-07T16:49:40+00:00 | The resource `Host0` has powered on.
+6 | OK | 2000-01-07T16:49:40.715+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C001).
+7 | OK | 2000-01-07T16:49:40.761+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C003).
+8 | OK | 2000-01-07T16:49:40.777+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason SYS_RESET_N (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C003).
+9 | OK | 2000-01-07T16:49:40.818+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x70C0C981).
+10 | OK | 2000-01-07T16:49:40.826+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 0, reported by PSCROM, reset reason SW_MAIN (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x70C0C983).
+11 | OK | 2000-01-07T16:49:40.836+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 0, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x70C1C443).
+12 | OK | 2000-01-07T16:49:46.013+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C001).
+13 | OK | 2000-01-07T16:49:46.055+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason SYS_RESET_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C003).
+14 | OK | 2000-01-07T16:49:46.063+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason SYS_RESET_N (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C003).
+15 | OK | 2000-01-07T16:49:46.084+00:00 | PSC ROM I2C external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_I2C_EXT_MSG_INIT, Code 0x71C0C9C1).
+16 | OK | 2000-01-07T16:49:46.096+00:00 | PSC ROM USB external messaging initialization - encodes reset reason in instance field on CPU 1, reported by PSCROM, reset reason L0L1_RST_OUT_N (PSC_ROM_PC_USB_EXT_MSG_INIT, Code 0x71C0C9C3).
+17 | OK | 2000-01-07T16:49:46.105+00:00 | PSC FMC NVLink low-speed link up - encodes reset reason in instance field on CPU 1, reported by PSCFMC, reset reason L1_RST_REQ_N_SYS (PSC_FMC_PC_LPI_LS_LINK_UP, Code 0x71C1C443).
+18 | OK | 2000-01-07T16:49:54+00:00 | A platform error occurred.
+19 | OK | 2000-01-07T16:49:54+00:00 | A platform error occurred.
+20 | OK | 2000-01-07T16:50:44+00:00 | The resource has been created successfully.
+21 | OK | 2000-01-07T16:51:02+00:00 | The property SecureCurrentBoot was assigned the value 'Disabled' due to modification by the service.
+22 | OK | 2000-01-07T16:51:02+00:00 | The property SecureBootEnable was assigned the value '0' due to modification by the service.
+23 | OK | 2000-01-07T16:51:02+00:00 | The property SecureBootMode was assigned the value 'Setup' due to modification by the service.
+24 | OK | 2000-01-07T16:51:04+00:00 | The resource has been removed successfully.
+25 | OK | 2000-01-07T16:51:27+00:00 | The resource has been created successfully.
+26 | OK | 2000-01-07T16:51:28+00:00 | The resource has been created successfully.

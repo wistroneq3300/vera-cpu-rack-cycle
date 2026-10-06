@@ -1,0 +1,7 @@
+UTC+8: 2026-10-06T22:44:38+08:00
+Role: os
+Command: test -f /var/tmp/vera-neutrino_reboot_inband_20261006_222112_ec4225-ETF1_n2-e9af813bc1b3.sh && test ! -L /var/tmp/vera-neutrino_reboot_inband_20261006_222112_ec4225-ETF1_n2-e9af813bc1b3.sh && test "$(stat -c %u:%a /var/tmp/vera-neutrino_reboot_inband_20261006_222112_ec4225-ETF1_n2-e9af813bc1b3.sh)" = "$(id -u):700"
+Exit: 0
+State: RETURNED
+Duration: 1.20s
+

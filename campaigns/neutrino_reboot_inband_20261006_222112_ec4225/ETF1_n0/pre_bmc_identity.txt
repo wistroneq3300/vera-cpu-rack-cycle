@@ -1,0 +1,9 @@
+UTC+8: 2026-10-06T22:21:13+08:00
+Role: bmc
+Command: printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id
+Exit: 0
+State: RETURNED
+Duration: 1.48s
+
+HOSTNAME=vc-256-bmc-n0
+BOOT_ID=4d92e3ff-a42f-41ec-8026-d4ee59321420

@@ -1,0 +1,29 @@
+UTC+8: 2026-10-06T22:50:24+08:00
+Role: os
+Command: dmesg
+Exit: 0
+State: RETURNED
+Duration: 1.20s
+
+[   89.659499] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x1 bus: 0x0
+[   89.659507] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0x2 bus: 0x0
+[   89.659516] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0x2 bus: 0x20
+[   89.659519] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0x3 bus: 0x0
+[   89.659521] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0x3 bus: 0x80
+[   89.659524] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x0
+[   89.659526] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x40
+[   89.659528] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0x80
+[   89.659530] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0x4 bus: 0xc0
+[   89.659533] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x5 bus: 0x0
+[   89.659540] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x6 bus: 0x0
+[   89.659542] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0x9 bus: 0x0
+[   89.659544] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0xa bus: 0x0
+[   89.659547] MFT device name created: id: 12184, slot id: 0, device name: /dev/mst/mt12184_pciconf0.0 domain: 0xa bus: 0x20
+[   89.659549] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0xb bus: 0x0
+[   89.659551] MFT device name created: id: 12182, slot id: 0, device name: /dev/mst/mt12182_pciconf0.0 domain: 0xb bus: 0x80
+[   89.659552] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x0
+[   89.659555] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x40
+[   89.659557] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0x80
+[   89.659559] MFT device name created: id: 12183, slot id: 0, device name: /dev/mst/mt12183_pciconf0.0 domain: 0xc bus: 0xc0
+[   89.659561] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0xd bus: 0x0
+[   89.659563] MFT device name created: id: 12181, slot id: 0, device name: /dev/mst/mt12181_pciconf0.0 domain: 0xe bus: 0x0

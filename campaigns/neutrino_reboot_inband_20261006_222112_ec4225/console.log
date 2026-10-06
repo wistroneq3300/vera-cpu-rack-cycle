@@ -1,0 +1,799 @@
+2026-10-06T22:21:12+08:00 Run ID: neutrino_reboot_inband_20261006_222112_ec4225
+2026-10-06T22:21:12+08:00 Time zone: UTC+8 (local time in Run ID and +08:00 in console/evidence timestamps)
+2026-10-06T22:21:12+08:00 Planned output: /root/sheng/vera-cycle/campaigns/neutrino_reboot_inband_20261006_222112_ec4225
+2026-10-06T22:21:12+08:00 Project config: /root/sheng/vera-cycle/neutrino_config.sh
+2026-10-06T22:21:12+08:00 Selected targets: ETF1_n0, ETF1_n1, ETF1_n2, ETF1_n3
+2026-10-06T22:21:12+08:00 Mode: reboot; channel: inband; loops: 10; hours: unlimited
+2026-10-06T22:21:12+08:00 PRE started. Missing standard tools will be installed with apt when available; mst is not installed by this program.
+2026-10-06T22:21:42+08:00 PRE: still running — ETF1_n0: starting, ETF1_n1: starting, ETF1_n2: starting, ETF1_n3: starting
+2026-10-06T22:21:58+08:00 ETF1_n3 | PRE | FAIL
+2026-10-06T22:21:58+08:00   Duration: 00:00:46
+2026-10-06T22:21:58+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-06T22:21:58+08:00   Checks: eventlog PASS | redfish_sel PASS | dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:21:58+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00 ETF1_n2 | PRE | FAIL
+2026-10-06T22:21:58+08:00   Duration: 00:00:46
+2026-10-06T22:21:58+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-06T22:21:58+08:00   Checks: eventlog PASS | redfish_sel PASS | dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:21:58+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00 ETF1_n1 | PRE | FAIL
+2026-10-06T22:21:58+08:00   Duration: 00:00:46
+2026-10-06T22:21:58+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-06T22:21:58+08:00   Checks: eventlog PASS | redfish_sel PASS | dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:21:58+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:21:58+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:22:07+08:00 ETF1_n0 | PRE | FAIL
+2026-10-06T22:22:07+08:00   Duration: 00:00:55
+2026-10-06T22:22:07+08:00   Identity: BMC SSH OK | OS SSH OK
+2026-10-06T22:22:07+08:00   Checks: eventlog PASS | redfish_sel PASS | dmesg PASS | pci PASS | hardware FAIL | sensor WARN | sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:22:07+08:00   FAIL BF4: Expected exactly 1 physical card(s); detected 0
+2026-10-06T22:22:07+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:22:07+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row
+2026-10-06T22:22:07+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:22:07+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row
+2026-10-06T22:22:44+08:00 Operator decision: START
+2026-10-06T22:22:44+08:00 Campaign started. Output: /root/sheng/vera-cycle/campaigns/neutrino_reboot_inband_20261006_222112_ec4225
+2026-10-06T22:22:44+08:00 Stop after the current POST: ./stop_cycle.sh neutrino_reboot_inband_20261006_222112_ec4225
+2026-10-06T22:22:47+08:00 ETF1_n1 | log clearing | PASS
+2026-10-06T22:22:47+08:00 ETF1_n3 | log clearing | PASS
+2026-10-06T22:22:47+08:00 ETF1_n2 | log clearing | PASS
+2026-10-06T22:22:47+08:00 ETF1_n0 | log clearing | PASS
+2026-10-06T22:22:47+08:00 Loop 1: starting 4 target(s) concurrently
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n2 | reboot sent
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n2 | waiting OS boot
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n3 | reboot sent
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n3 | waiting OS boot
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n0 | reboot sent
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n0 | waiting OS boot
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n1 | reboot sent
+2026-10-06T22:22:54+08:00 Loop 1: ETF1_n1 | waiting OS boot
+2026-10-06T22:23:17+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:23:47+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:24:17+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:24:47+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:25:17+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:25:37+08:00 Loop 1: ETF1_n3 | OS up, system check running
+2026-10-06T22:25:37+08:00 Loop 1: ETF1_n1 | OS up, system check running
+2026-10-06T22:25:44+08:00 Loop 1: ETF1_n2 | OS up, system check running
+2026-10-06T22:25:47+08:00 Loop 1: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:26:04+08:00 Loop 1: ETF1_n0 | OS up, system check running
+2026-10-06T22:26:15+08:00 Loop 1: ETF1_n3 | system check done
+2026-10-06T22:26:15+08:00 Loop 1: ETF1_n3 | DONE
+2026-10-06T22:26:15+08:00 ETF1_n3 | LOOP 1 | FAIL
+2026-10-06T22:26:15+08:00   Duration: 00:03:22
+2026-10-06T22:26:15+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:26:15+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:28 · new:29
+2026-10-06T22:26:15+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:26:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:26:15+08:00 Loop 1: ETF1_n1 | system check done
+2026-10-06T22:26:15+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:26:15+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:26:15+08:00 Loop 1: ETF1_n1 | DONE
+2026-10-06T22:26:15+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:26:15+08:00 ETF1_n1 | LOOP 1 | FAIL
+2026-10-06T22:26:15+08:00   Duration: 00:03:22
+2026-10-06T22:26:15+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:26:15+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:26:15+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:26:15+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:26:21+08:00 Loop 1: ETF1_n2 | system check done
+2026-10-06T22:26:21+08:00 Loop 1: ETF1_n2 | DONE
+2026-10-06T22:26:21+08:00 ETF1_n2 | LOOP 1 | FAIL
+2026-10-06T22:26:21+08:00   Duration: 00:03:28
+2026-10-06T22:26:21+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:26:21+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:26:21+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:26:21+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:26:51+08:00 Loop 1: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:27:21+08:00 Loop 1: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:27:34+08:00 Loop 1: ETF1_n0 | system check done
+2026-10-06T22:27:34+08:00 Loop 1: ETF1_n0 | DONE
+2026-10-06T22:27:34+08:00 ETF1_n0 | LOOP 1 | FAIL
+2026-10-06T22:27:34+08:00   Duration: 00:04:41
+2026-10-06T22:27:34+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor FAIL | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:27:34+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:27:34+08:00   Previously observed in PRE: 1 finding(s); see PRE and HTML for details
+2026-10-06T22:27:34+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:27:34+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:27:34+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:27:34+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:27:34+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:27:34+08:00   FAIL NVMeE1SSSD0Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:27:34+08:00   FAIL NVMeE1SSSD1Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:27:34+08:00 Loop 2: starting 4 target(s) concurrently
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n2 | reboot sent
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n2 | waiting OS boot
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n1 | reboot sent
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n1 | waiting OS boot
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n3 | reboot sent
+2026-10-06T22:27:41+08:00 Loop 2: ETF1_n3 | waiting OS boot
+2026-10-06T22:27:46+08:00 Loop 2: ETF1_n0 | reboot sent
+2026-10-06T22:27:46+08:00 Loop 2: ETF1_n0 | waiting OS boot
+2026-10-06T22:28:04+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:28:34+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:29:04+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:29:34+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:30:04+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:30:18+08:00 Loop 2: ETF1_n2 | OS up, system check running
+2026-10-06T22:30:24+08:00 Loop 2: ETF1_n1 | OS up, system check running
+2026-10-06T22:30:24+08:00 Loop 2: ETF1_n3 | OS up, system check running
+2026-10-06T22:30:34+08:00 Loop 2: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:30:42+08:00 Loop 2: ETF1_n0 | OS up, system check running
+2026-10-06T22:30:56+08:00 Loop 2: ETF1_n2 | system check done
+2026-10-06T22:30:56+08:00 Loop 2: ETF1_n2 | DONE
+2026-10-06T22:30:56+08:00 ETF1_n2 | LOOP 2 | FAIL
+2026-10-06T22:30:56+08:00   Duration: 00:03:16
+2026-10-06T22:30:56+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:30:56+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:56 · new:32
+2026-10-06T22:30:56+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:30:56+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:30:56+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:30:56+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:30:56+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:31:01+08:00 Loop 2: ETF1_n3 | system check done
+2026-10-06T22:31:01+08:00 Loop 2: ETF1_n3 | DONE
+2026-10-06T22:31:01+08:00 ETF1_n3 | LOOP 2 | FAIL
+2026-10-06T22:31:01+08:00   Duration: 00:03:21
+2026-10-06T22:31:01+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:31:01+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:56 · new:28
+2026-10-06T22:31:01+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:31:01+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:31:01+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:31:01+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:31:01+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:31:02+08:00 Loop 2: ETF1_n1 | system check done
+2026-10-06T22:31:02+08:00 Loop 2: ETF1_n1 | DONE
+2026-10-06T22:31:02+08:00 ETF1_n1 | LOOP 2 | FAIL
+2026-10-06T22:31:02+08:00   Duration: 00:03:22
+2026-10-06T22:31:02+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:31:02+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:31:02+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:31:02+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:31:32+08:00 Loop 2: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:32:02+08:00 Loop 2: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:32:15+08:00 Loop 2: ETF1_n0 | system check done
+2026-10-06T22:32:15+08:00 Loop 2: ETF1_n0 | DONE
+2026-10-06T22:32:15+08:00 ETF1_n0 | LOOP 2 | FAIL
+2026-10-06T22:32:15+08:00   Duration: 00:04:31
+2026-10-06T22:32:15+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor FAIL | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:32:15+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:49 · new:27
+2026-10-06T22:32:15+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:32:15+08:00   Previously observed in PRE: 1 finding(s); see PRE and HTML for details
+2026-10-06T22:32:15+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:32:15+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:32:15+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:32:15+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:32:15+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:32:15+08:00   FAIL NVMeE1SSSD0Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:32:15+08:00   FAIL NVMeE1SSSD1Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:32:15+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:32:15+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:32:15+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:32:15+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:32:15+08:00 Loop 3: starting 4 target(s) concurrently
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n3 | reboot sent
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n3 | waiting OS boot
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n2 | reboot sent
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n2 | waiting OS boot
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n1 | reboot sent
+2026-10-06T22:32:22+08:00 Loop 3: ETF1_n1 | waiting OS boot
+2026-10-06T22:32:27+08:00 Loop 3: ETF1_n0 | reboot sent
+2026-10-06T22:32:27+08:00 Loop 3: ETF1_n0 | waiting OS boot
+2026-10-06T22:32:45+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:33:15+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:33:45+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:34:15+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:34:45+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:35:00+08:00 Loop 3: ETF1_n2 | OS up, system check running
+2026-10-06T22:35:07+08:00 Loop 3: ETF1_n3 | OS up, system check running
+2026-10-06T22:35:07+08:00 Loop 3: ETF1_n1 | OS up, system check running
+2026-10-06T22:35:15+08:00 Loop 3: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:35:37+08:00 Loop 3: ETF1_n2 | system check done
+2026-10-06T22:35:37+08:00 Loop 3: ETF1_n2 | DONE
+2026-10-06T22:35:37+08:00 ETF1_n2 | LOOP 3 | FAIL
+2026-10-06T22:35:37+08:00   Duration: 00:03:16
+2026-10-06T22:35:37+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:35:37+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:87 · new:31
+2026-10-06T22:35:37+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:35:37+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:35:37+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:35:37+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:35:37+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:35:38+08:00 Loop 3: ETF1_n0 | OS up, system check running
+2026-10-06T22:35:44+08:00 Loop 3: ETF1_n3 | system check done
+2026-10-06T22:35:44+08:00 Loop 3: ETF1_n3 | DONE
+2026-10-06T22:35:44+08:00 ETF1_n3 | LOOP 3 | FAIL
+2026-10-06T22:35:44+08:00   Duration: 00:03:23
+2026-10-06T22:35:44+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:35:44+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:87 · new:31
+2026-10-06T22:35:44+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:35:44+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:35:44+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:35:44+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:35:44+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:35:45+08:00 Loop 3: ETF1_n1 | system check done
+2026-10-06T22:35:45+08:00 Loop 3: ETF1_n1 | DONE
+2026-10-06T22:35:45+08:00 ETF1_n1 | LOOP 3 | FAIL
+2026-10-06T22:35:45+08:00   Duration: 00:03:24
+2026-10-06T22:35:45+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:35:45+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:35:45+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:35:45+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:36:15+08:00 Loop 3: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:36:45+08:00 Loop 3: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:37:15+08:00 Loop 3: ETF1_n0 | system check done
+2026-10-06T22:37:15+08:00 Loop 3: ETF1_n0 | DONE
+2026-10-06T22:37:15+08:00 ETF1_n0 | LOOP 3 | FAIL
+2026-10-06T22:37:15+08:00   Duration: 00:04:49
+2026-10-06T22:37:15+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor FAIL | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:37:15+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:80 · new:31
+2026-10-06T22:37:15+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:37:15+08:00   Previously observed in PRE: 1 finding(s); see PRE and HTML for details
+2026-10-06T22:37:15+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:37:15+08:00   WARN PrMo0CPU0EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:37:15+08:00   WARN PrMo0CPU1EnfEDP0: 2 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:37:15+08:00   WARN PrMo0MeCn0MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:37:15+08:00   WARN PrMo0MeCn1MeTem0: 4 rows share this sensor name; review each row (repeated 2 times)
+2026-10-06T22:37:15+08:00   FAIL NVMeE1SSSD0Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:37:15+08:00   FAIL NVMeE1SSSD1Temp0: Missing 1 baseline row(s) after confirmation
+2026-10-06T22:37:15+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:37:15+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:37:15+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:37:15+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:37:15+08:00 Loop 4: starting 4 target(s) concurrently
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n1 | reboot sent
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n1 | waiting OS boot
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n2 | reboot sent
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n2 | waiting OS boot
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n3 | reboot sent
+2026-10-06T22:37:22+08:00 Loop 4: ETF1_n3 | waiting OS boot
+2026-10-06T22:37:29+08:00 Loop 4: ETF1_n0 | reboot sent
+2026-10-06T22:37:29+08:00 Loop 4: ETF1_n0 | waiting OS boot
+2026-10-06T22:37:45+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:38:15+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:38:45+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:39:15+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:39:45+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:40:02+08:00 Loop 4: ETF1_n2 | OS up, system check running
+2026-10-06T22:40:07+08:00 Loop 4: ETF1_n1 | OS up, system check running
+2026-10-06T22:40:07+08:00 Loop 4: ETF1_n3 | OS up, system check running
+2026-10-06T22:40:15+08:00 Loop 4: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:40:40+08:00 Loop 4: ETF1_n2 | system check done
+2026-10-06T22:40:40+08:00 Loop 4: ETF1_n2 | DONE
+2026-10-06T22:40:40+08:00 ETF1_n2 | LOOP 4 | FAIL
+2026-10-06T22:40:40+08:00   Duration: 00:03:19
+2026-10-06T22:40:40+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:40:40+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:118 · new:31
+2026-10-06T22:40:40+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:40:40+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:40:40+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:40:40+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:40:40+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:40:40+08:00 Loop 4: ETF1_n0 | OS up, system check running
+2026-10-06T22:40:45+08:00 Loop 4: ETF1_n3 | system check done
+2026-10-06T22:40:45+08:00 Loop 4: ETF1_n3 | DONE
+2026-10-06T22:40:45+08:00 ETF1_n3 | LOOP 4 | FAIL
+2026-10-06T22:40:45+08:00   Duration: 00:03:24
+2026-10-06T22:40:45+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:40:45+08:00 Loop 4: ETF1_n1 | system check done
+2026-10-06T22:40:45+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:120 · new:35
+2026-10-06T22:40:45+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:40:45+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:40:45+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:40:45+08:00 Loop 4: ETF1_n1 | DONE
+2026-10-06T22:40:45+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:40:45+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:40:45+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:40:45+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:40:45+08:00 ETF1_n1 | LOOP 4 | FAIL
+2026-10-06T22:40:45+08:00   Duration: 00:03:24
+2026-10-06T22:40:45+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog PASS | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:40:45+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:40:45+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:40:45+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:41:15+08:00 Loop 4: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:41:35+08:00 Loop 4: ETF1_n0 | system check done
+2026-10-06T22:41:35+08:00 Loop 4: ETF1_n0 | DONE
+2026-10-06T22:41:35+08:00 ETF1_n0 | LOOP 4 | FAIL
+2026-10-06T22:41:35+08:00   Duration: 00:04:07
+2026-10-06T22:41:35+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:41:35+08:00   EventLog: FAIL · Critical:8 Warning:0 OK:106 · new:30
+2026-10-06T22:41:35+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:41:35+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:41:35+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:41:35+08:00 Loop 5: starting 4 target(s) concurrently
+2026-10-06T22:41:42+08:00 Loop 5: ETF1_n2 | reboot sent
+2026-10-06T22:41:42+08:00 Loop 5: ETF1_n2 | waiting OS boot
+2026-10-06T22:41:43+08:00 Loop 5: ETF1_n1 | reboot sent
+2026-10-06T22:41:43+08:00 Loop 5: ETF1_n1 | waiting OS boot
+2026-10-06T22:41:43+08:00 Loop 5: ETF1_n3 | reboot sent
+2026-10-06T22:41:43+08:00 Loop 5: ETF1_n3 | waiting OS boot
+2026-10-06T22:41:49+08:00 Loop 5: ETF1_n0 | reboot sent
+2026-10-06T22:41:49+08:00 Loop 5: ETF1_n0 | waiting OS boot
+2026-10-06T22:42:05+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:42:35+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:43:05+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:43:35+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:44:05+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:44:22+08:00 Loop 5: ETF1_n2 | OS up, system check running
+2026-10-06T22:44:27+08:00 Loop 5: ETF1_n1 | OS up, system check running
+2026-10-06T22:44:27+08:00 Loop 5: ETF1_n3 | OS up, system check running
+2026-10-06T22:44:35+08:00 Loop 5: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:45:00+08:00 Loop 5: ETF1_n2 | system check done
+2026-10-06T22:45:00+08:00 Loop 5: ETF1_n2 | DONE
+2026-10-06T22:45:00+08:00 ETF1_n2 | LOOP 5 | FAIL
+2026-10-06T22:45:00+08:00   Duration: 00:03:19
+2026-10-06T22:45:00+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:45:00+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:149 · new:31
+2026-10-06T22:45:00+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:45:00+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:45:00+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:45:00+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:45:00+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:45:05+08:00 Loop 5: ETF1_n1 | system check done
+2026-10-06T22:45:05+08:00 Loop 5: ETF1_n1 | DONE
+2026-10-06T22:45:05+08:00 ETF1_n1 | LOOP 5 | FAIL
+2026-10-06T22:45:05+08:00   Duration: 00:03:24
+2026-10-06T22:45:05+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:45:05+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:149 · new:35
+2026-10-06T22:45:05+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:45:05+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:45:05+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:45:05+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:45:05+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:45:06+08:00 Loop 5: ETF1_n3 | system check done
+2026-10-06T22:45:06+08:00 Loop 5: ETF1_n3 | DONE
+2026-10-06T22:45:06+08:00 ETF1_n3 | LOOP 5 | FAIL
+2026-10-06T22:45:06+08:00   Duration: 00:03:25
+2026-10-06T22:45:06+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:45:06+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:150 · new:31
+2026-10-06T22:45:06+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:45:06+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:45:06+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:45:06+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:45:06+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:45:06+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:45:06+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:45:13+08:00 Loop 5: ETF1_n0 | OS up, system check running
+2026-10-06T22:45:36+08:00 Loop 5: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:46:00+08:00 Loop 5: ETF1_n0 | system check done
+2026-10-06T22:46:00+08:00 Loop 5: ETF1_n0 | DONE
+2026-10-06T22:46:00+08:00 ETF1_n0 | LOOP 5 | FAIL
+2026-10-06T22:46:00+08:00   Duration: 00:04:12
+2026-10-06T22:46:00+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:46:00+08:00   EventLog: FAIL · Critical:8 Warning:0 OK:137 · new:31
+2026-10-06T22:46:00+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:46:00+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:46:00+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:46:00+08:00 Loop 6: starting 4 target(s) concurrently
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n2 | reboot sent
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n2 | waiting OS boot
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n1 | reboot sent
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n1 | waiting OS boot
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n3 | reboot sent
+2026-10-06T22:46:08+08:00 Loop 6: ETF1_n3 | waiting OS boot
+2026-10-06T22:46:10+08:00 Loop 6: ETF1_n0 | reboot sent
+2026-10-06T22:46:10+08:00 Loop 6: ETF1_n0 | waiting OS boot
+2026-10-06T22:46:30+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:47:00+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:47:30+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:48:00+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:48:30+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:48:48+08:00 Loop 6: ETF1_n2 | OS up, system check running
+2026-10-06T22:48:51+08:00 Loop 6: ETF1_n1 | OS up, system check running
+2026-10-06T22:48:51+08:00 Loop 6: ETF1_n3 | OS up, system check running
+2026-10-06T22:49:00+08:00 Loop 6: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:49:25+08:00 Loop 6: ETF1_n2 | system check done
+2026-10-06T22:49:25+08:00 Loop 6: ETF1_n2 | DONE
+2026-10-06T22:49:25+08:00 ETF1_n2 | LOOP 6 | FAIL
+2026-10-06T22:49:25+08:00   Duration: 00:03:18
+2026-10-06T22:49:25+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:49:25+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:49:25+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:49:25+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:49:25+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:49:25+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:49:25+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:49:29+08:00 Loop 6: ETF1_n3 | system check done
+2026-10-06T22:49:29+08:00 Loop 6: ETF1_n1 | system check done
+2026-10-06T22:49:29+08:00 Loop 6: ETF1_n3 | DONE
+2026-10-06T22:49:29+08:00 ETF1_n3 | LOOP 6 | FAIL
+2026-10-06T22:49:29+08:00   Duration: 00:03:22
+2026-10-06T22:49:29+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:49:29+08:00 Loop 6: ETF1_n1 | DONE
+2026-10-06T22:49:29+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:150 · new:31
+2026-10-06T22:49:29+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:49:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:49:29+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:49:29+08:00 ETF1_n1 | LOOP 6 | FAIL
+2026-10-06T22:49:29+08:00   Duration: 00:03:22
+2026-10-06T22:49:29+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:49:29+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:49:29+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:49:29+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:49:29+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:49:29+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:49:32+08:00 Loop 6: ETF1_n0 | OS up, system check running
+2026-10-06T22:49:59+08:00 Loop 6: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:50:20+08:00 Loop 6: ETF1_n0 | system check done
+2026-10-06T22:50:20+08:00 Loop 6: ETF1_n0 | DONE
+2026-10-06T22:50:20+08:00 ETF1_n0 | LOOP 6 | FAIL
+2026-10-06T22:50:20+08:00   Duration: 00:04:11
+2026-10-06T22:50:20+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:50:20+08:00   EventLog: FAIL · Critical:8 Warning:0 OK:150 · new:31
+2026-10-06T22:50:20+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:50:20+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:50:20+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:50:20+08:00 Loop 7: starting 4 target(s) concurrently
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n3 | reboot sent
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n3 | waiting OS boot
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n2 | reboot sent
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n2 | waiting OS boot
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n1 | reboot sent
+2026-10-06T22:50:27+08:00 Loop 7: ETF1_n1 | waiting OS boot
+2026-10-06T22:50:30+08:00 Loop 7: ETF1_n0 | reboot sent
+2026-10-06T22:50:30+08:00 Loop 7: ETF1_n0 | waiting OS boot
+2026-10-06T22:50:50+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:51:20+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:51:50+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:52:20+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:52:50+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:53:10+08:00 Loop 7: ETF1_n3 | OS up, system check running
+2026-10-06T22:53:13+08:00 Loop 7: ETF1_n1 | OS up, system check running
+2026-10-06T22:53:20+08:00 Loop 7: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: waiting OS boot, ETF1_n3: OS up, system check running
+2026-10-06T22:53:33+08:00 Loop 7: ETF1_n2 | OS up, system check running
+2026-10-06T22:53:39+08:00 Loop 7: ETF1_n0 | OS up, system check running
+2026-10-06T22:53:48+08:00 Loop 7: ETF1_n3 | system check done
+2026-10-06T22:53:48+08:00 Loop 7: ETF1_n3 | DONE
+2026-10-06T22:53:48+08:00 ETF1_n3 | LOOP 7 | FAIL
+2026-10-06T22:53:48+08:00   Duration: 00:03:22
+2026-10-06T22:53:48+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:53:48+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:150 · new:31
+2026-10-06T22:53:48+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:53:48+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:53:48+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:53:48+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:53:48+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:53:48+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:53:48+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:53:52+08:00 Loop 7: ETF1_n1 | system check done
+2026-10-06T22:53:52+08:00 Loop 7: ETF1_n1 | DONE
+2026-10-06T22:53:52+08:00 ETF1_n1 | LOOP 7 | FAIL
+2026-10-06T22:53:52+08:00   Duration: 00:03:26
+2026-10-06T22:53:52+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:53:52+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:53:52+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:53:52+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:53:52+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:53:52+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:53:52+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:54:11+08:00 Loop 7: ETF1_n2 | system check done
+2026-10-06T22:54:11+08:00 Loop 7: ETF1_n2 | DONE
+2026-10-06T22:54:11+08:00 ETF1_n2 | LOOP 7 | FAIL
+2026-10-06T22:54:11+08:00   Duration: 00:03:45
+2026-10-06T22:54:11+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:54:11+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:54:11+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:54:11+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:54:11+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:54:11+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:54:11+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:54:36+08:00 Loop 7: ETF1_n0 | system check done
+2026-10-06T22:54:36+08:00 Loop 7: ETF1_n0 | DONE
+2026-10-06T22:54:36+08:00 ETF1_n0 | LOOP 7 | FAIL
+2026-10-06T22:54:36+08:00   Duration: 00:04:07
+2026-10-06T22:54:36+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:54:36+08:00   EventLog: FAIL · Critical:13 Warning:0 OK:150 · new:31
+2026-10-06T22:54:36+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:54:36+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:54:36+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 201 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 202 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 203 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 204 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:54:36+08:00   FAIL eventlog: Redfish EventLog: 205 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T22:54:36+08:00 Loop 8: starting 4 target(s) concurrently
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n3 | reboot sent
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n3 | waiting OS boot
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n2 | reboot sent
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n2 | waiting OS boot
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n1 | reboot sent
+2026-10-06T22:54:43+08:00 Loop 8: ETF1_n1 | waiting OS boot
+2026-10-06T22:54:50+08:00 Loop 8: ETF1_n0 | reboot sent
+2026-10-06T22:54:50+08:00 Loop 8: ETF1_n0 | waiting OS boot
+2026-10-06T22:55:06+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:55:36+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:56:06+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:56:36+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:57:06+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:57:21+08:00 Loop 8: ETF1_n2 | OS up, system check running
+2026-10-06T22:57:26+08:00 Loop 8: ETF1_n3 | OS up, system check running
+2026-10-06T22:57:26+08:00 Loop 8: ETF1_n1 | OS up, system check running
+2026-10-06T22:57:36+08:00 Loop 8: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T22:57:59+08:00 Loop 8: ETF1_n2 | system check done
+2026-10-06T22:57:59+08:00 Loop 8: ETF1_n2 | DONE
+2026-10-06T22:57:59+08:00 ETF1_n2 | LOOP 8 | FAIL
+2026-10-06T22:57:59+08:00   Duration: 00:03:17
+2026-10-06T22:57:59+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:57:59+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:57:59+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:57:59+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:57:59+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:57:59+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:57:59+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:58:01+08:00 Loop 8: ETF1_n0 | OS up, system check running
+2026-10-06T22:58:04+08:00 Loop 8: ETF1_n3 | system check done
+2026-10-06T22:58:04+08:00 Loop 8: ETF1_n3 | DONE
+2026-10-06T22:58:04+08:00 ETF1_n3 | LOOP 8 | FAIL
+2026-10-06T22:58:04+08:00   Duration: 00:03:22
+2026-10-06T22:58:04+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:58:04+08:00   EventLog: FAIL · Critical:6 Warning:0 OK:150 · new:35
+2026-10-06T22:58:04+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:58:04+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:58:04+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 228 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:58:04+08:00   FAIL eventlog: Redfish EventLog: 229 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:58:05+08:00 Loop 8: ETF1_n1 | system check done
+2026-10-06T22:58:05+08:00 Loop 8: ETF1_n1 | DONE
+2026-10-06T22:58:05+08:00 ETF1_n1 | LOOP 8 | FAIL
+2026-10-06T22:58:05+08:00   Duration: 00:03:23
+2026-10-06T22:58:05+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:58:05+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T22:58:05+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:58:05+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:58:05+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:58:05+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T22:58:05+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T22:58:35+08:00 Loop 8: still running — ETF1_n0: OS up, system check running
+2026-10-06T22:58:55+08:00 Loop 8: ETF1_n0 | system check done
+2026-10-06T22:58:55+08:00 Loop 8: ETF1_n0 | DONE
+2026-10-06T22:58:55+08:00 ETF1_n0 | LOOP 8 | FAIL
+2026-10-06T22:58:55+08:00   Duration: 00:04:07
+2026-10-06T22:58:55+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T22:58:55+08:00   EventLog: FAIL · Critical:14 Warning:0 OK:150 · new:32
+2026-10-06T22:58:55+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T22:58:55+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T22:58:55+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 201 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 202 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 203 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 204 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 205 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T22:58:55+08:00   FAIL eventlog: Redfish EventLog: 237 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T22:58:55+08:00 Loop 9: starting 4 target(s) concurrently
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n1 | reboot sent
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n1 | waiting OS boot
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n3 | reboot sent
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n3 | waiting OS boot
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n2 | reboot sent
+2026-10-06T22:59:03+08:00 Loop 9: ETF1_n2 | waiting OS boot
+2026-10-06T22:59:09+08:00 Loop 9: ETF1_n0 | reboot sent
+2026-10-06T22:59:09+08:00 Loop 9: ETF1_n0 | waiting OS boot
+2026-10-06T22:59:25+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T22:59:55+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:00:25+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:00:55+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:01:25+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:01:43+08:00 Loop 9: ETF1_n2 | OS up, system check running
+2026-10-06T23:01:48+08:00 Loop 9: ETF1_n3 | OS up, system check running
+2026-10-06T23:01:48+08:00 Loop 9: ETF1_n1 | OS up, system check running
+2026-10-06T23:01:55+08:00 Loop 9: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T23:02:21+08:00 Loop 9: ETF1_n0 | OS up, system check running
+2026-10-06T23:02:21+08:00 Loop 9: ETF1_n2 | system check done
+2026-10-06T23:02:21+08:00 Loop 9: ETF1_n2 | DONE
+2026-10-06T23:02:21+08:00 ETF1_n2 | LOOP 9 | FAIL
+2026-10-06T23:02:21+08:00   Duration: 00:03:19
+2026-10-06T23:02:21+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:02:21+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T23:02:21+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:02:21+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:02:21+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:02:21+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:21+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:26+08:00 Loop 9: ETF1_n1 | system check done
+2026-10-06T23:02:26+08:00 Loop 9: ETF1_n1 | DONE
+2026-10-06T23:02:26+08:00 ETF1_n1 | LOOP 9 | FAIL
+2026-10-06T23:02:26+08:00   Duration: 00:03:24
+2026-10-06T23:02:26+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:02:26+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T23:02:26+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:02:26+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:02:26+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:26+08:00 Loop 9: ETF1_n3 | system check done
+2026-10-06T23:02:26+08:00 Loop 9: ETF1_n3 | DONE
+2026-10-06T23:02:26+08:00 ETF1_n3 | LOOP 9 | FAIL
+2026-10-06T23:02:26+08:00   Duration: 00:03:24
+2026-10-06T23:02:26+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:02:26+08:00   EventLog: FAIL · Critical:8 Warning:0 OK:150 · new:35
+2026-10-06T23:02:26+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:02:26+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:02:26+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 228 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 229 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 258 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:02:26+08:00   FAIL eventlog: Redfish EventLog: 259 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:02:56+08:00 Loop 9: still running — ETF1_n0: OS up, system check running
+2026-10-06T23:03:16+08:00 Loop 9: ETF1_n0 | system check done
+2026-10-06T23:03:16+08:00 Loop 9: ETF1_n0 | DONE
+2026-10-06T23:03:16+08:00 ETF1_n0 | LOOP 9 | FAIL
+2026-10-06T23:03:16+08:00   Duration: 00:04:08
+2026-10-06T23:03:16+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:03:16+08:00   EventLog: FAIL · Critical:17 Warning:0 OK:150 · new:36
+2026-10-06T23:03:16+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:03:16+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:03:16+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 201 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 202 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 203 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 204 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 205 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 237 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 246 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 247 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:03:16+08:00   FAIL eventlog: Redfish EventLog: 273 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:03:16+08:00 Loop 10: starting 4 target(s) concurrently
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n1 | reboot sent
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n1 | waiting OS boot
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n3 | reboot sent
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n3 | waiting OS boot
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n2 | reboot sent
+2026-10-06T23:03:23+08:00 Loop 10: ETF1_n2 | waiting OS boot
+2026-10-06T23:03:30+08:00 Loop 10: ETF1_n0 | reboot sent
+2026-10-06T23:03:30+08:00 Loop 10: ETF1_n0 | waiting OS boot
+2026-10-06T23:03:46+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:04:16+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:04:46+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:05:16+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:05:46+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: waiting OS boot, ETF1_n2: waiting OS boot, ETF1_n3: waiting OS boot
+2026-10-06T23:06:01+08:00 Loop 10: ETF1_n2 | OS up, system check running
+2026-10-06T23:06:06+08:00 Loop 10: ETF1_n1 | OS up, system check running
+2026-10-06T23:06:06+08:00 Loop 10: ETF1_n3 | OS up, system check running
+2026-10-06T23:06:16+08:00 Loop 10: still running — ETF1_n0: waiting OS boot, ETF1_n1: OS up, system check running, ETF1_n2: OS up, system check running, ETF1_n3: OS up, system check running
+2026-10-06T23:06:40+08:00 Loop 10: ETF1_n2 | system check done
+2026-10-06T23:06:40+08:00 Loop 10: ETF1_n2 | DONE
+2026-10-06T23:06:40+08:00 ETF1_n2 | LOOP 10 | FAIL
+2026-10-06T23:06:40+08:00   Duration: 00:03:18
+2026-10-06T23:06:40+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:06:40+08:00   EventLog: FAIL · Critical:2 Warning:0 OK:150 · new:31
+2026-10-06T23:06:40+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:06:40+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:06:40+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:06:40+08:00   FAIL eventlog: Redfish EventLog: 33 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:40+08:00   FAIL eventlog: Redfish EventLog: 34 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00 Loop 10: ETF1_n3 | system check done
+2026-10-06T23:06:44+08:00 Loop 10: ETF1_n3 | DONE
+2026-10-06T23:06:44+08:00 ETF1_n3 | LOOP 10 | FAIL
+2026-10-06T23:06:44+08:00   Duration: 00:03:22
+2026-10-06T23:06:44+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:06:44+08:00   EventLog: FAIL · Critical:8 Warning:0 OK:150 · new:31
+2026-10-06T23:06:44+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:06:44+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:06:44+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 8 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 9 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 96 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 97 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 228 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 229 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 258 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 259 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00 Loop 10: ETF1_n1 | system check done
+2026-10-06T23:06:44+08:00 Loop 10: ETF1_n1 | DONE
+2026-10-06T23:06:44+08:00 ETF1_n1 | LOOP 10 | FAIL
+2026-10-06T23:06:44+08:00   Duration: 00:03:22
+2026-10-06T23:06:44+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:06:44+08:00   EventLog: FAIL · Critical:4 Warning:0 OK:150 · new:35
+2026-10-06T23:06:44+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:06:44+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:06:44+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 123 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 124 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 282 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:06:44+08:00   FAIL eventlog: Redfish EventLog: 283 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:06:52+08:00 Loop 10: ETF1_n0 | OS up, system check running
+2026-10-06T23:07:14+08:00 Loop 10: still running — ETF1_n0: OS up, system check running
+2026-10-06T23:07:39+08:00 Loop 10: ETF1_n0 | system check done
+2026-10-06T23:07:39+08:00 Loop 10: ETF1_n0 | DONE
+2026-10-06T23:07:39+08:00 ETF1_n0 | LOOP 10 | FAIL
+2026-10-06T23:07:39+08:00   Duration: 00:04:11
+2026-10-06T23:07:39+08:00   Checks: dmesg WARN | pci PASS | hardware FAIL | sensor WARN | sel PASS | eventlog FAIL | redfish_sel PASS | power PASS | CPU PASS | CPU_ONLINE PASS | DIMM PASS | MEMORY_VISIBLE PASS | NVMe PASS | BF4 FAIL
+2026-10-06T23:07:39+08:00   EventLog: FAIL · Critical:17 Warning:0 OK:150 · new:31
+2026-10-06T23:07:39+08:00   New dmesg observations: WARN=1, FAIL=0
+2026-10-06T23:07:39+08:00   Previously observed in PRE: 5 finding(s); see PRE and HTML for details
+2026-10-06T23:07:39+08:00   WARN apei: APEI 8193: corrected; {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8193
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 48 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 49 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 50 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 51 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 109 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 110 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 111 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 112 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 201 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 202 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 203 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 204 Error Code Major 0x00071000:Redfish service failure. Configuration at BMC may not be up-to-date.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 205 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 237 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 246 The drive located in 'NVMe E1.S Slot 1' was removed.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 247 The drive located in 'NVMe E1.S Slot 0' was removed.
+2026-10-06T23:07:39+08:00   FAIL eventlog: Redfish EventLog: 273 Error Code Major 0xc1030001:Failed to send SMBIOS tables to BMC
+2026-10-06T23:07:40+08:00 ============================================================
+2026-10-06T23:07:40+08:00 FINISHED: COMPLETE | Health: FAIL | Completed node-loops: 40
+2026-10-06T23:07:40+08:00 Campaign elapsed: 00:44:56
+2026-10-06T23:07:40+08:00 Report: /root/sheng/vera-cycle/campaigns/neutrino_reboot_inband_20261006_222112_ec4225/CYCLE_REVIEW_REPORT.html
+2026-10-06T23:07:40+08:00 ============================================================
