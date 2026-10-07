@@ -1001,5 +1001,75 @@ class HttpGateTests(unittest.TestCase):
             case.tearDown()
 
 
+class ReferencedEntryIntegrityTests(RedfishSessionCase):
+    """A referenced member that is unreadable must fail closed, not PASS.
+
+    ``_redfish_json`` returning ``None`` only covers truncated/non-JSON bodies.
+    A successfully decoded but empty ``{}`` (or an object missing both Id and
+    Message) previously normalised to a blank OK entry, so a malformed reference
+    produced a false PASS. These pin the fail-closed behaviour and prove a
+    genuine entry - including one with an unknown/blank severity - is untouched.
+    """
+    REF = '/redfish/v1/Systems/System_0/LogServices/EventLog/Entries/42'
+
+    def _reference_only(self, body):
+        self.fake.routes[self.REF] = body if isinstance(body, Command) else Command(0, body)
+        self.fake.eventlog_pages = [{"Members": [{"@odata.id": self.REF}]}]
+
+    def test_truncated_reference_is_collection_failure(self):
+        self._reference_only('{')
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['status'], 'FAILED')
+        self.assertNotEqual(record['status'], 'PASS')
+        self.assertIn('REDFISH_COLLECTION_FAILED', [i['code'] for i in record['issues']])
+
+    def test_empty_object_reference_is_collection_failure(self):
+        self._reference_only('{}')
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['status'], 'FAILED')
+        self.assertNotEqual(record['status'], 'PASS')
+        self.assertIn('REDFISH_COLLECTION_FAILED', [i['code'] for i in record['issues']])
+
+    def test_missing_identity_reference_is_collection_failure(self):
+        self._reference_only(json.dumps({"Severity": "OK"}))
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['status'], 'FAILED')
+        self.assertNotEqual(record['status'], 'PASS')
+
+    def test_valid_warning_reference_is_a_warn_finding(self):
+        self._reference_only(json.dumps(entry(42, "Warning", "via reference")))
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['verdict'], 'WARN')
+        self.assertEqual(record['eventlog_entries'][0]['id'], '42')
+
+    def test_valid_critical_reference_is_a_fail_finding(self):
+        self._reference_only(json.dumps(entry(42, "Critical", "via reference")))
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['verdict'], 'FAIL')
+        self.assertEqual(record['eventlog_entries'][0]['id'], '42')
+
+    def test_valid_ok_reference_is_pass(self):
+        self._reference_only(json.dumps(entry(42, "OK", "fine")))
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['verdict'], 'PASS')
+        self.assertEqual(record['eventlog_meta']['status'], 'COLLECTED')
+
+    def test_valid_unknown_severity_reference_is_not_collection_failure(self):
+        # A vendor entry with a blank/unknown severity is a VALID event.
+        self._reference_only(json.dumps({"Id": "42", "Severity": "", "Message": "vendor note"}))
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['status'], 'COLLECTED')
+        self.assertNotIn('REDFISH_COLLECTION_FAILED', [i['code'] for i in record['issues']])
+
+    def test_one_bad_member_among_good_fails_the_collection(self):
+        good = '/redfish/v1/Systems/System_0/LogServices/EventLog/Entries/1'
+        self.fake.routes[good] = Command(0, json.dumps(entry(1, "OK", "fine")))
+        self.fake.routes[self.REF] = Command(0, '{}')
+        self.fake.eventlog_pages = [{"Members": [{"@odata.id": good}, {"@odata.id": self.REF}]}]
+        record = self.collect()
+        self.assertEqual(record['eventlog_meta']['status'], 'FAILED')
+        self.assertNotEqual(record['status'], 'PASS')
+
+
 if __name__ == '__main__':
     unittest.main()
