@@ -67,6 +67,12 @@ class SpecificationTests(unittest.TestCase):
             self.assertIn(label, page)
         for value in ("PASS", "WARN", "FAIL", "KNOWN", "NEW", "COMPLETE", "INCOMPLETE"):
             self.assertIn(value, page)
+        self.assertIn("NIC_DEGRADED", page)
+        self.assertIn("NIC_MISSING", page)
+        self.assertIn("REDFISH_LOGOUT_FAILED", page)
+        self.assertIn("not a valid LogEntry", page)
+        self.assertNotIn("WORSENED", page)
+        self.assertNotIn("worsened", page.lower())
 
     def test_specification_stays_project_independent_and_formal(self):
         page = render_specification()

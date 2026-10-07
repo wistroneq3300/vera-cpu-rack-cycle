@@ -295,30 +295,30 @@ ITEMS = [
         "18", "redfish-eventlog", t("Redfish EventLog", "Redfish EventLog"), PRE_POST,
         t("Authenticated Redfish：`/redfish/v1/Systems` → `<System>/LogServices` → `Entries`；dynamic discovery、pagination 與 member reference resolution。", "Authenticated Redfish: `/redfish/v1/Systems` → `<System>/LogServices` → `Entries`; dynamic discovery, pagination, and member-reference resolution."),
         t("收集 EventLog 並以最高 severity 判定，讓 PRE 與每次 loop 的新增事件可追溯。", "Collect EventLog and evaluate it by worst severity so PRE and each loop's new events are traceable."),
-        t("每次 capture 重新 login；HTTP status gate 必須成功；不把 invalid JSON、bad Members 或 page 2 failure 當作空 collection。", "Login again for each capture; the HTTP status gate must succeed; invalid JSON, bad Members, or a page-2 failure is not treated as an empty collection."),
+        t("每次 capture 重新 login；HTTP status gate 必須成功；不把 invalid JSON、empty object、缺少 Id/Message 的 referenced member 或 page 2 failure 當作空 collection。capture 完成後會 release session；logout 未確認會留下 WARN evidence。", "Login again for each capture; the HTTP status gate must succeed; invalid JSON, an empty object, a referenced member missing Id/Message, or a page-2 failure is not treated as an empty collection. The session is released after capture; an unconfirmed logout leaves a WARN finding and evidence."),
         t("Critical → FAIL；Warning → WARN；只有 OK 或空 collection → PASS。可讀取 listing 且沒有此 service 是 `NOT PRESENT` / PASS。", "Critical → FAIL; Warning → WARN; only OK or an empty collection → PASS. A readable listing with no such service is `NOT PRESENT` / PASS."),
         t("沒有 Critical/Warning 且 collection 完整。", "There are no Critical/Warning entries and the collection is complete."),
         t("Warning entry；或 clear action 回報 warning。", "A Warning entry; or a clear action reports a warning."),
-        t("Critical entry、discovery/collection unavailable、pagination incomplete、invalid member/JSON 或 HTTP failure。", "A Critical entry, discovery/collection unavailable, incomplete pagination, invalid member/JSON, or HTTP failure."),
-        t("N/A；每次 capture re-login，但沒有對同一個 failed collection 的額外 retry contract。", "N/A; each capture re-logs in, but there is no additional retry contract for the same failed collection."),
-        t("PRE capture 建立 severity baseline；loop 在 before snapshot 與 POST 之間以 Id + Message + Severity 做 content delta，timestamp 不參與 identity。", "PRE capture establishes the severity baseline; a loop compares before snapshot to POST by Id + Message + Severity, excluding timestamp from identity."),
+        t("Critical entry、discovery/collection unavailable、pagination incomplete、invalid member/JSON、referenced member 不是 valid LogEntry，或 HTTP failure。", "A Critical entry, discovery/collection unavailable, incomplete pagination, invalid member/JSON, a referenced member that is not a valid LogEntry, or an HTTP failure."),
+        t("N/A；每次 capture re-login 並在 finally path release session，但沒有對同一個 failed collection 的額外 retry contract；logout 未確認會產生 WARN。", "N/A; each capture re-logs in and releases the session on the finally path, but there is no additional retry contract for the same failed collection; an unconfirmed logout produces WARN."),
+        t("PRE capture 建立 severity baseline；loop 在 before snapshot 與 POST 之間以 Id + Message + created 做 content delta。Id wrap/reset 時，created 不同會保留為新事件；timestamp 不作一般歷史 identity。", "PRE capture establishes the severity baseline; a loop compares before snapshot to POST by Id + Message + created. If an Id wraps/resets, a different created value remains a new event; timestamps are not used as the general historical identity."),
         t("`pre_eventlog.txt`、`eventlog.txt`、`eventlog_delta.txt`、pre-clear history、meta/Counts/Pages/Reason。", "`pre_eventlog.txt`, `eventlog.txt`, `eventlog_delta.txt`, pre-clear history, and meta/Counts/Pages/Reason."),
-        t("REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED", "REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED"),
+        t("REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED; REDFISH_LOGOUT_FAILED", "REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED; REDFISH_LOGOUT_FAILED"),
         t("Service absent 只有在 valid LogServices listing 下才可宣告；discovery failed 時必須是 UNAVAILABLE。", "A service may be declared absent only after a valid LogServices listing; discovery failure must remain UNAVAILABLE."),
     ),
     item(
         "19", "redfish-sel", t("Redfish SEL", "Redfish SEL"), PRE_POST,
         t("同 EventLog 的 authenticated dynamic Redfish discovery，但 service name 為 `SEL`。", "The same authenticated dynamic Redfish discovery as EventLog, with service name `SEL`."),
         t("收集 BMC Redfish SEL（若該 BMC 提供），並以相同 severity/delta contract 記錄。", "Collect the BMC Redfish SEL when exposed by the BMC and apply the same severity/delta contract."),
-        t("Members 可能是 expanded entry 或 `@odata.id` reference；全部 page 完成後才算 valid。", "Members may be expanded entries or `@odata.id` references; all pages must complete before the collection is valid."),
+        t("Members 可能是 expanded entry 或 `@odata.id` reference；referenced JSON 必須至少有 Id 或 Message；全部 page 完成後才算 valid。", "Members may be expanded entries or `@odata.id` references; referenced JSON must contain at least Id or Message; all pages must complete before the collection is valid."),
         t("Critical → FAIL；Warning → WARN；OK/empty → PASS；valid listing 確認 absent → NOT PRESENT / PASS。", "Critical → FAIL; Warning → WARN; OK/empty → PASS; a valid listing that confirms absence is NOT PRESENT / PASS."),
         t("沒有 Critical/Warning 且 collection 完整。", "There are no Critical/Warning entries and the collection is complete."),
         t("Warning entry 或 clear warning。", "A Warning entry or clear warning."),
-        t("Critical、unavailable、invalid/incomplete collection、bad member、HTTP failure。", "Critical, unavailable, invalid/incomplete collection, bad member, or HTTP failure."),
-        t("N/A；每次 capture 重新登入 Redfish session。", "N/A; each capture creates a new Redfish session."),
-        t("PRE/loop 同 EventLog；delta 只在 before 與 POST 都 valid/complete 時標示 `COMPARED`。", "Same as EventLog for PRE/loop; delta is `COMPARED` only when both before and POST are valid/complete."),
+        t("Critical、unavailable、invalid/incomplete collection、invalid referenced member、HTTP failure，或 Redfish session logout 未確認。", "Critical, unavailable, invalid/incomplete collection, an invalid referenced member, an HTTP failure, or an unconfirmed Redfish session logout."),
+        t("N/A；每次 capture 重新登入並在 finally path release Redfish session；logout failure 不 retry，產生 WARN evidence。", "N/A; each capture logs in again and releases the Redfish session on the finally path; logout failure is not retried and produces WARN evidence."),
+        t("PRE/loop 同 EventLog；delta 只在 before 與 POST 都 valid/complete 時標示 `COMPARED`，事件 identity 使用 Id + Message + created。", "Same as EventLog for PRE/loop; delta is `COMPARED` only when both before and POST are valid/complete, with event identity using Id + Message + created."),
         t("`pre_redfish_sel.txt`、`redfish_sel.txt`、`redfish_sel_delta.txt`、meta/Counts/Pages/Reason。", "`pre_redfish_sel.txt`, `redfish_sel.txt`, `redfish_sel_delta.txt`, and meta/Counts/Pages/Reason."),
-        t("REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED", "REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED"),
+        t("REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED; REDFISH_LOGOUT_FAILED", "REDFISH_CRITICAL; REDFISH_WARNING; REDFISH_UNAVAILABLE; REDFISH_COLLECTION_FAILED; REDFISH_CLEAR_FAILED; REDFISH_LOGOUT_FAILED"),
         t("只收集實際 dynamic discovery 到的 EventLog/SEL；不延伸到未實作的 PostCodes、Journal、HostLogger 或 Dump。", "Only EventLog/SEL found through dynamic discovery are collected; the framework does not claim PostCodes, Journal, HostLogger, or Dump coverage."),
     ),
     item(
@@ -462,6 +462,20 @@ ITEMS = [
         t("journal、sidecars、`cycle_summary.json`、`CYCLE_REVIEW_REPORT.html`、`recovery_notes` 與 recovery issue。", "The journal, sidecars, `cycle_summary.json`, `CYCLE_REVIEW_REPORT.html`, `recovery_notes`, and recovery findings."),
         t("EXECUTION_ERROR; recovery integrity findings; INCOMPLETE/FAIL outcome", "EXECUTION_ERROR; recovery integrity findings; INCOMPLETE/FAIL outcome"),
         t("Campaign completion 與 campaign health 必須分開閱讀；recovery 完成不會洗掉 validation failure。", "Campaign completion and campaign health must be read separately; recovery completion does not wash away a validation failure."),
+    ),
+    item(
+        "30", "nic-slot", t("NIC Slot State Comparison", "NIC Slot State Comparison"), PRE_POST,
+        t("Verified project configuration output：`CHECK|NIC_SLOT|slot=<bdf>|state=<PRESENT|DEGRADED|MISSING>`；framework 另解析 `NIC_MST_ROW` 與 `NIC_NON_CARD` evidence。", "Verified project-configuration output: `CHECK|NIC_SLOT|slot=<bdf>|state=<PRESENT|DEGRADED|MISSING>`; the framework also retains `NIC_MST_ROW` and `NIC_NON_CARD` evidence."),
+        t("以 slot BDF 為 identity，確認 cycle 後 NIC slot 沒有從 PRE 的狀態變成 missing 或 degraded；不以單純 device count 取代 slot-level finding。", "Use the slot BDF as the identity and confirm that a NIC slot does not become missing or degraded after the cycle; a simple device count does not replace the slot-level finding."),
+        t("Framework 在 verified hardware script 的 PRE 與 POST structured output 中收集 `NIC_SLOT`，PRE 保存 state map，POST 以 `nic_slot_issues` 比較。MST row 與 non-card row 只保留為 raw evidence。", "The framework collects `NIC_SLOT` from verified hardware-script output in PRE and POST, stores the PRE state map, and compares POST with `nic_slot_issues`. MST rows and non-card rows are retained as raw evidence only."),
+        t("slot 狀態與 PRE 相同，或由 degraded/missing 回復為 PRESENT；沒有新的 slot finding。", "The slot state is unchanged from PRE, or recovers from degraded/missing to PRESENT; there is no new slot finding."),
+        t("N/A；目前 slot transition evaluator 沒有 WARN path。", "N/A; the current slot-transition evaluator has no WARN path."),
+        t("POST 從 PRE 的 PRESENT 或 DEGRADED 變成 MISSING → `NIC_MISSING`；POST 變成 DEGRADED → `NIC_DEGRADED`。Selected script 自己回報的 `ISSUE|...` 也會進入同一 record health。", "POST changes from PRE PRESENT or DEGRADED to MISSING → `NIC_MISSING`; POST changes to DEGRADED → `NIC_DEGRADED`. An `ISSUE|...` reported by the selected script also enters the same record health."),
+        t("N/A；這是 PRE↔POST state comparison，不會 retry 或重新送出 cycle action。", "N/A; this is a PRE↔POST state comparison and does not retry or resend the cycle action."),
+        t("PRE `nic_slots` map 是 baseline；POST 依 slot BDF 比較。MISSING→PRESENT 與 DEGRADED→PRESENT 是 recovery，不產生 degradation finding。", "The PRE `nic_slots` map is the baseline; POST compares by slot BDF. MISSING→PRESENT and DEGRADED→PRESENT are recoveries and do not create a degradation finding."),
+        t("`pre_hardware.txt` / `hardware.txt`、`CHECK|NIC_SLOT` lines、`record.nic_slots`、NIC issue snippet 與 report hardware detail。", "`pre_hardware.txt` / `hardware.txt`, `CHECK|NIC_SLOT` lines, `record.nic_slots`, NIC issue snippets, and report hardware detail."),
+        t("NIC_MISSING; NIC_DEGRADED; DEVICE_MISSING; CONFIG_FAILED; HARDWARE_EXECUTION_INCOMPLETE", "NIC_MISSING; NIC_DEGRADED; DEVICE_MISSING; CONFIG_FAILED; HARDWARE_EXECUTION_INCOMPLETE"),
+        t("`NIC_MST_ROW` 與 `NIC_NON_CARD` 是 evidence-only rows，不單獨產生 PASS/FAIL badge；本共用規範不列 project-specific NIC quantity。", "`NIC_MST_ROW` and `NIC_NON_CARD` are evidence-only rows and do not independently create a PASS/FAIL badge; this shared specification does not list a project-specific NIC quantity."),
     ),
 ]
 
@@ -611,9 +625,9 @@ def render_specification(generated_time: str | None = None) -> str:
     headers = [t("階段", "Phase"), t("驗證項目", "Validation Item"), t("指令／資料來源", "Command / Source"), t("驗證方式", "Validation Method"), t("通過條件", "PASS Criteria"), t("警告條件", "WARN Criteria"), t("失敗條件", "FAIL Criteria"), t("驗證證據", "Evidence")]
     matrix += '<div class="matrix-wrap"><div class="matrix-head">' + ''.join(f'<div>{_pair(h)}</div>' for h in headers) + '</div>' + ''.join(_matrix_row(spec) for spec in ITEMS) + '</div></section>'
 
-    pre_keys = ["endpoint-identity", "connectivity-auth", "root-dependencies", "clean-start", "pci-inventory", "pci-topology", "pci-link", "block-devices", "nvme", "usb", "memory", "network", "firmware", "system-info", "sensors", "dmesg", "ipmi-sel", "redfish-eventlog", "redfish-sel", "bmc-firmware", "chassis-power", "host-power", "project-hardware"]
+    pre_keys = ["endpoint-identity", "connectivity-auth", "root-dependencies", "clean-start", "pci-inventory", "pci-topology", "pci-link", "block-devices", "nvme", "usb", "memory", "network", "nic-slot", "firmware", "system-info", "sensors", "dmesg", "ipmi-sel", "redfish-eventlog", "redfish-sel", "bmc-firmware", "chassis-power", "host-power", "project-hardware"]
     cycle_keys = ["cycle-command", "boot-transition", "endpoint-recovery", "unexpected-boot"]
-    post_keys = ["pci-inventory", "pci-topology", "pci-link", "block-devices", "nvme", "usb", "memory", "network", "firmware", "system-info", "sensors", "dmesg", "ipmi-sel", "redfish-eventlog", "redfish-sel", "bmc-firmware", "chassis-power", "host-power", "project-hardware"]
+    post_keys = ["pci-inventory", "pci-topology", "pci-link", "block-devices", "nvme", "usb", "memory", "network", "nic-slot", "firmware", "system-info", "sensors", "dmesg", "ipmi-sel", "redfish-eventlog", "redfish-sel", "bmc-firmware", "chassis-power", "host-power", "project-hardware"]
     kernel_keys = ["sensors", "dmesg", "pci-link", "nvme"]
     bmc_keys = ["ipmi-sel", "redfish-eventlog", "redfish-sel", "bmc-firmware", "chassis-power", "host-power"]
 
@@ -646,6 +660,7 @@ def render_specification(generated_time: str | None = None) -> str:
            .replace('.flow-stage strong{font-size:12px;line-height:1.25', '.flow-stage strong{font-size:12px;line-height:1.35')
            .replace('.flow-stage small{color:var(--muted);line-height:1.25', '.flow-stage small{color:var(--muted);line-height:1.35')
            .replace('.item-heading h3{font-size:18px;line-height:1.25', '.item-heading h3{font-size:18px;line-height:1.35')
+           .replace('.badge.worsened{background:#f2e9d9;color:#7b4d18}', '')
            .replace('.matrix-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--paper);border-radius:var(--radius)}', '.matrix-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--paper);border-radius:var(--radius);padding:4px}')
            .replace('.matrix-wrap{overflow:visible;border:.5pt solid #ccd8de}', '.matrix-wrap{overflow:visible;border:.5pt solid #ccd8de;padding:0}'))
     js = _JS
