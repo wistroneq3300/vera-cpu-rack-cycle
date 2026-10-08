@@ -127,11 +127,13 @@ _LABELS = {
     'NIC_SLOT': 'NIC slot inventory',
     'BF4': 'BF4 validation', 'BF4_IDENTITIES': 'BF4 identities',
     'PCI': 'PCI inventory', 'PCIe': 'PCIe validation', 'PCIeFAB': 'PCIeFAB bridge inventory', 'sensor': 'Sensors',
+    'USB_DRIFT': 'USB device removed (present at PRE, absent after loop)',
+    'NET_DRIFT': 'Network interface removed (present at PRE, absent after loop)',
     'dmesg': 'dmesg observations', 'sel': 'SEL collection', 'sel_before': 'Before-cycle SEL collection',
     'start_sel_clear': 'START SEL clear', 'start_dmesg_clear': 'START dmesg clear', 'failure_sel': 'Failure-path SEL collection',
     'hardware': 'Hardware script execution',
     'pci': 'PCI raw inventory', 'pci_tree': 'PCI topology raw', 'pci_verbose': 'PCI verbose raw',
-    'pci_config': 'PCI config-space raw', 'disks': 'Block devices raw', 'nvme': 'NVMe command output',
+    'disks': 'Block devices raw', 'nvme': 'NVMe command output',
     'usb': 'USB command output', 'memory': 'Memory command output', 'network': 'Network command output',
     'firmware': 'Firmware command output', 'system': 'System command output',
     'identity': 'Endpoint identity', 'root_uid': 'Root privilege', 'dependencies': 'OS dependencies',
@@ -412,7 +414,7 @@ def _render_pci_group(record, baseline=None):
 def _summary_groups(record):
     groups = {'hardware': [], 'evidence': [], 'execution': [], 'other': []}
     hardware_keys = set(record.get('hardware_checks', {}))
-    collection_keys = {'pci', 'pci_tree', 'pci_verbose', 'pci_config', 'disks', 'nvme', 'usb', 'memory', 'network', 'firmware', 'system', 'sel', 'sel_before', 'failure_sel'}
+    collection_keys = {'pci', 'pci_tree', 'pci_verbose', 'disks', 'nvme', 'usb', 'memory', 'network', 'firmware', 'system', 'sel', 'sel_before', 'failure_sel'}
     execution_keys = {'root_uid', 'dependencies', 'package_install', 'dependencies_after_install', 'mst_available', 'script_safety', 'script_sha256', 'hardware', 'cycle_command', 'power', 'host_power', 'bmc_firmware'}
     for key, value in record.get('check_summary', {}).items():
         if _is_pci_device_check(key):
@@ -420,7 +422,7 @@ def _summary_groups(record):
             # Keep the JSON key intact, but do not show the same finding twice
             # in the general Hardware validation table.
             continue
-        if key in hardware_keys or key.split('/', 1)[0] in {'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'BF4_IDENTITIES', 'PCIe', 'PCIeFAB', 'PCIE_LINK', 'PCIE_DOWNGRADE', 'sensor', 'dmesg'}:
+        if key in hardware_keys or key.split('/', 1)[0] in {'CPU', 'CPU_ONLINE', 'DIMM', 'MEMORY_VISIBLE', 'NVMe', 'NIC', 'BF4', 'BF4_IDENTITIES', 'PCIe', 'PCIeFAB', 'PCIE_LINK', 'PCIE_DOWNGRADE', 'USB_DRIFT', 'NET_DRIFT', 'sensor', 'dmesg'}:
             group = 'hardware'
         elif key in collection_keys:
             group = 'evidence'
