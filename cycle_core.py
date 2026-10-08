@@ -570,6 +570,76 @@ def nic_slot_issues(baseline, current):
                            snippet=f"PRE NIC slot {bdf} state={old}; POST absent"))
     return found
 
+def parse_usb(text):
+    """Parse ``lsusb`` output into a ``{usb_id: row}`` map.
+
+    ``lsusb`` prints one device per line:
+
+        Bus 002 Device 002: ID 0bda:8153 Realtek RTL8153 Gigabit Ethernet Adapter
+
+    The identity used for comparison is the ``vid:pid`` pair (e.g. ``0bda:8153``).
+    Multiple devices of the same model collapse onto one key, which is the right
+    granularity here: a device that disappears is what matters, not which of two
+    identical sticks survived.
+    """
+    rows = {}
+    for line in text.splitlines():
+        match = re.match(r"^Bus\s+\d+\s+Device\s+\d+:\s+ID\s+([0-9a-f]{4}:[0-9a-f]{4})\s*(.*)$", line.strip(), re.I)
+        if not match:
+            continue
+        usb_id, description = match[1].lower(), match[2].strip()
+        rows[usb_id] = dict(id=usb_id, raw=line.strip(), description=description)
+    return rows
+
+
+def usb_issues(baseline, current):
+    """Report a USB device present at PRE that is gone in the current loop.
+
+    Only removals are findings. A device that appears after PRE is ignored by
+    operator decision (the BMC KVM keyboard/mouse is hotplugged whenever a
+    console is opened, so additions are expected noise). Comparison is by
+    ``vid:pid`` identity from :func:`parse_usb`.
+    """
+    found = []
+    for usb_id in sorted(set(baseline) - set(current)):
+        old = baseline[usb_id]
+        found.append(issue("USB_DRIFT", "usb",
+                           f"USB device {usb_id} present at PRE is absent after the loop",
+                           snippet=f"PRE USB {usb_id}: {old['raw']}"))
+    return found
+
+
+def parse_network(text):
+    """Parse ``ip address show`` output into a ``{ifname: row}`` map.
+
+    Only the interface name is compared (operator decision). The name plus its
+    state and addresses are retained as evidence.
+    """
+    rows = {}
+    for line in text.splitlines():
+        match = re.match(r"^\d+:\s+([^:@]+)(?:@[^:]+)?:\s+<([^>]*)>\s*(.*)$", line)
+        if not match:
+            continue
+        name = match[1].strip()
+        rows[name] = dict(name=name, flags=match[2], raw=line.strip())
+    return rows
+
+
+def network_issues(baseline, current):
+    """Report a network interface present at PRE that is gone in the loop.
+
+    Comparison is by interface name only (operator decision); additions are
+    ignored, matching the USB contract.
+    """
+    found = []
+    for name in sorted(set(baseline) - set(current)):
+        old = baseline[name]
+        found.append(issue("NET_DRIFT", "network",
+                           f"Network interface {name} present at PRE is absent after the loop",
+                           snippet=f"PRE interface {name}: {old['raw']}"))
+    return found
+
+
 def _check_snippet(line):
     """Turn a ``CHECK|<component>|key=value|...`` line into a one-line pointer
     to what the hardware script measured. A missing device has no offending

@@ -319,6 +319,57 @@ class PureTests(unittest.TestCase):
         # A brand-new slot that appears after PRE is not a degradation.
         self.assertFalse(nic_slot_issues({}, {b: 'PRESENT'}))
 
+    def test_usb_device_removed_after_loop_is_a_fail(self):
+        # The RTL8153 USB NIC present at PRE and gone after the loop must be
+        # reported (this is the neutrino-n3 regression: the USB device is not
+        # in lspci, so only the lsusb comparison can catch it).
+        before = parse_usb(
+            "Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\n"
+            "Bus 002 Device 002: ID 0bda:8153 Realtek Semiconductor Corp. RTL8153 Gigabit Ethernet Adapter\n")
+        after = parse_usb(
+            "Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\n")
+        items = usb_issues(before, after)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['code'], 'USB_DRIFT')
+        self.assertEqual(items[0]['component'], 'usb')
+        self.assertIn('0bda:8153', items[0]['detail'])
+
+    def test_usb_added_device_is_ignored(self):
+        # KVM keyboard/mouse and other hotplugged devices appear after PRE;
+        # additions are operator-decided noise and must never raise a finding.
+        before = parse_usb("Bus 002 Device 002: ID 0bda:8153 Realtek RTL8153\n")
+        after = parse_usb("Bus 002 Device 002: ID 0bda:8153 Realtek RTL8153\n"
+                          "Bus 001 Device 006: ID 1d6b:0104 OpenBMC Virtual Keyboard and Mouse\n")
+        self.assertFalse(usb_issues(before, after))
+
+    def test_usb_stable_inventory_has_no_issues(self):
+        text = ("Bus 001 Device 003: ID 0525:a4a2 Linux-USB Ethernet/RNDIS Gadget\n"
+                "Bus 002 Device 002: ID 0bda:8153 Realtek RTL8153\n")
+        self.assertFalse(usb_issues(parse_usb(text), parse_usb(text)))
+
+    def test_network_interface_removed_after_loop_is_a_fail(self):
+        # The interface that carries the IP disappearing after the loop is a
+        # failure; comparison is by interface name only.
+        before = parse_network(
+            "1: lo: <LOOPBACK,UP> mtu 65536\n"
+            "2: enP2p33s0u3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500\n")
+        after = parse_network("1: lo: <LOOPBACK,UP> mtu 65536\n")
+        items = network_issues(before, after)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['code'], 'NET_DRIFT')
+        self.assertEqual(items[0]['component'], 'network')
+        self.assertIn('enP2p33s0u3', items[0]['detail'])
+
+    def test_network_added_interface_is_ignored(self):
+        before = parse_network("1: lo: <LOOPBACK,UP> mtu 65536\n")
+        after = parse_network("1: lo: <LOOPBACK,UP> mtu 65536\n"
+                              "2: virbr0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500\n")
+        self.assertFalse(network_issues(before, after))
+
+    def test_network_stable_inventory_has_no_issues(self):
+        text = "1: lo: <LOOPBACK,UP> mtu 65536\n2: enP2p33s0u3: <UP,LOWER_UP> mtu 1500\n"
+        self.assertFalse(network_issues(parse_network(text), parse_network(text)))
+
     def test_dmesg_issue_points_at_line_number(self):
         text = 'first line\nAER: Uncorrected (Fatal) error\nanother\n'
         item = dmesg_issues(text)[0]
