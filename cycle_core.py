@@ -543,18 +543,31 @@ def nic_slot_issues(baseline, current):
     found = []
     for bdf in sorted(set(baseline) | set(current)):
         old, new = baseline.get(bdf), current.get(bdf)
-        was_present = old is not None and old != 'MISSING'
-        is_present = new is not None and new != 'MISSING'
-        if was_present and not is_present:
-            found.append(issue("NIC_MISSING", "NIC",
-                               f"PRE NIC at slot {bdf} is absent after the loop (missing slot {bdf})",
-                               snippet=f"PRE NIC slot {bdf} state={old}; POST absent"))
+        if new is None:
+            new = 'MISSING'
+        if old is None:
+            old = 'MISSING'
+        if old == new:
+            # PRESENT->PRESENT is healthy; DEGRADED->DEGRADED and
+            # MISSING->MISSING are pre-existing states, not new degradations.
             continue
-        if was_present and is_present and old != new:
+        if new == 'PRESENT':
+            # DEGRADED->PRESENT and MISSING->PRESENT are recoveries. A card
+            # coming back or healing must never be reported as a degradation.
+            continue
+        if new == 'DEGRADED':
+            # e.g. PRESENT->DEGRADED is present-but-degraded. (DEGRADED->DEGRADED
+            # was already filtered by old == new.)
             found.append(issue("NIC_DEGRADED", "NIC",
                                f"root port {bdf} -> downstream NIC changed state at PRE={old} -> POST={new} "
                                f"(degraded slot {bdf})",
                                snippet=f"PRE NIC slot {bdf} state={old}; POST state={new}"))
+            continue
+        # new == 'MISSING': a slot that was healthy or degraded at PRE and is now
+        # gone is a real removal (MISSING->MISSING was filtered by old == new).
+        found.append(issue("NIC_MISSING", "NIC",
+                           f"PRE NIC at slot {bdf} is absent after the loop (missing slot {bdf})",
+                           snippet=f"PRE NIC slot {bdf} state={old}; POST absent"))
     return found
 
 def parse_usb(text):

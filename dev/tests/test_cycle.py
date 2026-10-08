@@ -281,6 +281,45 @@ class PureTests(unittest.TestCase):
         # pre-existing condition, not a new per-loop issue.
         self.assertFalse(nic_slot_issues({'0002:00:00.0': 'DEGRADED'}, {'0002:00:00.0': 'DEGRADED'}))
 
+    def test_nic_slot_state_machine_transitions(self):
+        # Full transition table. A recovery must never be reported as a
+        # degradation, and a pre-existing state must not be re-raised.
+        b = '0002:00:00.0'
+        cases = [
+            # (PRE, POST, expected issue codes)
+            ('PRESENT', 'PRESENT', []),
+            ('PRESENT', 'DEGRADED', ['NIC_DEGRADED']),
+            ('PRESENT', 'MISSING', ['NIC_MISSING']),
+            ('DEGRADED', 'DEGRADED', []),
+            ('DEGRADED', 'PRESENT', []),   # RECOVERED, must not FAIL
+            ('DEGRADED', 'MISSING', ['NIC_MISSING']),
+            ('MISSING', 'PRESENT', []),    # RECOVERED, must not FAIL
+            ('MISSING', 'MISSING', []),
+            ('MISSING', 'DEGRADED', ['NIC_DEGRADED']),
+        ]
+        for pre, post, expected in cases:
+            with self.subTest(pre=pre, post=post):
+                items = nic_slot_issues({b: pre}, {b: post})
+                self.assertEqual([i['code'] for i in items], expected)
+
+    def test_nic_slot_recovery_is_never_a_fail(self):
+        # Explicit guard for the reported bug: DEGRADED -> PRESENT and
+        # MISSING -> PRESENT are recoveries and must produce no FAIL finding.
+        b = '0002:00:00.0'
+        for pre in ('DEGRADED', 'MISSING'):
+            with self.subTest(pre=pre):
+                items = nic_slot_issues({b: pre}, {b: 'PRESENT'})
+                self.assertFalse([i for i in items if i['severity'] == 'FAIL'])
+
+    def test_nic_slot_absent_key_is_treated_as_missing(self):
+        # A slot key that vanishes entirely (not even state=MISSING emitted)
+        # is a removal when it was present at PRE.
+        b = '0002:00:00.0'
+        items = nic_slot_issues({b: 'PRESENT'}, {})
+        self.assertEqual([i['code'] for i in items], ['NIC_MISSING'])
+        # A brand-new slot that appears after PRE is not a degradation.
+        self.assertFalse(nic_slot_issues({}, {b: 'PRESENT'}))
+
     def test_usb_device_removed_after_loop_is_a_fail(self):
         # The RTL8153 USB NIC present at PRE and gone after the loop must be
         # reported (this is the neutrino-n3 regression: the USB device is not
