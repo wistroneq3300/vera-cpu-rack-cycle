@@ -11,7 +11,7 @@ import unittest
 
 from vera_cycle.core.cycle_core import (classify_against_pre, dmesg_issues, display_component, health,
                         issue_baseline)
-from vera_cycle.reporting.cycle_report import _dmesg_package_html, _finding_html, _finding_html_compact
+from vera_cycle.reporting.cycle_report import _finding_html, _finding_html_compact
 
 BOOT = '\n'.join([
     '[   11.87] pci 0001:00:00.0: bridge window [io  size 0x1000]: failed to assign',
@@ -82,6 +82,8 @@ class BundleTests(unittest.TestCase):
         aer = ('[ 1.0] PCIe Bus Error: severity=Uncorrected (Fatal), type=Physical\n'
                '[ 1.1] pcieport 0001:00:00.0: AER: error status/mask=00000004/00002000\n')
         codes = [item['code'] for item in dmesg_issues(aer)]
+        # The event is claimed by the PCIe family; its status/mask companion is
+        # benign, so it must not be re-reported as a second FAIL in the bundle.
         self.assertIn('DMESG_PCIE', codes)
         self.assertNotIn('DMESG_BUNDLE', codes)
 
@@ -137,22 +139,21 @@ class BundleTests(unittest.TestCase):
                             '[ 1.2] {1}[Hardware Error]: device: 0000:01:00.0\n')[0]
         self.assertEqual(display_component(apei), '0000:01:00.0')
 
-    def test_dmesg_package_html_survives_every_capture_shape(self):
-        # bundle=None must not be dereferenced (APEI-only captures), and the
-        # card renderers must accept the same shapes.
+    def test_card_renderers_survive_every_capture_shape(self):
+        # An APEI-only capture has no bundle and a bundle-only capture has no
+        # APEI; neither shape may be assumed present.
         apei = dmesg_issues('[ 1.0] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 8194\n'
                             '[ 1.1] {1}[Hardware Error]: event severity: fatal\n'
                             '[ 1.2] {1}[Hardware Error]: device: 0000:01:00.0\n')
         bundle = dmesg_issues('ipmi_ssif probe failed -17')
         for issues in ([], apei, bundle, apei + bundle):
             with self.subTest(count=len(issues)):
-                b = next((i for i in issues if i['code'] == 'DMESG_BUNDLE'), None)
-                a = [i for i in issues if i['code'] == 'DMESG_APEI']
-                self.assertIn('dmesg', _dmesg_package_html(b, a))
                 record = dict(phase='LOOP 1', issues=issues)
                 for rendered in (_finding_html(record), _finding_html_compact(record)):
                     # No issues is a benign empty card, not a crash and not a claim.
                     self.assertTrue('record-issues' in rendered or 'No issues recorded' in rendered)
+                if issues:
+                    self.assertIn('dmesg-block', _finding_html_compact(record))
 
 
 BENIGN = ('CPU features: detected: WFx with timeout\n'
@@ -188,15 +189,15 @@ class BenignNoiseTests(unittest.TestCase):
         self.assertNotIn('ipmi_ssif', '\n'.join(e['text'] for e in noise['entries']))
         self.assertNotIn('WFx', '\n'.join(e['text'] for e in bundle['entries']))
 
-    def test_noise_renders_in_package_with_evidence_link(self):
+    def test_noise_renders_collapsed_with_evidence_link(self):
         items = dmesg_issues(BENIGN + '\n' + REAL)
         for i in items:
             i['evidence'] = 'Neutrino0_n0/loop0001/dmesg_clear.txt'
-        bundle = by_code(items)['DMESG_BUNDLE']
-        noise = by_code(items)['DMESG_NOISE']
-        html = _dmesg_package_html(bundle, [], noise)
+            i['phase'] = 'dmesg_clear'
+        html = _finding_html_compact(dict(phase='LOOP 1', issues=items))
         # Benign rows are visible (review only), collapsed, and carry a link.
-        self.assertIn('Known-benign dmesg lines', html)
+        self.assertIn('dmesg-noise', html)
+        self.assertIn('<details', html)
         self.assertIn('dmesg_clear.txt', html)
         self.assertIn('WFx', html)
 
@@ -216,9 +217,131 @@ class BenignNoiseTests(unittest.TestCase):
             i['evidence'] = 'Neutrino0_n0/loop0001/dmesg_clear.txt'
         # Per-loop view.
         loop_html = _finding_html_compact(dict(phase='LOOP 1', issues=items))
-        self.assertIn('Known-benign dmesg lines', loop_html)
+        # Benign lines stay reviewable but collapsed (never affect health); the
+        # label is the same fail/error group as every other dmesg block.
+        self.assertIn('dmesg-noise', loop_html)
+        self.assertIn('<details', loop_html)
+        self.assertIn('fail/error', loop_html)
         # Whole-campaign summary aggregation keeps the noise finding.
         node = dict(key='n1', pre=dict(phase='PRE', issues=[]), loops=[dict(phase='LOOP 1', issues=items)], blocked=[])
         merged = aggregate_issues(dict(nodes=[node]))
         self.assertIn('DMESG_NOISE', [i['code'] for i in merged])
         self.assertTrue(all(i['severity'] == 'INFO' for i in merged if i['code'] == 'DMESG_NOISE'))
+
+
+class FamilyVisibilityTests(unittest.TestCase):
+    """Every parsed dmesg family must reach the report.
+
+    Regression: ``_visible_issues`` kept only the catch-all bundle, so an EDAC
+    uncorrectable or an NVMe timeout raised the health verdict while the page
+    showed nothing but the bundle -- the finding existed and was hidden.
+    """
+
+    LINES = '\n'.join([
+        '[ 20.0] EDAC MC0: 1 CE memory read error on CPU_SrcID#0_MC#0_Chan#0_DIMM#0',
+        '[ 21.0] nvme0: I/O 145 QID 1 timeout, aborting',
+        '[ 22.0] pcieport 0000:01:00.0: AER: device recovery failed',
+        '[ 23.0] Kernel panic - not syncing: Fatal exception',
+    ])
+
+    def test_each_family_is_rendered(self):
+        items = dmesg_issues(self.LINES)
+        for item in items:
+            item['evidence'] = 'n/loop0001/dmesg_clear.txt'
+        html = _finding_html_compact(dict(phase='LOOP 1', issues=items))
+        for needle in ('EDAC', 'nvme0', 'pcieport', 'Kernel panic'):
+            self.assertIn(needle, html)
+        codes = {i['code'] for i in items}
+        self.assertIn('DMESG_EDAC', codes)
+        self.assertIn('DMESG_NVME', codes)
+        self.assertIn('DMESG_KERNEL', codes)
+
+    def test_dmesg_cards_carry_no_known_new_badge(self):
+        items = dmesg_issues(self.LINES)
+        classify_against_pre(items, set())
+        html = _finding_html_compact(dict(phase='LOOP 1', issues=items))
+        # dmesg blocks are shown as the log itself; KNOWN/NEW badges on them
+        # were unreadable and are gone from both the card and the tally.
+        self.assertNotIn('>NEW<', html)
+        self.assertNotIn('>KNOWN<', html)
+
+    def test_bundle_count_is_stable_across_membership_changes(self):
+        # Two captures whose BENIGN content differs must not re-report the
+        # error lines as fresh; the displayed messages are what matters.
+        first = dmesg_issues(self.LINES)
+        second = dmesg_issues(self.LINES + '\n[ 24.0] ipmi_si: Unable to find any System Interface(s)')
+        first_bundle = [e['text'] for i in first if i['code'] == 'DMESG_BUNDLE'
+                        for e in i.get('entries', [])]
+        second_bundle = [e['text'] for i in second if i['code'] == 'DMESG_BUNDLE'
+                         for e in i.get('entries', [])]
+        self.assertTrue(set(first_bundle) <= set(second_bundle))
+
+
+class CrossCaptureIdentityTests(unittest.TestCase):
+    """A second device failing the same way must survive as its own finding.
+
+    Real failure this pins: 0000:01:00.0 logged ``BAR assignment failed`` on the
+    first capture, then 0000:02:00.0 logged the same text on the next one. The
+    bundle signature normalised the BDF away, so the engine's (boot, raw) delta
+    treated the second capture as a repeat and the second card never reached the
+    report -- a newly failing device was invisible on the page that is supposed
+    to prove no such thing happened.
+
+    Identity is per (device, message). Normalisation may still collapse repeats
+    for presentation, but it must never decide whether an observation exists.
+    """
+
+    def bundle(self, text):
+        return [e for e in dmesg_issues(text) if e['code'] == 'DMESG_BUNDLE']
+
+    def test_second_bdf_is_a_distinct_observation(self):
+        first = '[ 10.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+        second = first + '[ 20.0] pcieport 0000:02:00.0: BAR assignment failed\n'
+        one, two = self.bundle(first), self.bundle(second)
+        self.assertEqual(len(one), 1)
+        self.assertEqual(len(two), 1)
+        # The raw signature may normalise, but the observation identity may not
+        # lose the device: that is what the delta compares.
+        devices_one = {d for e in one for d in e['device']}
+        devices_two = {d for e in two for d in e['device']}
+        self.assertIn('0000:01:00.0', devices_one)
+        self.assertIn('0000:02:00.0', devices_two)
+        self.assertNotEqual(self.identity(one[0]), self.identity(two[0]))
+
+    def identity(self, event):
+        return tuple(sorted(event.get('observations') or []))
+
+    def test_same_device_repeat_keeps_its_count(self):
+        text = ('[ 10.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+                '[ 11.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+                '[ 12.0] pcieport 0000:01:00.0: BAR assignment failed\n')
+        event = self.bundle(text)[0]
+        # occurrence_count is what the engine sums; it said 1 for three lines.
+        self.assertEqual(event['occurrence_count'], 3)
+        self.assertEqual(event['entries'][0]['count'], 3)
+
+    def test_multiset_delta_does_not_double_count(self):
+        text = '[ 10.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+        twice = text + '[ 11.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+        one = self.bundle(text)[0]
+        two = self.bundle(twice)[0]
+        self.assertEqual(one['occurrence_count'], 1)
+        self.assertEqual(two['occurrence_count'], 2)
+        # Overlapping captures: the second read repeats the first line only.
+        self.assertEqual(two['occurrence_count'] - one['occurrence_count'], 1)
+
+    def test_different_devices_same_error_are_not_swallowed(self):
+        text = ('[ 10.0] pcieport 0000:01:00.0: BAR assignment failed\n'
+                '[ 11.0] pcieport 0000:02:00.0: BAR assignment failed\n')
+        event = self.bundle(text)[0]
+        self.assertEqual(event['occurrence_count'], 2)
+        self.assertEqual(len(event['entries']), 2)
+        self.assertEqual({d for d in event['device']}, {'0000:01:00.0', '0000:02:00.0'})
+
+    def test_raw_evidence_keeps_the_original_text(self):
+        # raw is used as a dedupe key, so it may normalise for comparison, but
+        # the original line must remain readable in the evidence trail.
+        text = '[ 10.0] pcieport 0000:02:00.0: BAR assignment failed\n'
+        event = self.bundle(text)[0]
+        self.assertIn('0000:02:00.0', ' '.join(event['raw_lines_text'] if 'raw_lines_text' in event
+                                               else [e['text'] for e in event['entries']]))

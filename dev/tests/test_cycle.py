@@ -647,17 +647,67 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(any(name.endswith('_before_cycle.txt') or name.endswith('_after_cycle.txt') for name in loop_files))
         self.assertFalse(any(name.startswith('post_') for name in loop_files))
 
-    def test_wrong_hostname_warns_but_still_runs(self):
-        # Hostname is a soft check: a mismatch is surfaced as a WARN and the run
-        # continues (operator decides). It must not block the node.
+    def test_wrong_hostname_blocks_pre_before_any_change(self):
+        # PRE runs before any log is cleared, so a machine that does not match
+        # the inventory must be refused there -- the operator has not yet handed
+        # the node over. (During the loops a mismatch only warns; see
+        # test_post_hostname_mismatch_keeps_running_with_warning.)
         self.fake.mismatch = True
         self.session.precheck()
-        self.assertFalse(self.session.node['blocked'])
-        self.assertIn('HOSTNAME_MISMATCH', [i['code'] for i in self.session.node['pre']['issues']])
-        self.assertTrue(any(i.get('code') == 'HOSTNAME_MISMATCH' and i.get('severity') == 'WARN'
-                            for i in self.session.node['pre']['issues']))
-        self.assertTrue(self.fake.uploaded)
-        self.assertTrue(any(cmd == 'dmesg -C' for _, _, cmd in self.fake.calls))
+        self.assertTrue(self.session.node['blocked'])
+        self.assertIn('hostname mismatch', self.session.node['blocked'][0])
+        self.assertIn('PRE_BLOCKED', [i['code'] for i in self.session.node['pre']['issues']])
+        # Refused before the clean-start step: no log was wiped.
+        self.assertFalse(any(cmd == 'dmesg -C' for _, _, cmd in self.fake.calls))
+        self.assertFalse(any(cmd == 'sel clear' for _, _, cmd in self.fake.calls))
+
+    def test_empty_hostname_during_loop_warns(self):
+        # A blank reply used to pass silently: the check required both values to
+        # be non-empty. "No name where one is expected" is itself a signal.
+        self.ready()
+        original = self.fake.ssh
+        calls = {'n': 0}
+        def ssh(t, role, cmd, timeout=60, sudo=False):
+            # Blank only during the loop's own identity checks. PRE legitimately
+            # blocks on a blank name; that case has its own test.
+            if "printf 'HOSTNAME='" in cmd:
+                calls['n'] += 1
+                if calls['n'] > 2:   # PRE checks os+bmc, START checks os+bmc
+                    reply = original(t, role, cmd, timeout, sudo)
+                    return Command(0, reply.output.replace(
+                        'HOSTNAME=' + getattr(t, role + '_hostname'), 'HOSTNAME='))
+            return original(t, role, cmd, timeout, sudo)
+        with patch.object(self.fake, 'ssh', side_effect=ssh):
+            result = self.session.one_loop(1)
+        self.assertTrue(self.session.node['active'])
+        codes = [i['code'] for i in result['issues']]
+        self.assertIn('HOSTNAME_MISMATCH', codes)
+
+    def test_empty_hostname_blocks_pre(self):
+        original = self.fake.ssh
+        def ssh(t, role, cmd, timeout=60, sudo=False):
+            if "printf 'HOSTNAME='" in cmd:
+                return Command(0, 'HOSTNAME=\nBOOT_ID=00000000-0000-0000-0000-000000000000\n')
+            return original(t, role, cmd, timeout, sudo)
+        with patch.object(self.fake, 'ssh', side_effect=ssh):
+            self.session.precheck()
+        self.assertTrue(self.session.node['blocked'])
+        self.assertIn('hostname mismatch', self.session.node['blocked'][0])
+
+    def test_failed_end_of_loop_dmesg_warns_without_invalidating_cycle(self):
+        # A log read that fails must not rewrite the loop verdict: the POST
+        # either succeeded or it did not.
+        self.ready()
+        original = self.fake.ssh
+        def ssh(t, role, cmd, timeout=60, sudo=False):
+            if cmd == 'dmesg -c':
+                raise ConnectionError('ssh closed the channel')
+            return original(t, role, cmd, timeout, sudo)
+        with patch.object(self.fake, 'ssh', side_effect=ssh):
+            result = self.session.one_loop(1)
+        self.assertIn('DMESG_COLLECT_FAILED', [i['code'] for i in result['issues']])
+        self.assertEqual(next(i for i in result['issues'] if i['code'] == 'DMESG_COLLECT_FAILED')['severity'], 'WARN')
+        self.assertTrue(result['valid_cycle'])
 
     def test_post_hostname_mismatch_keeps_running_with_warning(self):
         self.ready()
@@ -1041,3 +1091,78 @@ class ConsolePaintTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DegradedOutputTests(unittest.TestCase):
+    """A boot that never comes back must still leave its log behind.
+
+    Regression: the timeout ended the loop immediately. The only record of why
+    the node never returned (a kernel panic, a wedged driver) lived in its ring
+    buffer, and the next operator retry wiped it -- so the most interesting
+    failure of a campaign was also the least documented.
+    """
+
+    setUp = EngineTests.setUp
+    tearDown = EngineTests.tearDown
+    ready = EngineTests.ready
+
+    def test_timeout_retains_boot_log_before_halting(self):
+        self.fake.no_recovery = True
+        self.ready()
+        original = self.fake.ssh
+        def ssh(t, role, cmd, timeout=60, sudo=False):
+            if cmd == 'dmesg -c':
+                return Command(0, '[ 512.0] BUG: soft lockup - CPU#3 stuck for 22s\n')
+            return original(t, role, cmd, timeout, sudo)
+        with patch.object(self.fake, 'ssh', side_effect=ssh):
+            result = self.session.one_loop(1)
+        self.assertFalse(self.session.node['active'])
+        codes = [i['code'] for i in result['issues']]
+        self.assertIn('BOOT_TIMEOUT', codes)
+        self.assertIn('DMESG_KERNEL', codes)
+        kept = next(i for i in result['issues'] if i['code'] == 'DMESG_KERNEL')
+        self.assertEqual(kept['phase'], 'recovery')
+        self.assertIn('soft lockup', (self.session.root / kept['evidence']).read_text())
+        # The verdict is still the timeout, not "the log had a bug".
+        self.assertIn('boot log retained', self.session.node['stop_reason'])
+
+    def test_unreadable_recovery_log_is_info_not_a_second_failure(self):
+        # The node is slow but answering; the recovery read itself fails. That
+        # is a note, not a new FAIL: the loop already failed for the timeout.
+        self.fake.no_recovery = True
+        self.ready()
+        original = self.fake.ssh
+        in_recovery = {'on': False}
+        def ssh(t, role, cmd, timeout=60, sudo=False):
+            if self.session.node.get('stage') == 'Recovery log':
+                in_recovery['on'] = True
+            if cmd == 'dmesg -c' and in_recovery['on']:
+                return Command(255, 'dmesg: read timout', 'NOT_ISSUED')
+            return original(t, role, cmd, timeout, sudo)
+        with patch.object(self.fake, 'ssh', side_effect=ssh):
+            result = self.session.one_loop(1)
+        notes = [i for i in result['issues'] if i['code'] == 'RECOVERY_LOG_FAILED']
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0]['severity'], 'INFO')
+        self.assertNotIn('boot log retained', self.session.node['stop_reason'])
+        self.assertIn('BOOT_TIMEOUT', [i['code'] for i in result['issues']])
+
+    def test_persistence_failure_marks_degraded_and_keeps_looping(self):
+        # The archive step must never abort a cycle: losing a sidecar is
+        # recoverable with --report, losing the campaign is not.
+        self.ready()
+        # Fail the underlying write, not ``persist`` itself: the point is that
+        # persist's own guard converts it into DEGRADED.
+        import vera_cycle.engine.cycle_engine as engine
+        real = engine.write_json
+        def flaky(path, payload):
+            if 'report.json' in str(path):
+                raise OSError('No space left on device')
+            return real(path, payload)
+        with patch.object(engine, 'write_json', flaky):
+            result = self.session.one_loop(1)
+        self.assertTrue(self.session.node['active'])
+        self.assertEqual(self.session.node['persistence'], 'DEGRADED')
+        self.assertIn('No space left on device', self.session.node['persistence_detail'])
+        self.assertEqual(result['persistence']['state'], 'FAILED')
+        self.assertEqual(result['status'], 'FAIL')   # the loop itself still judged

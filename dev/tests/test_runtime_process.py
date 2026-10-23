@@ -43,8 +43,14 @@ finally:
             finally:
                 locks.close()
             data = json.loads(next(root.glob('endpoint-*.lock')).read_text())
-            self.assertIn('user', data)
+            # A released lock is blanked, not left holding a stale pid: a pid
+            # that outlives its process is what made a reused PID look like a
+            # live lock holder.
+            self.assertEqual(data, {})
+            # A later campaign rewrites the payload and, on release, blanks it
+            # again -- so no pid ever survives the process that wrote it.
             self.assertEqual(run('192.0.2.1', '192.0.2.2').returncode, 0)
+            self.assertEqual(json.loads(next(root.glob('endpoint-*.lock')).read_text()), {})
 
     @unittest.skipUnless(os.name == 'posix' and hasattr(os, 'getuid') and os.getuid() == 0,
                          'Cross-UID test needs a Linux root test environment')

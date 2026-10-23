@@ -43,7 +43,7 @@ from vera_cycle.core.cycle_storage import writer_identity
 from vera_cycle.engine.cycle_engine import NodeSession
 from vera_cycle.engine.cycle_runtime import EndpointLocks, RunRegistry, list_running, request_stop
 from vera_cycle.reporting.cycle_report import (
-    duration, elapsed, rebuild, status, write_journal, write_reports,
+    ReportDegraded, duration, elapsed, rebuild, run_status, status, write_journal, write_reports,
 )
 
 # Repository root, kept for callers that derive sibling paths from it.
@@ -218,13 +218,20 @@ def safe_write_reports(output, data, console):
 
     Report generation is an output step; a rendering bug, a full disk or a
     missing asset must not abort the cycles or rewrite the execution verdict.
-    The caller persists the verdict separately (``write_journal``); here the
-    HTML/Markdown failure is reported and the run continues.
+    The journal and the rendered documents are written independently, so one
+    failing leaves the other in place; ``run_status`` names which one failed
+    and the run records DEGRADED rather than pretending the output is complete.
     """
     try:
         write_reports(output, data)
         return True
+    except ReportDegraded as exc:
+        data['persistence'] = exc.persistence
+        data['report'] = exc.report
+        console(f"Output degraded: {exc}. Execution continues; rebuild later with --report {output}")
+        return False
     except Exception as exc:
+        data['report'] = dict(state='FAILED', detail=f'{type(exc).__name__}: {exc}')
         console(f"Report generation failed: {exc}. Execution continues; rebuild later with --report {output}")
         return False
 
@@ -361,9 +368,13 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             # is then attempted without letting a rendering error change the run.
             try:
                 write_journal(output, data)
+                data['persistence'] = dict(state='OK', detail='')
             except Exception as exc:
+                data['persistence'] = dict(state='FAILED', detail=f'{type(exc).__name__}: {exc}')
                 console(f"Journal could not be written: {exc}. Recover with --report {output}")
             safe_write_reports(output, data, console)
+            verdict = run_status(data)
+            console(f"Output: persistence {verdict['persistence']['state']}; report {verdict['report']['state']}")
             registry.finish(data['state'])
             result = status(data)
             console("=" * 60)

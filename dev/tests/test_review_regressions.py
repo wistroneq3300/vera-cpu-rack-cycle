@@ -164,6 +164,11 @@ class EngineReviewTests(unittest.TestCase):
         self.assertTrue(self.session.node['start']['identities'])
 
     def test_ring_buffer_check_tail_and_next_action_evidence(self):
+        # One read-and-clear per loop, at the end of the loop. The read covers
+        # the whole boot plus everything this loop did (hardware check, MCTP
+        # stress), so nothing is left for the next loop to pick up and
+        # mis-attribute -- a line written between two loops is only ever seen
+        # if it survives until the next loop's capture.
         self.ready()
         ring = []
         original = self.fake.ssh
@@ -176,15 +181,17 @@ class EngineReviewTests(unittest.TestCase):
                 ring.append('[ 10.0] AER: Uncorrected error at 0000:01:00.0')
             if cmd == 'ipmitool power cycle': ring.clear()
             return original(t, role, cmd, timeout, sudo)
+        self.fake.calls.clear()   # PRE legitimately keeps one read-only baseline read
         with patch.object(self.fake, 'ssh', side_effect=ssh):
             first = self.session.one_loop(1)
-            ring.append('[ 11.0] Kernel panic between loops')
             second = self.session.one_loop(2)
-        for record, fragment in [(first, 'AER'), (second, 'panic')]:
-            event = next(i for i in record['issues'] if fragment in i['detail'])
-            self.assertIn(fragment, (self.root/event['evidence']).read_text())
+        event = next(i for i in first['issues'] if 'AER' in i['snippet'])
+        self.assertIn('AER', (self.root/event['evidence']).read_text())
         self.assertIn('dmesg_clear', first['issues'][-1]['phase'])
         self.assertEqual(first['dmesg_delta']['FAIL'], 1)
+        # The second loop's own capture is empty (the previous loop cleared it),
+        # and no read-only ``dmesg`` runs during the loops.
+        self.assertEqual([cmd for _, _, cmd in self.fake.calls if cmd == 'dmesg'], [])
 
     def test_read_clear_dedup_keeps_distinct_bdfs_and_raw(self):
         self.ready()

@@ -7,6 +7,7 @@ import ipaddress
 import json
 import os
 import re
+import socket
 import stat
 from pathlib import Path
 
@@ -89,7 +90,16 @@ class EndpointLocks:
             raise
 
     def close(self):
+        # Blank the payload before releasing the lock. The file is shared and
+        # never deleted, so a stale pid left in it is exactly what made a reused
+        # PID look like a live lock holder.
         for handle in self.handles:
+            try:
+                handle.seek(0)
+                handle.write(b"{}")
+                handle.truncate()
+            except OSError:
+                pass
             handle.close()
         self.handles.clear()
 
@@ -194,3 +204,49 @@ def request_stop(run_id, root=None):
         raise ValueError('Campaign process is no longer running; no stop request sent')
     (path / "stop.request").write_text(now(), encoding="ascii")
     return data
+
+
+def verify_owner(run_id, root=None):
+    """Return the registration for ``run_id`` after proving it is still that process.
+
+    Fails closed: an unknown run, another user's run, a registration from another
+    controller, a PID that no longer exists, and above all a reused PID (same
+    number, different start token) all raise instead of returning a target to
+    signal. Callers must use the returned ``pid`` -- never a PID read from an
+    endpoint lock file, whose contents outlive the process that wrote them.
+    """
+    if not re.fullmatch(r"[A-Za-z0-9_.+\-]+", run_id):
+        raise ValueError("Invalid Run ID")
+    path = (Path(root) if root is not None else shared_root()) / ("run-" + run_id)
+    if path.is_symlink() or not path.is_dir():
+        raise ValueError(f"Unknown Run ID: {run_id}")
+    if os.name != "nt" and path.stat().st_uid != os.getuid():
+        raise PermissionError("Only the campaign owner can stop this run")
+    owner = json.loads((path / "owner.json").read_text(encoding="utf-8"))
+    if not isinstance(owner, dict):
+        raise ValueError(f"Unreadable registration for {run_id}")
+    if owner.get("state") != "RUNNING":
+        raise ValueError(f"Campaign already finished: {owner.get('state')}")
+    host = owner.get("host")
+    if host and host != socket.gethostname():
+        raise ValueError(f"Campaign {run_id} is registered on {host}; stop it there")
+    pid = owner.get("pid")
+    if not isinstance(pid, int) or pid <= 0:
+        raise ValueError("Invalid PID in the registration")
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        raise ValueError(f"Campaign {run_id} is no longer running") from None
+    except PermissionError:
+        raise ValueError(f"Cannot verify campaign {run_id}: permission denied") from None
+    expected = owner.get("process_token")
+    if not expected:
+        raise ValueError(f"Cannot verify campaign {run_id}: no start token recorded")
+    current = process_token(pid)
+    if current is None:
+        raise ValueError(f"Cannot verify campaign {run_id}: start token unreadable")
+    if current != expected:
+        raise ValueError(
+            f"PID {pid} is no longer campaign {run_id} (start token changed: PID reuse); refusing to signal it")
+    return owner
+

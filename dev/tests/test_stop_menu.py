@@ -12,7 +12,8 @@ from unittest.mock import patch
 os.environ.setdefault('VERA_CAMPAIGN_TMP', tempfile.mkdtemp(prefix='vera-campaign-tmp-'))
 
 from vera_cycle.reporting.cycle_report import journal_path
-from vera_cycle.engine.cycle_runtime import RunRegistry, list_running, process_running, request_stop
+from vera_cycle.engine.cycle_runtime import (RunRegistry, list_running, process_running,
+                                           request_stop, verify_owner)
 from vera_cycle.cli import main, stop_menu
 
 
@@ -97,3 +98,65 @@ class StopMenuTests(unittest.TestCase):
             stop_menu(self.root, read)
         self.assertIn('already finished', output.getvalue())
         self.assertFalse(self.runs[0].requested())
+
+
+class VerifyOwnerTests(unittest.TestCase):
+    """A PID from a registration is only signalled when it is still that process.
+
+    Regression: the wrapper used to identify a campaign by UID + cmdline from a
+    lock file whose contents outlive the process, so a reused PID (or any other
+    neutrino_cycle.py of the same user) could be terminated.
+    """
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / 'runtime'
+        self.registry = RunRegistry('run1', self.root)
+        self.registry.register(Path(self.temp.name) / 'out', project='neutrino',
+                               cycle_mode='power_cycle', channel='inband', nodes=['n0'])
+        self.owner = json.loads((self.registry.path / 'owner.json').read_text())
+
+    def verify(self, **overrides):
+        data = dict(self.owner, **overrides)
+        (self.registry.path / 'owner.json').write_text(json.dumps(data))
+        return verify_owner('run1', self.root)
+
+    def test_matching_token_is_accepted(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'), \
+             patch('vera_cycle.engine.cycle_runtime.process_token', return_value=self.owner['process_token']):
+            self.assertEqual(self.verify()['pid'], self.owner['pid'])
+
+    def test_reused_pid_is_refused(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'), \
+             patch('vera_cycle.engine.cycle_runtime.process_token', return_value='other-boot:999'):
+            with self.assertRaisesRegex(ValueError, 'PID reuse'):
+                self.verify()
+
+    def test_dead_pid_is_refused(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill', side_effect=ProcessLookupError):
+            with self.assertRaisesRegex(ValueError, 'no longer running'):
+                self.verify()
+
+    def test_missing_token_fails_closed(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'):
+            with self.assertRaisesRegex(ValueError, 'no start token'):
+                self.verify(process_token=None)
+
+    def test_unreadable_token_fails_closed(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'), \
+             patch('vera_cycle.engine.cycle_runtime.process_token', return_value=None):
+            with self.assertRaisesRegex(ValueError, 'unreadable'):
+                self.verify()
+
+    def test_other_controller_registration_is_refused(self):
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'):
+            with self.assertRaisesRegex(ValueError, 'registered on'):
+                self.verify(host='some-other-host')
+
+    def test_finished_run_is_refused(self):
+        self.registry.finish('COMPLETE')
+        self.owner = json.loads((self.registry.path / 'owner.json').read_text())
+        with patch('vera_cycle.engine.cycle_runtime.os.kill'):
+            with self.assertRaisesRegex(ValueError, 'already finished'):
+                self.verify()

@@ -44,15 +44,15 @@ BUNDLE_BENIGN = [
     re.compile(r'\bInitialized with .*timeout\b', re.I),
     re.compile(r'\btimeout set to\b', re.I),
     re.compile(r'\bset to \d+\s*seconds?\b', re.I),
-    # Anchors of a family above: a continuation line that the strict family
-    # pattern did not itself claim still belongs to that event, so the fallback
-    # must not re-report it as unclassified. Only true AER continuation markers
-    # are listed: a bare ``nvme``/``mlx5``/``NVRM``/``EDAC`` token is NOT a
-    # continuation marker, and excluding on it silently dropped genuine device
-    # errors (e.g. ``mlx5_cmd_check timeout``, ``nvme0: Abort status``) that no
-    # strict pattern claimed. Those now flow into the bundle like any other
-    # unclassified error line.
-    re.compile(r'\bAER:|\bPCIe Bus Error:', re.I),
+    # AER/PCIe continuation markers are NOT benign by themselves. Excluding the
+    # whole prefix hid real failures such as ``AER: device recovery failed`` and
+    # ``PCIe Bus Error: severity=Recoverable`` as INFO, because the family
+    # pattern only claims lines carrying corrected/uncorrected/fatal. Only the
+    # exact capability banners and the status/mask companion of an AER event the
+    # family pattern already claimed are benign; every other AER line reaches
+    # the bundle and stays a FAIL.
+    re.compile(r'\bAER:\s*(?:Enabled|Capabilit(?:y|ies)|\S+:\s*Enabled)\b', re.I),
+    re.compile(r'\bAER:\s*error status/mask=[0-9a-f]+/[0-9a-f]+\b', re.I),
 ]
 # IPMI/SSIF transport failures are functional, not noise: a broken SSIF leaves
 # /dev/ipmi0 present but unusable, so ``ipmitool`` fails outright. They are not
@@ -64,11 +64,22 @@ BUNDLE_TS = re.compile(r'^\s*(?:<\d+>)?\s*\[\s*\d+(?:\.\d+)?\]\s*')
 def _bundle_event(lines, code, family, severity):
     """One finding carrying a group of error/fail lines, deduped by message.
 
-    Identical messages collapse into a single entry with a count and the line
-    number of their first occurrence, so a repeated boot-time complaint is one
-    row in the report rather than dozens.
+    Identical messages from the same device collapse into a single entry with a
+    count and the line number of their first occurrence, so a repeated boot-time
+    complaint is one row in the report rather than dozens.
+
+    Identity has two levels, and they must not be confused:
+
+    * ``observations`` -- one ``(device, message)`` pair per distinct occurrence.
+      This is what the engine's cross-capture delta compares. It keeps the BDF,
+      because 0000:01:00.0 and 0000:02:00.0 failing the same way are two devices
+      failing, not one repeated message.
+    * ``raw`` / ``fingerprint`` -- normalised, BDF-free, used only for grouping
+      and for PRE comparison. Folding a BDF into these would make a pre-existing
+      bundle look NEW on every boot when enumeration order shifts.
     """
     counts, first, order = {}, {}, []
+    observations, devices = [], []
     for number, line in lines:
         key = BUNDLE_TS.sub('', line).strip()
         # Keep the device address in the entry: two NICs or two PCIe cards that
@@ -79,26 +90,45 @@ def _bundle_event(lines, code, family, severity):
             first[key] = number
             order.append(key)
         counts[key] = counts.get(key, 0) + 1
-    entries = [dict(line=first[k], count=counts[k], text=k) for k in order]
+        device = _bdf_of(key)
+        if device and device not in devices:
+            devices.append(device)
+        observations.append(f'{device or "<none>"}|{_strip_count(key)}')
+    entries = [dict(line=first[k], count=counts[k], text=k,
+                    device=_bdf_of(k)) for k in order]
     # The fingerprint identifies the *group of message types*, not the device
     # addresses: it must not change when a run's BDF enumeration differs, or a
     # pre-existing bundle would be reclassified NEW on every boot. Device
     # identity is carried by the entries above, not by the fingerprint.
-    def _strip_bdf(text):
-        text = re.sub(r'\b(?:[0-9a-f]{4}:)?[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]\b', '<bdf>', text, flags=re.I)
-        return re.sub(r'\b[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]\b', '<bdf>', text, flags=re.I)
     signature = '\n'.join(sorted({_strip_bdf(text) for text in counts}))
     fingerprint = hashlib.sha256((family + '||errors|' + signature).encode()).hexdigest()
     detail = (f'{family}: {len(order)} distinct error/fail line(s), '
               f'{sum(counts.values())} occurrence(s)')
     return dict(code=code, component=family.lower(), family=family,
-                subtype='errors', device=[], source='', native_severity='unknown',
+                subtype='errors', device=devices, source='', native_severity='unknown',
                 native_severities=['unknown'], severity=severity,
                 fingerprint=fingerprint, detail=detail, evidence='',
                 snippet=f'dmesg line {entries[0]["line"]}: {entries[0]["text"]}',
                 raw_start=entries[0]['line'], raw_end=entries[-1]['line'],
                 raw_lines=[e['line'] for e in entries], raw=signature,
-                occurrence_count=1, entries=entries)
+                observations=observations,
+                occurrence_count=sum(counts.values()), entries=entries)
+
+
+def _bdf_of(text):
+    found = re.search(r'\b(?:(?:[0-9a-f]{4}):)?([0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\b', text, re.I)
+    return found[0].lower() if found else ''
+
+
+def _strip_bdf(text):
+    text = re.sub(r'\b(?:[0-9a-f]{4}:)?[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]\b', '<bdf>', text, flags=re.I)
+    return re.sub(r'\b[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]\b', '<bdf>', text, flags=re.I)
+
+
+def _strip_count(text):
+    """Drop the counters that make a repeat differ from its first occurrence."""
+    text = re.sub(r'\b0x[0-9a-f]+\b', '<hex>', text, flags=re.I)
+    return re.sub(r'\b(I/O|QID|error status/mask)\s*\d+', r'\1 <n>', text, flags=re.I)
 
 
 def _message(line):

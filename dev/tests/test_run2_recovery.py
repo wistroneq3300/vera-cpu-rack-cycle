@@ -17,7 +17,7 @@ os.environ.setdefault('VERA_CAMPAIGN_TMP', tempfile.mkdtemp(prefix='vera-campaig
 
 from vera_cycle.core.cycle_core import issue, now, write_json
 from vera_cycle.engine.cycle_engine import new_record
-from vera_cycle.reporting.cycle_report import journal_path, rebuild, status, write_reports
+from vera_cycle.reporting.cycle_report import journal_path, rebuild, render_html, status, write_reports
 from vera_cycle.engine.cycle_runtime import RunRegistry
 from vera_cycle.cli import main
 from test_cycle import target
@@ -283,3 +283,119 @@ with report_writer_lock(sys.argv[1]):
         self.assertEqual(result['nodes'][0]['completed'], 1)
         self.assertEqual(result['state'], 'INCOMPLETE')
         self.assertEqual(status(result)['health'], 'FAIL')
+
+
+class DegradedOutputTests(unittest.TestCase):
+    """Journal and report are written independently; neither breaks the other.
+
+    Regression: both were written in one try block, so a full disk outside the
+    bundle (where the journal lives) also cost the operator the HTML -- the one
+    artefact readable without the tool.
+    """
+
+    setUp = RecoveryTests.setUp
+    save = RecoveryTests.save
+
+    def test_journal_failure_still_renders_report(self):
+        from vera_cycle.reporting.cycle_report import ReportDegraded
+        real = write_json
+        def boom(path, payload):
+            if 'campaign.json' in str(path):
+                raise OSError('No space left on device')
+            return real(path, payload)
+        with patch('vera_cycle.reporting.cycle_report.write_json', boom):
+            with self.assertRaises(ReportDegraded) as caught:
+                write_reports(self.root, self.data)
+        self.assertEqual(caught.exception.persistence['state'], 'FAILED')
+        self.assertEqual(caught.exception.report['state'], 'READY')
+        self.assertTrue((self.root/'CYCLE_REVIEW_REPORT.html').is_file())
+        # The journal from setUp is left untouched, not deleted or half-written.
+        self.assertEqual(read_journal_text(self.root)['state'], 'COMPLETE')
+
+    def test_render_failure_keeps_journal_and_marks_report(self):
+        from vera_cycle.reporting.cycle_report import ReportDegraded
+        with patch('vera_cycle.reporting.cycle_report.render_html', side_effect=ValueError('bad template')):
+            with self.assertRaises(ReportDegraded) as caught:
+                write_reports(self.root, self.data)
+        self.assertEqual(caught.exception.report['state'], 'FAILED')
+        self.assertEqual(caught.exception.persistence['state'], 'OK')
+        # The verdict of record survives a broken template.
+        self.assertTrue(journal_path(self.root).is_file())
+        self.assertEqual(read_journal_text(self.root)['state'], 'COMPLETE')
+
+    def test_node_degraded_archive_is_part_of_run_status(self):
+        from vera_cycle.reporting.cycle_report import run_status
+        self.data['nodes'][0].update(persistence='DEGRADED',
+                                     persistence_detail='tray1_n1/loop0001/report.json: OSError')
+        verdict = run_status(self.data)
+        self.assertEqual(verdict['persistence']['state'], 'DEGRADED')
+        self.assertIn('loop0001/report.json', verdict['persistence']['detail'])
+        self.assertEqual(verdict['execution'], 'COMPLETE')
+        self.assertEqual(verdict['health'], 'FAIL')
+
+    def test_run_status_file_is_written_even_when_journal_fails(self):
+        import json as jsonlib
+        from vera_cycle.reporting.cycle_report import ReportDegraded
+        real = write_json
+        def boom(path, payload):
+            if 'campaign.json' in str(path):
+                raise OSError('disk full')
+            return real(path, payload)
+        with patch('vera_cycle.reporting.cycle_report.write_json', boom):
+            with self.assertRaises(ReportDegraded):
+                write_reports(self.root, self.data)
+        payload = jsonlib.loads((self.root/'run_status.json').read_text())
+        self.assertEqual(payload['persistence']['state'], 'FAILED')
+        self.assertIn('disk full', payload['persistence']['detail'])
+        self.assertIn('Persistence: FAILED', (self.root/'cycle_summary.txt').read_text())
+
+
+def read_journal_text(root):
+    return json.loads(journal_path(root).read_text())
+
+
+class DegradedBannerTests(unittest.TestCase):
+    """The banner is the only part of the verdict a reader sees without tools.
+
+    It carries persistence failures only. The report's own state cannot be
+    stated inside the report ("was this HTML written?" is unknown until after
+    it is written), so that lives in run_status.json.
+    """
+
+    setUp = RecoveryTests.setUp
+    save = RecoveryTests.save
+
+    BANNER = '<div class="degraded-banner">'
+
+    def test_healthy_campaign_has_no_banner(self):
+        # Matched as an element, not as a substring: the CSS is inlined and
+        # defines .degraded-banner, so a substring test passes when nothing shows.
+        html = render_html(self.data)
+        self.assertNotIn(self.BANNER, html)
+
+    def test_journal_failure_shows_banner(self):
+        self.data['persistence'] = dict(state='FAILED', detail='OSError: No space left on device')
+        html = render_html(self.data)
+        self.assertIn(self.BANNER, html)
+        self.assertIn('No space left on device', html)
+        # The verdict itself must not be rewritten by an output problem.
+        self.assertIn('COMPLETE', html)
+        self.assertIn('FAIL', html)
+
+    def test_node_archive_failure_shows_its_own_row(self):
+        self.data['nodes'][0].update(persistence='DEGRADED',
+                                     persistence_detail='tray1_n1/loop0001/report.json: OSError')
+        html = render_html(self.data)
+        self.assertIn(self.BANNER, html)
+        self.assertIn('tray1_n1/loop0001/report.json', html)
+
+    def test_ok_node_states_do_not_trigger_it(self):
+        self.data['nodes'][0]['persistence'] = 'OK'
+        self.assertNotIn(self.BANNER, render_html(self.data))
+
+    def test_banner_survives_print(self):
+        # Handed over as PDF: the warning must be on paper too.
+        from vera_cycle.reporting.cycle_report import ASSETS
+        css = (ASSETS / 'report.css').read_text()
+        self.assertNotIn('.degraded-banner{display:none', css)
+        self.assertIn('.degraded-banner', css)

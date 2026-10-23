@@ -1,30 +1,31 @@
 #!/usr/bin/env bash
-# Request a graceful stop of one campaign owned by the current user.
+# Stop one campaign owned by the current user.
 #
-# A campaign registers itself (run-<run_id>/owner.json) only AFTER it has
-# acquired endpoint locks, so a process that hangs in that window holds the
-# endpoints but is invisible to the graceful stop menu. This wrapper closes
-# that gap: in addition to the graceful request it inspects the endpoint lock
-# files and can force-terminate a stuck holder.
+# The only PID this script will ever signal is the one recorded in the run's
+# owner.json, and only after verify_owner re-derives the process start token and
+# confirms it still matches. Endpoint lock files are shown for troubleshooting
+# but are never used as a kill target: their contents outlive the process that
+# wrote them, so a stale PID there can point at an unrelated program.
+#
+# Stopping means SIGTERM, nothing more. The campaign handles TERM by finishing
+# the POST it is in and stopping at the loop boundary; escalating to SIGKILL is
+# deliberately not automated.
 #
 # Usage:
-#   ./stop_cycle.sh                 Interactive graceful stop menu
-#   ./stop_cycle.sh <run_id>        Graceful stop of one Run ID
-#   ./stop_cycle.sh --status        Report registered campaigns and lock holders
-#   ./stop_cycle.sh --force [id]    Skip the menu; terminate stuck lock holders
+#   ./stop_cycle.sh                 Pick a running campaign from a menu, then stop it
+#   ./stop_cycle.sh <run_id>        Stop that Run ID
+#   ./stop_cycle.sh --status        List running campaigns and held endpoint locks
 set -eu
 
 show_usage() {
-    echo 'Usage: ./stop_cycle.sh [--force|--status] [run_id]' >&2
+    echo 'Usage: ./stop_cycle.sh [<run_id>|--status]' >&2
     exit 2
 }
 
-FORCE=0
 STATUS=0
 RUN_ID=''
 for arg in "$@"; do
     case "$arg" in
-        --force) FORCE=1 ;;
         --status) STATUS=1 ;;
         -h|--help) show_usage ;;
         -*) echo "Unknown option: $arg" >&2; show_usage ;;
@@ -35,8 +36,8 @@ done
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 RUNTIME_DIR="${VERA_RUNTIME_DIR:-/tmp/vera-cycle-runtime}"
 
-# Registered campaigns, in the same shape the interactive menu uses. Read-only.
-list_registered() {
+# Running campaigns, one "run_id<TAB>header<TAB>nodes<TAB>started" per line.
+list_running() {
     python3 - "$SCRIPT_DIR" <<'PY'
 import sys
 sys.path.insert(0, sys.argv[1])
@@ -44,29 +45,20 @@ try:
     from vera_cycle.engine import cycle_runtime
     runs = cycle_runtime.list_running()
 except Exception as exc:  # keep the wrapper usable even if the module moved
-    print(f'  (could not read registrations: {exc})')
+    print(f'(could not read registrations: {exc})', file=sys.stderr)
     raise SystemExit(0)
-if not runs:
-    print('  (none registered)')
 for run in runs:
     nodes = ', '.join(run.get('nodes', [])) or 'Not recorded'
-    print(f"  {run['run_id']}  [{run.get('project','?')}/{run.get('cycle_mode','?')}/{run.get('channel','?')}]"
-          f"  nodes: {nodes}  started: {run.get('utc','?')}")
+    header = f"{run.get('cycle_mode', '?')}/{run.get('channel', '?')}"
+    print(f"{run['run_id']}\t{header}\t{nodes}\t{run.get('utc', '?')}")
 PY
 }
 
-# Pids that currently hold endpoint locks for the current user. Liveness is
-# proven from /proc, and the cmdline must still reference neutrino_cycle.py so
-# a recycled PID can never be mistaken for a live campaign.
-# An optional run_id restricts the result to that campaign's holders, so a
-# forced stop of one Run ID never terminates a sibling campaign running
-# side-by-side on the same controller.
-# Output: TAB-separated "pid run_id user nodes endpoint_count".
-lock_holders() {
-    python3 - "$RUNTIME_DIR" "${1:-}" <<'PY'
+# Endpoint locks held by a live process, for troubleshooting only (never killed).
+report_holders() {
+    python3 - "$RUNTIME_DIR" <<'PY'
 import glob, json, os, sys
 root = sys.argv[1]
-want = sys.argv[2] if len(sys.argv) > 2 else ''
 uid = os.getuid()
 seen = {}
 for path in sorted(glob.glob(os.path.join(root, 'endpoint-*.lock'))):
@@ -80,9 +72,6 @@ for path in sorted(glob.glob(os.path.join(root, 'endpoint-*.lock'))):
     pid = data.get('pid')
     if not isinstance(pid, int) or pid <= 0:
         continue
-    run_id = str(data.get('run_id', '?'))
-    if want and run_id != want:
-        continue
     try:
         if os.stat(f'/proc/{pid}').st_uid != uid:
             continue
@@ -92,111 +81,101 @@ for path in sorted(glob.glob(os.path.join(root, 'endpoint-*.lock'))):
         continue
     if not any(b'neutrino_cycle.py' in part for part in cmd):
         continue
-    info = seen.setdefault(pid, {'run_id': run_id,
-                                 'user': data.get('user', '?'),
-                                 'nodes': set(), 'count': 0})
+    info = seen.setdefault(pid, {'run_id': str(data.get('run_id', '?')), 'nodes': set()})
     info['nodes'].add(str(data.get('node', '?')))
-    info['count'] += 1
+if not seen:
+    print('No endpoint locks held by a live cycle process.')
+    raise SystemExit(0)
+print('Endpoint locks currently held by a live cycle process (informational only):')
 for pid in sorted(seen):
     info = seen[pid]
-    print(f"{pid}\t{info['run_id']}\t{info['user']}\t{','.join(sorted(info['nodes']))}\t{info['count']}")
+    print(f"  pid {pid} | run {info['run_id']} | nodes: {','.join(sorted(info['nodes']))}")
 PY
 }
 
-report_holders() {
-    local holders
-    holders=$(lock_holders "${1:-}")
-    [ -z "$holders" ] && return 0
-    echo 'Endpoint locks currently held by a live cycle process:'
-    printf '%s\n' "$holders" | while IFS="$(printf '\t')" read -r pid run user nodes count; do
-        echo "  pid $pid | run $run | user $user | nodes: $nodes | endpoints: $count"
-    done
-}
-
-terminate_holders() {
-    local run_id holders pids pid remaining left
-    run_id="${1:-}"
-    holders=$(lock_holders "$run_id")
-    [ -z "$holders" ] && return 0
-    pids=$(printf '%s\n' "$holders" | cut -f1 | sort -u)
-    if [ -n "$run_id" ]; then
-        echo "Terminating stuck cycle process(es) for run $run_id: $(echo $pids | tr '\n' ' ')"
-    else
-        echo "Terminating stuck cycle process(es): $(echo $pids | tr '\n' ' ')"
-    fi
-    for pid in $pids; do
-        kill -TERM "$pid" 2>/dev/null || true
-    done
-    # Give the handler a chance to unwind before escalating.
-    for _ in $(seq 1 10); do
-        sleep 1
-        remaining=''
-        for pid in $pids; do
-            kill -0 "$pid" 2>/dev/null && remaining="$remaining $pid"
-        done
-        [ -z "$remaining" ] && break
-    done
-    for pid in $pids; do
-        if kill -0 "$pid" 2>/dev/null; then
-            echo "  pid $pid ignored SIGTERM; sending SIGKILL"
-            kill -KILL "$pid" 2>/dev/null || true
-        fi
-    done
-    sleep 1
-    left=$(lock_holders "$run_id")
-    if [ -z "$left" ]; then
-        echo 'All endpoint locks released.'
-    else
-        echo 'WARNING: some endpoint locks are still held:' >&2
-        printf '%s\n' "$left" >&2
-        return 1
-    fi
+# Prove the recorded PID is still this campaign, then send exactly one SIGTERM.
+stop_run() {
+    local run_id="$1" pid
+    pid=$(python3 - "$SCRIPT_DIR" "$run_id" <<'PY'
+import sys
+sys.path.insert(0, sys.argv[1])
+from vera_cycle.engine import cycle_runtime
+try:
+    owner = cycle_runtime.verify_owner(sys.argv[2])
+    # Record the stop request too, so a campaign polling it exits even if it is
+    # between loop boundaries when the signal arrives.
+    cycle_runtime.request_stop(sys.argv[2])
+except Exception as exc:
+    print(f'REFUSED: {exc}', file=sys.stderr)
+    raise SystemExit(1)
+print(owner['pid'])
+PY
+) || return 1
+    echo "Stopping run $run_id (pid $pid)."
+    echo 'The campaign finishes the POST it is in, then stops at the loop boundary.'
+    kill -TERM "$pid"
 }
 
 if [ "$STATUS" = 1 ]; then
-    echo 'Registered campaigns:'
-    list_registered
-    echo
-    if [ -z "$(lock_holders)" ]; then
-        echo 'No endpoint locks held by a live cycle process.'
+    echo 'Running campaigns:'
+    listing=$(list_running)
+    if [ -z "$listing" ]; then
+        echo '  (none)'
     else
-        report_holders
+        printf '%s\n' "$listing" | awk -F'\t' '{printf "  %s  [%s]  nodes: %s  started: %s\n", $1, $2, $3, $4}'
     fi
+    echo
+    report_holders
     exit 0
 fi
 
-if [ "$FORCE" = 1 ]; then
-    # A named Run ID first gets the graceful request, then a force sweep that is
-    # restricted to that Run ID's own holders -- a sibling campaign running at
-    # the same time must not be terminated. Without a Run ID the sweep is
-    # deliberately account-wide (every holder of the current user), which is the
-    # documented meaning of a bare ``--force``.
-    if [ -n "$RUN_ID" ]; then
-        python3 "$SCRIPT_DIR/neutrino_cycle.py" --stop "$RUN_ID" || true
-        terminate_holders "$RUN_ID"
-    else
-        terminate_holders
-    fi
-    exit 0
+if [ -n "$RUN_ID" ]; then
+    stop_run "$RUN_ID"
+    exit $?
 fi
 
-# Default: behave exactly as before (graceful, interactive or by Run ID).
-python3 "$SCRIPT_DIR/neutrino_cycle.py" --stop "$@"
-
-# The graceful path cannot see a holder that never registered. Surface any that
-# remain and, on a terminal, offer to force-kill them. When a Run ID was named,
-# only that campaign's holders are offered for termination.
-if [ -n "$(lock_holders "$RUN_ID")" ]; then
-    echo
-    report_holders "$RUN_ID"
-    if [ -t 0 ]; then
-        printf 'Force-terminate these stuck process(es)? [y/N]: '
-        read -r reply
-        case "$reply" in
-            y|Y|yes|YES) terminate_holders "$RUN_ID" ;;
-            *) echo 'Left running. Re-run with --force to terminate them.' ;;
-        esac
-    else
-        echo 'Re-run with --force to terminate them.'
-    fi
+listing=$(list_running)
+if [ -z "$listing" ]; then
+    echo 'No campaign is running.'
+    exit 1
 fi
+
+count=$(printf '%s\n' "$listing" | wc -l | tr -d ' ')
+if [ "$count" -eq 1 ]; then
+    chosen=$(printf '%s\n' "$listing" | cut -f1)
+    header=$(printf '%s\n' "$listing" | cut -f2)
+    nodes=$(printf '%s\n' "$listing" | cut -f3)
+    echo "One campaign is running: $header"
+    echo "  nodes: $nodes"
+    echo "  run:   $chosen"
+    printf 'Stop it? [y/N]: '
+    read -r reply
+    case "$reply" in
+        y|Y|yes|YES) ;;
+        *) echo 'Left running.'; exit 0 ;;
+    esac
+else
+    echo 'Running campaigns:'
+    i=0
+    while IFS="$(printf '\t')" read -r rid header nodes started; do
+        i=$((i + 1))
+        echo "  [$i] $header"
+        echo "      nodes: $nodes   started: $started"
+        echo "      run:   $rid"
+    done <<EOF
+$listing
+EOF
+    printf 'Stop which one? [1-%s, q to quit]: ' "$count"
+    read -r reply
+    case "$reply" in
+        q|Q|'') echo 'Left running.'; exit 0 ;;
+        *[!0-9]*) echo 'Not a number.' >&2; exit 2 ;;
+    esac
+    if [ "$reply" -lt 1 ] || [ "$reply" -gt "$count" ]; then
+        echo 'Out of range.' >&2
+        exit 2
+    fi
+    chosen=$(printf '%s\n' "$listing" | sed -n "${reply}p" | cut -f1)
+fi
+
+stop_run "$chosen"
