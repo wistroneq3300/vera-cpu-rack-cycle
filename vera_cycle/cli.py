@@ -328,7 +328,12 @@ def safe_checkpoint(output, data, console):
 def campaign(options, targets, credentials, confirm=input, transport_factory=Transport, runtime_root=None):
     console = Console()
     console.node_names = [t.key for t in targets]
-    run_id = f"{options.project}_{options.cycle_mode}_{options.channel}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    # The run folder is named after the trays under test, so an operator opening
+    # the campaigns directory sees which hardware a run covered without reading
+    # the journal. One entry per tray, in selection order: a whole tray shows
+    # once rather than repeating for each of its nodes.
+    trays = list(dict.fromkeys(t.tray for t in targets)) or [options.project]
+    run_id = f"{'-'.join(trays)}_{options.cycle_mode}_{options.channel}_{datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
     output = options.output.resolve() / run_id
     locks = EndpointLocks(runtime_root)
     stop = threading.Event()

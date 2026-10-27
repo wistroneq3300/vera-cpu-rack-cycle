@@ -946,7 +946,7 @@ class EngineTests(unittest.TestCase):
             mocked_clock.now.side_effect=clock
             self.run_campaign()
         output=next(self.options.output.iterdir())
-        self.assertTrue(output.name.startswith('neutrino_power_cycle_inband_20260929_160000_'),output.name)
+        self.assertTrue(output.name.startswith('tray1_power_cycle_inband_20260929_160000_'),output.name)
         self.assertIn('Time zone: UTC+8 (local time in Run ID',(output/'console.log').read_text(encoding='utf-8'))
 
     def test_graceful_stop_keeps_current_loop_post(self):
