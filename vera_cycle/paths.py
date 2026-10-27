@@ -43,3 +43,8 @@ def inventory_path(project: str) -> Path:
 def mctp_stressor_path() -> Path:
     """Repository copy of the P5032 MCTP stressor pushed to the BMC."""
     return project_dir("neutrino") / "mctp-stressor-p5032.sh"
+
+
+def hwfw_script_path() -> Path:
+    """Repository copy of the OS-side hardware/firmware inventory script."""
+    return project_dir("neutrino") / "hwfw" / "vera_hwfw_inventory.sh"

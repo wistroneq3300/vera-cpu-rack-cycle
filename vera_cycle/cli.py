@@ -41,7 +41,7 @@ from vera_cycle.core.cycle_core import (
 )
 from vera_cycle.core.cycle_transport import Transport
 from vera_cycle.core.cycle_storage import owner_alive, writer_identity
-from vera_cycle.engine.cycle_engine import NodeSession
+from vera_cycle.engine.cycle_engine import AuxCycleGate, NodeSession
 from vera_cycle.engine.cycle_runtime import EndpointLocks, RunRegistry, list_running, request_stop
 from vera_cycle.reporting.cycle_report import (
     ReportDegraded, campaign_tmp, create_delivery_zip, duration, elapsed, rebuild,
@@ -362,6 +362,9 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             console("Outband reboot uses BMC power reset.")
         if options.cycle_mode == 'aux_cycle':
             console("Auxiliary AC cycle uses the BMC standby controller for either selected channel.")
+            if options.aux_interval > 0 and len(targets) > 1:
+                console(f"Aux cycles are staggered: one command every {options.aux_interval:g}s "
+                        f"(~{(len(targets) - 1) * options.aux_interval:g}s for {len(targets)} targets).")
         blocked = inventory_blocks(targets)
         for target in targets:
             if target.key not in blocked:
@@ -374,7 +377,12 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
         with tempfile.TemporaryDirectory(prefix='.vera-pre-', dir=options.output) as staging:
             root = Path(staging)
             transport = transport_factory(credentials, root / '.ssh')
-            sessions = [NodeSession(t, transport, root, run_id, script, digest(script), options, rules) for t in targets]
+            # One gate per campaign: aux cycles are spaced across nodes because a
+            # simultaneous AC cycle on several nodes of a tray takes the others
+            # down. Other cycle modes are unaffected.
+            aux_gate = AuxCycleGate(options.aux_interval) if options.cycle_mode == 'aux_cycle' else None
+            sessions = [NodeSession(t, transport, root, run_id, script, digest(script), options, rules,
+                                    aux_gate=aux_gate, stop_requested=stop.is_set) for t in targets]
             for session in sessions:
                 if session.target.key in blocked:
                     session.node['blocked'] = blocked[session.target.key]
@@ -865,6 +873,13 @@ def show_command(options):
     for line in lines:
         print(f"    {_cyan(line)}")
     print(f"  {_bold('Repeat')} {_yellow(limit)}")
+    if getattr(options, 'cycle_mode', '') == 'aux_cycle':
+        interval = getattr(options, 'aux_interval', 20.0)
+        if interval > 0 and len(getattr(options, 'node', None) or []) > 1:
+            print(f"  {_bold('Stagger')} {_cyan(f'one node every {interval:g}s')} "
+                  f"{_dim('(AC cycle must not hit several nodes at once)')}")
+        else:
+            print(f"  {_bold('Stagger')} {_dim('off')}")
 
 
 def _group_by_tray(targets):
@@ -960,6 +975,14 @@ def _menu_wizard(options):
         options.cycle_mode = _menu('Cycle mode', [
             ('power_cycle', 'power_cycle'), ('reboot', 'reboot'), ('aux_cycle', 'aux_cycle')], reader)
         _echo_kv('Cycle mode', options.cycle_mode)
+        if options.cycle_mode == 'aux_cycle':
+            options.aux_interval = _menu('Aux cycle stagger', [
+                ('20', '20 seconds between nodes (recommended)'),
+                ('30', '30 seconds between nodes'),
+                ('10', '10 seconds between nodes'),
+                ('0', 'off - all nodes at once (may drop nodes on this platform)')], reader, default=0)
+            options.aux_interval = float(options.aux_interval)
+            _echo_kv('Aux stagger', 'off' if not options.aux_interval else f'{options.aux_interval:g} s')
         options.channel = _menu('Channel', [('inband', 'inband'), ('outband', 'outband')], reader)
         _echo_kv('Channel', options.channel)
         duration = _menu('Duration type', [
@@ -995,6 +1018,13 @@ def wizard(options):
     options.node = _plain_node_prompt(names)
     options.cycle_mode = choose('Cycle mode', [
         ('power_cycle', 'power_cycle'), ('reboot', 'reboot'), ('aux_cycle', 'aux_cycle')], 1)
+    if options.cycle_mode == 'aux_cycle':
+        options.aux_interval = choose('Aux cycle stagger', [
+            ('20', '20 seconds between nodes (recommended)'),
+            ('30', '30 seconds between nodes'),
+            ('10', '10 seconds between nodes'),
+            ('0', 'off - all nodes at once (may drop nodes on this platform)')], 1)
+        options.aux_interval = float(options.aux_interval)
     options.channel = choose('Channel', [('inband', 'inband'), ('outband', 'outband')], 1)
     options.loops, options.hours = 0, 0.0
     if choose('Duration type', [('loops', 'Loops (number of cycles)'), ('hours', 'Hours (time limit)')], 1) == 'loops':
@@ -1016,6 +1046,8 @@ def parser():
     p.add_argument('--cycle-mode', choices=('reboot', 'power_cycle', 'aux_cycle'), default='power_cycle')
     p.add_argument('--channel', choices=('inband', 'outband'), default='inband')
     p.add_argument('--boot-timeout', type=float, default=900)
+    p.add_argument('--aux-interval', type=float, default=20.0,
+                   help='Seconds between consecutive aux_cycle commands across nodes (0 disables staggering; ignored by other cycle modes)')
     p.add_argument('--poll-interval', type=float, default=10)
     p.add_argument('--memory-min-ratio', type=float, default=0.90, help='Minimum OS MemTotal / installed SMBIOS capacity (0 < ratio <= 1)')
     p.add_argument('--config-script', type=Path,
@@ -1070,6 +1102,8 @@ def main(argv=None):
             raise ValueError('Invalid mode or channel')
         if options.loops < 0 or not math.isfinite(options.hours) or options.hours < 0 or not (options.loops or options.hours):
             raise ValueError('Provide a positive --loops or --hours limit; negative/non-finite limits are invalid')
+        if not math.isfinite(options.aux_interval) or not 0 <= options.aux_interval <= 3600:
+            raise ValueError('Aux cycle interval must be finite and between 0 and 3600 seconds')
         if not math.isfinite(options.boot_timeout) or options.boot_timeout < 1 or not math.isfinite(options.poll_interval) or options.poll_interval <= 0:
             raise ValueError('Boot timeout must be >= 1 second and polling interval must be positive')
         if not math.isfinite(options.memory_min_ratio) or not 0 < options.memory_min_ratio <= 1:

@@ -378,6 +378,7 @@ ITEMS = [
         t("`cycle_command.txt`、`action` metadata、`CYCLE_COMMAND_FAILED`、`COMMAND_RECONCILED` / `COMMAND_UNCONFIRMED`。", "`cycle_command.txt`, `action` metadata, `CYCLE_COMMAND_FAILED`, `COMMAND_RECONCILED` / `COMMAND_UNCONFIRMED`."),
         t("CYCLE_COMMAND_FAILED; COMMAND_RECONCILED; COMMAND_UNCONFIRMED", "CYCLE_COMMAND_FAILED; COMMAND_RECONCILED; COMMAND_UNCONFIRMED"),
         t("`aux_cycle` 的實際 action 固定在 BMC controller，不因 channel label 改成 OS action。", "The actual `aux_cycle` action is fixed to the BMC controller and does not change into an OS action because of the channel label."),
+        t("`aux_cycle` 指令在節點之間間隔發出（預設 20 秒，`--aux-interval`，0 表示關閉）；同一瞬間不得對多個節點下 AC cycle。其他 cycle mode 不受影響。等待期間節點顯示 stagger stage，操作員停止則不送出指令並記為 `STOP_REQUESTED`。", "`aux_cycle` commands are spaced across nodes (default 20 s, `--aux-interval`, 0 disables); no two nodes receive an AC cycle at the same instant. Other cycle modes are unaffected. Waiting nodes show a stagger stage, and an operator stop drops the command and records `STOP_REQUESTED`."),
     ),
     item(
         "24", "boot-transition", t("Boot ID Transition", "Boot ID Transition"), CYCLE,

@@ -1009,6 +1009,48 @@ def _identity_trace_html(record):
             + ''.join(rows) + '</tbody></table></div>')
 
 
+def _render_hwfw(record):
+    """Hardware and firmware summary captured at PRE.
+
+    Two tables, matching the rack-manager view: component totals (type /
+    component / quantity) and firmware versions. Nothing here is judged - there
+    is no PASS/FAIL column and no issue is produced from this panel.
+    """
+    data = record.get('hwfw')
+    if not data:
+        return ''
+    evidence = _record_evidence(record, data['evidence']) if data.get('evidence') else 'Not retained'
+    if data.get('state') == 'UNAVAILABLE':
+        return (f'<div class="hwfw-panel"><h3>Hardware and firmware</h3>'
+                f'<p class="muted">Not collected. {esc(data.get("reason") or "The inventory script was unavailable.")}</p></div>')
+
+    parts = ['<div class="hwfw-panel"><h3>Hardware and firmware</h3>']
+
+    totals = data.get('totals') or []
+    if totals:
+        rows = ''.join(
+            f'<tr><td>{esc(kind)}</td><td>{esc(component)}</td>'
+            f'<td class="qty">{'' if qty is None else 'x' + str(qty)}</td></tr>'
+            for kind, component, qty in totals)
+        parts.append('<h4>Hardware components</h4><div class="tablewrap"><table class="hwfw-totals">'
+                     '<thead><tr><th>Type</th><th>Component</th><th class="qty">Qty</th></tr></thead>'
+                     f'<tbody>{rows}</tbody></table></div>')
+
+    firmware = data.get('firmware') or {}
+    if firmware:
+        rows = ''.join(f'<tr><td>{esc(name)}</td><td><code>{esc(version)}</code></td></tr>'
+                       for name, version in firmware.items())
+        parts.append('<h4>Firmware versions</h4><div class="tablewrap"><table class="hwfw-firmware">'
+                     '<thead><tr><th>Component</th><th>Version</th></tr></thead>'
+                     f'<tbody>{rows}</tbody></table></div>')
+
+    if not totals and not firmware:
+        parts.append('<p class="muted">The inventory script returned no hardware or firmware rows.</p>')
+
+    parts.append(f'<p class="muted">Read from the node at PRE. Evidence: {evidence}</p></div>')
+    return ''.join(parts)
+
+
 def record_html(record, node_index, baseline=None):
     phase = _phase_kind(record)
     loop_number = _loop_number(record)
@@ -1023,7 +1065,7 @@ def record_html(record, node_index, baseline=None):
     action = _render_action(record)
     sel = _render_sel(record) + _render_redfish(record)
     return f'''<details id="{phase_id}"><summary><strong>{esc(record['phase'])}</strong> {badge(record['status'])}<span class="phase-count">{esc(_finding_summary(record))} · {esc(duration(record.get('duration_seconds')))} · {esc(record.get('finished') or 'Not finished')}</span></summary><div class="detail-body">
-      {_render_summary_groups(record)}{_render_pci_group(record, baseline) if phase != 'START' or record.get('pci') or record.get('pci_devices') else ''}{_render_mctp_group(record)}<h3>Findings</h3>{_finding_html(record)}{collection}{sel}<details><summary>{'START preparation and verified identities' if phase == 'START' else 'Cycle action and verified identities' if phase == 'LOOP' else 'Verified identities'}</summary>{action}{identity}</details>
+      {_render_summary_groups(record)}{_render_pci_group(record, baseline) if phase != 'START' or record.get('pci') or record.get('pci_devices') else ''}{_render_mctp_group(record)}{_render_hwfw(record) if phase == 'PRE' else ''}<h3>Findings</h3>{_finding_html(record)}{collection}{sel}<details><summary>{'START preparation and verified identities' if phase == 'START' else 'Cycle action and verified identities' if phase == 'LOOP' else 'Verified identities'}</summary>{action}{identity}</details>
       <p class="muted">{esc(record.get('sel_review', ''))}</p><details><summary>Original evidence files</summary><ul class="evidence-list">{evidence or '<li>Evidence paths were not recorded.</li>'}</ul></details></div></details>'''
 
 def record_html_compact(record, node_index, baseline=None):

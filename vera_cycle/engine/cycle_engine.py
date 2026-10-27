@@ -6,6 +6,7 @@ from collections import Counter
 from datetime import datetime
 import re
 import shlex
+import threading
 import time
 from pathlib import Path
 
@@ -59,12 +60,45 @@ MCTP_TARGETS = (("16", "0"), ("17", "1"))
 MCTP_DMESG_GREP = ("dmesg -c | grep -iE 'mctp|musb|error -71|USB disconnect|"
                    "usb device|renamed from|reset|timeout' || true")
 
+# BMC I2C inventory. Every bus is probed read-only once per PRE and once per
+# loop; the output is retained as evidence under ``i2cdetect/`` and never
+# produces a finding, because which addresses are populated legitimately varies
+# between trays and batches. Probing is read-byte only (``-y -r``), so no device
+# register is written and a bound driver (``UU``) is never disturbed. Each bus
+# is individually bounded by ``timeout`` so one wedged bus cannot stall a loop.
+I2C_SCAN = ("set -u; for b in $(i2cdetect -l | awk '{print $1}' | sed 's/i2c-//' | sort -n); do "
+            "echo \"@BUS $b\"; timeout 15 i2cdetect -y -r \"$b\" 2>&1 || echo \"@ERROR i2c-$b exit $?\"; done")
+
+# OS-side hardware/firmware inventory, run once per PRE. The repository copy is
+# pushed to its own path so it can never overwrite the operator's
+# /root/Config-Neutrino.sh - the two are maintained separately. Output is
+# retained as PRE evidence only: it reports the current state and is never
+# judged, so this produces no finding and cannot block a node.
+HWFW_REMOTE = "/root/vera-cycle-hwfw/vera_hwfw_inventory.sh"
+HWFW_RUN = f"bash {HWFW_REMOTE}"
+
+# The inventory script colours its section headers, so every parser below reads
+# ANSI-stripped text; otherwise "[FW Version]" never matches its own line.
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*[A-Za-z]')
+
+
+def _plain(text):
+    return _ANSI_RE.sub('', text)
+
 # Redfish members arrive with vendor casing (Id/Severity/Created/Message) and
 # are normalised to lowercase once; read either spelling so no evidence line is
 # blanked when a raw entry reaches a writer through a failure path.
 _REDFISH_FIELDS = {'id': ('id', 'Id'), 'severity': ('severity', 'Severity'),
                    'created': ('created', 'Created'), 'message': ('message', 'Message'),
                    'severity_key': ('severity_key', 'Severity')}
+
+
+def _bus_sort_key(bus):
+    """Numeric bus order, so i2c-87 sorts after i2c-9 rather than before it."""
+    try:
+        return (0, int(bus))
+    except (TypeError, ValueError):
+        return (1, str(bus))
 
 
 def _entry_field(entry, field):
@@ -103,11 +137,63 @@ def new_record(phase):
                 # from an old record that never retained SEL metadata.
                 sel_evidence_schema=1)
 
+class AuxCycleGate:
+    """Space aux-cycle commands across nodes instead of firing them together.
+
+    An auxiliary AC cycle momentarily drops the standby rail of the whole tray,
+    so issuing it to several nodes at the same instant has been observed to
+    take the other nodes of that tray down with it. Only the power command is
+    spaced here: PRE, POST, evidence collection and dmesg keep running
+    concurrently, so a staggered campaign costs (nodes - 1) x interval, not a
+    fully sequential run.
+
+    One instance is shared by every NodeSession of a campaign and is safe to
+    call from the per-node worker threads.
+    """
+
+    def __init__(self, interval):
+        self.interval = max(0.0, float(interval or 0.0))
+        self._lock = threading.Lock()
+        self._last = None
+
+    def wait(self, stage=None, cancelled=None):
+        """Block until the current thread may issue its command.
+
+        Holding the mutex while sleeping is deliberate: two nodes must never
+        pass the gate at the same moment, which is exactly the fault being
+        fixed. ``stage`` reports the remaining wait so a slow loop is visible
+        rather than looking hung, and ``cancelled()`` lets an operator stop
+        abort before the command is sent.
+        """
+        if self.interval <= 0:
+            return
+        with self._lock:
+            if self._last is not None:
+                remaining = self.interval - (time.monotonic() - self._last)
+                while remaining > 0:
+                    if cancelled is not None and cancelled():
+                        raise AuxCycleCancelled('Aux-cycle stagger cancelled before the command was sent')
+                    if stage:
+                        stage(f"aux cycle stagger: waiting {remaining:.0f}s")
+                    time.sleep(min(1.0, remaining))
+                    remaining = self.interval - (time.monotonic() - self._last)
+            if cancelled is not None and cancelled():
+                raise AuxCycleCancelled('Aux-cycle stagger cancelled before the command was sent')
+            self._last = time.monotonic()
+
+
+class AuxCycleCancelled(RuntimeError):
+    """Raised when a staggered command is dropped before it reaches a node."""
+
+
 class NodeSession:
-    def __init__(self, target, transport, root, run_id, script, script_hash, options, rules):
+    def __init__(self, target, transport, root, run_id, script, script_hash, options, rules,
+                 aux_gate=None, stop_requested=None):
         self.target, self.transport, self.root = target, transport, Path(root)
         self.run_id, self.script, self.script_hash = run_id, script, script_hash
         self.options, self.rules = options, rules
+        self.aux_gate = aux_gate
+        self.stop_requested = stop_requested
         self.remote = f"/var/tmp/vera-{run_id}-{target.key}-{script_hash[:12]}.sh"
         # Optional stage reporter set by the campaign; keeps one_loop silent when
         # a NodeSession is driven directly (tests, dry-run).
@@ -492,6 +578,55 @@ class NodeSession:
         else:
             self.dmesg_seen = counts
 
+    def collect_bmc_i2c(self, record):
+        """Retain one ``i2cdetect -y -r`` capture per BMC I2C bus.
+
+        Evidence only: the populated address set differs legitimately between
+        trays and SSD batches, so nothing here is judged. Files land in
+        ``i2cdetect/`` beside the other evidence of the same loop: one file per
+        bus (``i2c-81.txt``) plus the combined ``all.txt`` for quick reading.
+        A probe failure is recorded as evidence, never as a finding, so a
+        misbehaving bus cannot stop an otherwise healthy node.
+        """
+        result = self.command(record, 'bmc_i2c', 'bmc', I2C_SCAN,
+                             timeout=180, check=False, save_evidence=True)
+        folder = self.folder(record) / 'i2cdetect'
+        sections = self._split_i2c_scan(result.output)
+        for bus in sorted(sections, key=_bus_sort_key):
+            atomic_write(folder / f'i2c-{bus}.txt',
+                         f"UTC+8: {now()}\nBMC: {self.target.bmc_hostname or self.target.bmc_ip}\n"
+                         f"Bus: i2c-{bus}\nCommand: i2cdetect -y -r {bus}\n\n{sections[bus]}")
+        atomic_write(folder / 'all.txt',
+                     f"UTC+8: {now()}\nBMC: {self.target.bmc_hostname or self.target.bmc_ip}\n"
+                     f"Exit: {result.code}  State: {result.state}\n\n{result.output}")
+        record.setdefault('i2c', {}).update(
+            buses=sorted(sections, key=_bus_sort_key), count=len(sections),
+            path=(folder.relative_to(self.root).as_posix()),
+            state='COLLECTED' if sections else 'EMPTY')
+
+    @staticmethod
+    def _split_i2c_scan(output):
+        """Split the combined scan into ``{bus_number: text}``.
+
+        The remote loop emits ``@BUS <n>`` before each bus and ``@ERROR <bus>``
+        when the probe itself failed, so a wedged bus keeps a visible section
+        instead of silently disappearing from the report.
+        """
+        sections, current, body = {}, None, []
+        for line in output.splitlines():
+            marker = line.strip()
+            if marker.startswith('@BUS '):
+                if current is not None:
+                    sections[current] = '\n'.join(body).rstrip() + '\n'
+                current, body = marker.removeprefix('@BUS ').strip(), []
+            elif marker.startswith('@ERROR ') and current is not None:
+                body.append(line)
+            elif current is not None:
+                body.append(line)
+        if current is not None:
+            sections[current] = '\n'.join(body).rstrip() + '\n'
+        return sections
+
     def collect_bmc_dmesg(self, record):
         """Retain the BMC's MCTP/USB dmesg grep as diagnostic evidence only.
 
@@ -531,6 +666,141 @@ class NodeSession:
         record['mctp_stressor_pushed'] = True
         self.stage('MCTP stressor pushed to BMC')
 
+    def ensure_hwfw_script(self, record):
+        """Place this repo's hardware/firmware script on the node if it is absent.
+
+        The operator maintains their own copy at /root/Config-Neutrino.sh; this
+        one lives under its own directory and file name so neither can overwrite
+        the other. A node that already carries the script is left untouched.
+        """
+        probe = self.command(record, 'hwfw_probe', 'os',
+                             f'test -s {HWFW_REMOTE} && sha256sum {HWFW_REMOTE}',
+                             timeout=30, check=False, save_evidence=False,
+                             record_command=False)
+        if probe.code == 0:
+            record['hwfw_present'] = True
+            return True
+        try:
+            data = paths.hwfw_script_path().read_bytes()
+            self.transport.upload_replace(self.target, 'os', data, HWFW_REMOTE, mode=0o755)
+        except Exception as exc:
+            record['hwfw_present'] = False
+            record['hwfw_state'] = 'UNAVAILABLE'
+            record['hwfw_reason'] = f'Could not place {HWFW_REMOTE} on the node: {exc}'
+            return False
+        record['hwfw_present'] = True
+        record['hwfw_pushed'] = True
+        return True
+
+    def collect_hwfw(self, record):
+        """Retain the node's current hardware and firmware inventory at PRE.
+
+        This reports the state of the machine, nothing more: no threshold is
+        compared, no issue is raised and the verdict is untouched. The script's
+        own ``[Fail]`` section is its expectation list rather than a measurement,
+        so it is kept in the raw evidence but never promoted to a finding here.
+        """
+        if not self.ensure_hwfw_script(record):
+            record.setdefault('hwfw', {}).update(state='UNAVAILABLE',
+                                                 reason=record.get('hwfw_reason', ''))
+            return
+        result = self.command(record, 'hw_fw', 'os', HWFW_RUN, timeout=300,
+                              check=False, save_evidence=True, record_command=False)
+        text = result.output
+        # ``record_command=False`` keeps this out of ``commands``, which
+        # ``finish()`` turns into PASS/FAIL rows. The inventory is evidence, so
+        # its path is recorded on its own and no verdict row is produced.
+        evidence = next((p for p in reversed(record['evidence']) if 'hw_fw' in p), '')
+        record['hwfw'] = dict(state='COLLECTED' if result.code == 0 else 'PARTIAL',
+                              code=result.code,
+                              totals=self._parse_hwfw_totals(text),
+                              firmware=self._parse_hwfw_firmware(text),
+                              evidence=evidence)
+
+    @staticmethod
+    def _parse_hwfw_totals(text):
+        """``[Pass]`` rows as ``[(type, component, qty)]`` for the summary table.
+
+        Format is ``TYPE: component xN``. The quantity is always the rightmost
+        ``xN`` token, because a component name can itself contain one
+        (``HFS3T8GFPGX229N 0x1 x2`` is two NVMe drives, not one).
+        """
+        rows, inside = [], False
+        for line in _plain(text).splitlines():
+            stripped = line.strip()
+            if stripped == '[Pass]':
+                inside = True
+                continue
+            if stripped.startswith('[') and stripped.endswith(']'):
+                if inside:
+                    break
+                continue
+            if not inside or not stripped:
+                continue
+            match = re.match(r'^(?P<kind>[A-Za-z0-9_]+)\s*:\s*(?P<body>.+)$', stripped)
+            if not match:
+                continue
+            body = match.group('body').strip()
+            qty_match = re.search(r'\s+x(\d+)$', body)
+            if qty_match:
+                rows.append((match.group('kind'), body[:qty_match.start()].strip(), int(qty_match.group(1))))
+            else:
+                rows.append((match.group('kind'), body, None))
+        return rows
+
+    @staticmethod
+    def _parse_hwfw_sections(text):
+        """``[Info] <name>`` blocks with their body lines, in script order."""
+        sections, current = {}, None
+        for line in _plain(text).splitlines():
+            stripped = line.strip()
+            if stripped.startswith('[Info]'):
+                current = stripped.removeprefix('[Info]').strip()
+                sections[current] = []
+            elif stripped.startswith('[') and stripped.endswith(']'):
+                current = None
+            elif current is not None and stripped:
+                sections[current].append(line.rstrip())
+        return sections
+
+    @staticmethod
+    def _parse_hwfw_firmware(text):
+        """Rows of the ``[FW Version]`` table as ``{component: version}``."""
+        rows, inside = {}, False
+        for line in _plain(text).splitlines():
+            stripped = line.strip()
+            if stripped.startswith('[FW Version]'):
+                inside = True
+                continue
+            if inside and stripped.startswith('[') and stripped.endswith(']'):
+                break
+            if not inside or not stripped or stripped.startswith('---') or stripped.startswith('Component'):
+                continue
+            parts = stripped.split(None, 1)
+            if len(parts) == 2 and parts[0] != 'BMC':
+                rows[parts[0]] = parts[1].strip()
+        return rows
+
+    @staticmethod
+    def _parse_hwfw_expectation(text):
+        """The script's own ``[Pass]``/``[Fail]`` summary lines.
+
+        Kept separately from the measurements so the report can show what the
+        script itself considered expected without implying this harness judged
+        anything.
+        """
+        blocks, current = {}, None
+        for line in _plain(text).splitlines():
+            stripped = line.strip()
+            if stripped in ('[Pass]', '[Fail]'):
+                current = stripped.strip('[]')
+                blocks[current] = []
+            elif stripped.startswith('[') and stripped.endswith(']'):
+                current = None
+            elif current is not None and stripped:
+                blocks[current].append(stripped)
+        return blocks
+
     def run_mctp_stressor(self, record, label, eid, cpu, mode, judge):
         """Run one stressor invocation and (optionally) judge it.
 
@@ -559,6 +829,12 @@ class NodeSession:
         # adding a before-reboot or early-POST capture.
         if not post:
             self.collect_dmesg(record, 'dmesg', save_evidence=True)
+        # BMC I2C inventory: once for PRE and once per loop, retained as evidence
+        # only (never judged). A loop's only capture() call is the POST one, so
+        # this must run on either pass; ``i2c`` on the record marks it done and
+        # keeps a record from scanning its buses twice.
+        if 'i2c' not in record:
+            self.collect_bmc_i2c(record)
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
                 continue
@@ -845,6 +1121,10 @@ class NodeSession:
                                  usb=dict(record.get("usb", {})),
                                  network=dict(record.get("network_ifaces", {})),
                                  bmc_usb=dict(record.get("bmc_usb", {})))
+            # Hardware/firmware inventory: reports what the node currently
+            # carries. Never compared against anything, so it cannot change a
+            # verdict and a missing script cannot block the node.
+            self.collect_hwfw(record)
             # P5032 MCTP/USB preflight. The 4 stressor runs are the test baseline
             # (operator: their PASS/FAIL is the criterion), so a failure here is a
             # real FAIL. BMC dmesg grep is diagnostic evidence only.
@@ -1534,6 +1814,9 @@ class NodeSession:
                            "power_cycle": "power cycle"}.get(mode, mode)
             self.node["attempts"] += 1
             if mode == "aux_cycle":
+                if self.aux_gate is not None:
+                    self.aux_gate.wait(stage=self.stage,
+                                       cancelled=lambda: bool(self.stop_requested and self.stop_requested()))
                 state = self.dispatch(record, "cycle_command", "bmc", "/usr/bin/stbypowerctrl.sh aux_cycle")
             elif mode == "reboot" and channel == "outband":
                 state = self.dispatch(record, "cycle_command", "oob", "power reset")
@@ -1606,6 +1889,14 @@ class NodeSession:
             record['boot_confirmed'] = bool(recovered)
             record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified and self.hardware_execution_complete)
             self.node['valid_cycles'] += int(record['valid_cycle'])
+        except AuxCycleCancelled as exc:
+            # Nothing reached the node, so this is a deliberate stop, not a node
+            # failure: no recovery, no power evidence, no boot-log tail.
+            self.add(record, "STOP_REQUESTED", "cycle", str(exc))
+            self.node.update(active=False, stop_reason=str(exc))
+            record["post_complete"] = False
+            record['boot_confirmed'] = False
+            record['valid_cycle'] = False
         except Exception as exc:
             code = "IDENTITY_UNSAFE" if isinstance(exc, IdentityUnsafe) else "NODE_UNAVAILABLE"
             if isinstance(exc, IdentityUnsafe):
