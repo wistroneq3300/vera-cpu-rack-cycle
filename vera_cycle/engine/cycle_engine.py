@@ -161,20 +161,21 @@ class AuxCycleGate:
 
         Holding the mutex while sleeping is deliberate: two nodes must never
         pass the gate at the same moment, which is exactly the fault being
-        fixed. ``stage`` reports the remaining wait so a slow loop is visible
-        rather than looking hung, and ``cancelled()`` lets an operator stop
-        abort before the command is sent.
+        fixed. ``stage`` is called once on entry so the 30 s progress summary
+        can attribute the wait; the countdown itself is not reported, because
+        one line per second per node buries the rest of the console log.
+        ``cancelled()`` lets an operator stop abort before the command is sent.
         """
         if self.interval <= 0:
             return
         with self._lock:
             if self._last is not None:
                 remaining = self.interval - (time.monotonic() - self._last)
+                if remaining > 0 and stage:
+                    stage(f"aux cycle stagger: waiting {remaining:.0f}s")
                 while remaining > 0:
                     if cancelled is not None and cancelled():
                         raise AuxCycleCancelled('Aux-cycle stagger cancelled before the command was sent')
-                    if stage:
-                        stage(f"aux cycle stagger: waiting {remaining:.0f}s")
                     time.sleep(min(1.0, remaining))
                     remaining = self.interval - (time.monotonic() - self._last)
             if cancelled is not None and cancelled():

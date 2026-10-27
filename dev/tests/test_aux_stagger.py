@@ -48,6 +48,24 @@ class GateUnitTests(unittest.TestCase):
             gate.wait(cancelled=lambda: True)
         self.assertLess(gate.interval, 6)  # interval untouched by the cancel
 
+    def test_wait_is_reported_once_instead_of_every_second(self):
+        gate = AuxCycleGate(2)
+        gate.wait()
+        stages = []
+        gate.wait(stage=stages.append)
+        self.assertEqual(len(stages), 1, stages)
+        self.assertIn('aux cycle stagger: waiting', stages[0])
+
+    def test_wait_still_blocks_for_the_full_interval_when_reported_once(self):
+        gate = AuxCycleGate(2)
+        gate.wait()
+        stages = []
+        start = time.monotonic()
+        gate.wait(stage=stages.append)
+        elapsed = time.monotonic() - start
+        self.assertEqual(len(stages), 1, stages)
+        self.assertGreaterEqual(elapsed, 1.8, 'the single report must not shorten the spacing')
+
 
 class StaggeredCampaignTests(unittest.TestCase):
     setUp = fixtures.EngineTests.setUp
