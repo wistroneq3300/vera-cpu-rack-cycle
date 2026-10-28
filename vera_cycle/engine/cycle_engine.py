@@ -74,7 +74,10 @@ I2C_SCAN = ("set -u; for b in $(i2cdetect -l | awk '{print $1}' | sed 's/i2c-//'
 # /root/Config-Neutrino.sh - the two are maintained separately. Output is
 # retained as PRE evidence only: it reports the current state and is never
 # judged, so this produces no finding and cannot block a node.
-HWFW_REMOTE = "/root/vera-cycle-hwfw/vera_hwfw_inventory.sh"
+# The path is a bare file under /root on purpose: SFTP does not create parent
+# directories, so a dedicated subdirectory fails to upload on a node that has
+# never been seeded.
+HWFW_REMOTE = "/root/vera_hwfw_inventory.sh"
 HWFW_RUN = f"bash {HWFW_REMOTE}"
 
 # The inventory script colours its section headers, so every parser below reads
