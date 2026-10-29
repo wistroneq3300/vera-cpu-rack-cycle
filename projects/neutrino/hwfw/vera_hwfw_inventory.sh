@@ -138,35 +138,85 @@ function MLNX_fun(){
 
 
 #BlueField-4 DPU detector.
-#On the Vera CPU Rack the BF4 DPU is the expected-but-missing component.
-#We scan for it via MST (a DPU would show a distinct DEVICE_TYPE) and via
-#lspci vendor/device id. If nothing is found we report it explicitly.
+#On the Vera CPU Rack a single B4280VS card carries TWO BF4 SoCs, each exposing
+#one 800G datapath function, plus one SoC Management Interface on SoC#1.
+#A PCI function count is therefore not a card count: functions 3, SoCs 2,
+#cards 1. Cards are counted the only way that cannot be guessed wrong — by
+#distinct VPD board serial ([SN] in lspci -vv), which every function of the
+#same physical card shares.
 function BF4_fun(){
         IFS=$' \t\n'
         BF4_Qty=0
+        BF4_ERROR_TAG=0
         echo -e "\n[Info] BlueField-4 (DPU)"
 
-        #1) MST: BlueField-4 DPU shows as DEVICE_TYPE containing "BlueField4".
+        #1) MST: a BF4 SoC shows as DEVICE_TYPE "BlueField4(rev:0)".
         #   Only match BF4 — exclude BF3/BF2, GB100 (GPU), ConnectX (NIC), Vera (SuperNIC).
         local mst_bf4
         mst_bf4="$(mst status -v 2>/dev/null | grep '/dev/mst/' | awk '{print $1}' | grep -i 'bluefield4' | sort -u)"
 
-        #2) lspci: NVIDIA BlueField-4 DPU (device id 0x2618 / 0x2619 family).
+        #2) lspci fallback. BF4 data functions are 15b3:a2df and the SoC
+        #   Management Interface is 15b3:c2d6; 2618/2619 are the BF3 ids and
+        #   never match on a BF4 host. Keep the name match for older lspci -nn
+        #   output that prints the class name instead of the id.
         local lspci_bf4
-        lspci_bf4="$(lspci 2>/dev/null | grep -iE 'bluefield\s*4|2618|2619')"
+        lspci_bf4="$(lspci -Dnn 2>/dev/null | grep -iE 'bluefield[ -]?4|15b3:a2df|15b3:c2d6|2618|2619')"
 
-        if [ -n "$mst_bf4" ]; then
-                BF4_Qty=1
-                echo "$mst_bf4"
-        elif [ -n "$lspci_bf4" ]; then
-                BF4_Qty=1
-                echo "$lspci_bf4"
+        if [ -z "$mst_bf4" ] && [ -z "$lspci_bf4" ]; then
+                echo "  !! No BlueField-4 detected (expect ${BF4_MIN}x DPU on this rack -- MISSING) !!"
+                BF4_ERROR_TAG=1
+                return
         fi
 
-        if [ $BF4_Qty -eq 0 ]; then
-                echo "  !! No BlueField-4 detected (expect 1x DPU on this rack -- MISSING) !!"
+        #Per-function identity: BDF | board serial. The board serial is the VPD
+        #``[SN]`` line inside that function's own lspci stanza. Functions whose
+        #class name marks the SoC Management Interface are tagged "MGMT".
+        local verbose
+        verbose=$(lspci -Dvv -nn 2>/dev/null | awk '
+          function flush() {
+                  if (!bf4) return
+                  if (mgmt_now) print "MGMT|" bdf
+                  else print bdf "|" (serial == "" ? "-" : serial)
+          }
+          /^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ {
+                  flush(); bdf=$1; serial=""
+                  bf4 = ($0 ~ /(BlueField[ -]?4|15b3:a2df|15b3:c2d6)/)
+                  mgmt_now = ($0 ~ /Management Interface/)
+          }
+          bf4 && /\[SN\][[:space:]]+Serial number:/ {
+                  serial=$0; sub(/^.*Serial number:[[:space:]]*/, "", serial); sub(/[[:space:]]*$/, "", serial)
+          }
+          END {flush()}')
+
+        #Cards = distinct non-placeholder board serials. Serial-less functions
+        #still count as present but cannot be attributed to a card.
+        BF4_Qty=$(printf '%s\n' "$verbose" | awk -F '|' '$1 != "MGMT" && $2 != "-" && tolower($2) !~ /^(unknown|n\/a|none|0+)$/ {print $2}' | sort -u | awk 'END {print NR+0}')
+
+        local bf4_mgmt
+        bf4_mgmt=$(printf '%s\n' "$verbose" | awk -F '|' '$1 == "MGMT" {print $2}')
+        printf '  Cards (distinct VPD board serial) : %s   (expected %s)\n' "$BF4_Qty" "$BF4_MIN"
+        printf '  %-5s %-15s %-28s %-14s\n' "No." "BDF" "Role" "Board serial"
+        # Each datapath function is labelled by its PCI domain, which is how the
+        # two SoCs are told apart on this card (0003 and 000b). No running index:
+        # an index would imply an order the hardware does not guarantee.
+        printf '%s\n' "$verbose" | awk -F '|' '
+        $1 == "MGMT" {next}
+        {
+                n++
+                split($1, parts, ":")
+                role = "800G datapath, domain " parts[1]
+                printf "  %-5s %-15s %-28s %-14s\n", n ":", $1, role, $2
+        }'
+        if [ -n "$bf4_mgmt" ]; then
+                while read -r b; do
+                        printf '  %-5s %-15s %-28s %-14s\n' "-" "$b" "SoC management interface" "-"
+                done <<< "$bf4_mgmt"
         fi
-        BF4_ERROR_TAG=1
+
+        if [ $BF4_Qty -lt $BF4_MIN ]; then
+                echo "  !! Detected $BF4_Qty physical card(s); expected ${BF4_MIN}x on this rack -- MISSING !!"
+                BF4_ERROR_TAG=1
+        fi
 }
 
 
